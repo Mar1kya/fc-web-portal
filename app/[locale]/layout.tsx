@@ -3,6 +3,7 @@ import { routing } from "@/i18n/routing";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
+import "../globals.css"
 
 export default async function RootLayout({ children, params }: { children: React.ReactNode, params: Promise<{ locale: string }> }) {
   const { locale } = await params;
