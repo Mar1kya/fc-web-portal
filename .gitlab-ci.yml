@@ -10,6 +10,7 @@ cache:
   key:
     files:
       - package-lock.json
+    prefix: v2
   paths:
     - .npm/
 
