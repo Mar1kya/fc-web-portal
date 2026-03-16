@@ -20,7 +20,8 @@ lint_job:
     - if: $CI_COMMIT_BRANCH 
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
-    - npm ci --cache .npm --prefer-offline
+    - npm ci --cache .npm --prefer-offline --ignore-scripts
+    - npx prisma generate
     - npm run lint
 
 typecheck_job:
@@ -29,7 +30,8 @@ typecheck_job:
     - if: $CI_COMMIT_BRANCH
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
-    - npm ci --cache .npm --prefer-offline
+    - npm ci --cache .npm --prefer-offline --ignore-scripts
+    - npx prisma generate
     - npm run type-check
 
 build_job:
@@ -38,7 +40,8 @@ build_job:
     - if: $CI_COMMIT_BRANCH
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
-    - npm ci --cache .npm --prefer-offline
+    - npm ci --cache .npm --prefer-offline --ignore-scripts
+    - npx prisma generate
     - npm run build
 
 mirror_to_github:
