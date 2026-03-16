@@ -1,5 +1,10 @@
 {
-    "HomePage": {
-        "title": "Football club"
-    }
+  "HomePage": {
+    "title": "Football club"
+  },
+  "Validations": {
+    "invalidEmail": "Invalid email format.",
+    "weakPassword": "Password must be at least 8 characters, include letters and numbers.",
+    "invalidPhone": "Invalid phone format (e.g. +380...)."
+  }
 }
