@@ -12,7 +12,6 @@ cache:
       - package-lock.json
   paths:
     - .npm/
-    - node_modules/
 
 lint_job:
   stage: lint
