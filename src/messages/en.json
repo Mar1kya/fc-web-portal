@@ -22,6 +22,22 @@
       "description": "Log in to your account to view your orders and shop for club merchandise."
     }
   },
+  "RegisterPage": {
+    "title": "Create an account",
+    "description": "Enter your details below to create your account",
+    "google-button": "Sign up with Google",
+    "field-separator": "Or continue with",
+    "name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "register-button": "Create Account",
+    "has-account": "Already have an account?",
+    "sign-in": "Sign in",
+    "Metadata": {
+      "title": "Sign Up",
+      "description": "Create an account to join the fan community, track your orders, and shop for official club merchandise."
+    }
+  },
   "Auth": {
     "LoginErrors": {
       "invalidEmail": "Invalid email format.",
