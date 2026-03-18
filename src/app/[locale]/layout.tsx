@@ -25,7 +25,7 @@ export default async function RootLayout({ children, params }: { children: React
           >
             <NextIntlClientProvider messages={messages}>
               {children}
-              <Toaster />
+              <Toaster position="top-right" />
             </NextIntlClientProvider>
           </ThemeProvider>
         </SessionProvider>

@@ -6,5 +6,29 @@
     "invalidEmail": "Invalid email format.",
     "weakPassword": "Password must be at least 8 characters, include letters and numbers.",
     "invalidPhone": "Invalid phone format (e.g. +380...)."
+  },
+  "LoginPage": {
+    "title": "Welcome back",
+    "description": "Login with your Google account",
+    "google-button": "Login with Google",
+    "field-separator": "Or continue with",
+    "email": "Email",
+    "password": "Password",
+    "login-button": "Login",
+    "not-account": "Don't have an account?",
+    "sign-up": "Sign up",
+    "Metadata": {
+      "title": "Sign In",
+      "description": "Log in to your account to view your orders and shop for club merchandise."
+    }
+  },
+  "Auth": {
+    "LoginErrors": {
+      "invalidEmail": "Invalid email format.",
+      "weakPassword": "Password must be at least 8 characters long and include letters and numbers.",
+      "invalidData": "Please check the entered data.",
+      "invalidCredentials": "Invalid email or password.",
+      "defaultError": "Something went wrong. Please try again later."
+    }
   }
 }
