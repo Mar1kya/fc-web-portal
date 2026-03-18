@@ -21,5 +21,14 @@
       "title": "Sign In",
       "description": "Log in to your account to view your orders and shop for club merchandise."
     }
+  },
+  "Auth": {
+    "LoginErrors": {
+      "invalidEmail": "Invalid email format.",
+      "weakPassword": "Password must be at least 8 characters long and include letters and numbers.",
+      "invalidData": "Please check the entered data.",
+      "invalidCredentials": "Invalid email or password.",
+      "defaultError": "Something went wrong. Please try again later."
+    }
   }
 }

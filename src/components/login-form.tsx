@@ -1,3 +1,4 @@
+"use client"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,14 +16,24 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { getTranslations } from "next-intl/server"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { useActionState, useEffect } from "react"
+import { login } from "@/actions/auth"
+import { toast } from "sonner"
 
-export async function LoginForm({
+export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const t = await getTranslations("LoginPage");
+  const t = useTranslations("LoginPage");
+  const [state, actionFn, isPending] = useActionState(login, undefined);
+
+  useEffect(() => {
+    if (state?.message) {
+      toast.error(state.message)
+    }
+  }, [state?.message])
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -33,7 +44,7 @@ export async function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form action={actionFn}>
             <FieldGroup>
               <Field>
                 <Button variant="outline" type="button">
@@ -55,15 +66,17 @@ export async function LoginForm({
                   id="email"
                   type="email"
                   placeholder="m@example.com"
-                  required
+                  name="email"
                 />
+                {state?.errors?.email && <p className="text-red-500 text-sm">{state.errors.email[0]}</p>}
               </Field>
               <Field>
                 <FieldLabel htmlFor="password">{t("password")}</FieldLabel>
-                <Input id="password" type="password" required />
+                <Input id="password" type="password" name="password" />
+                {state?.errors?.password && <p className="text-red-500 text-sm">{state.errors.password[0]}</p>}
               </Field>
               <Field>
-                <Button type="submit">{t("login-button")}</Button>
+                <Button type="submit" disabled={isPending}>{t("login-button")}</Button>
                 <FieldDescription className="text-center">
                   {t("not-account")} <Link href="/register">{t("sign-up")}</Link>
                 </FieldDescription>
