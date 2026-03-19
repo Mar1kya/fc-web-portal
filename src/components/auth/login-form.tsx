@@ -16,7 +16,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 import { useActionState, useEffect } from "react"
 import { login } from "@/actions/auth"

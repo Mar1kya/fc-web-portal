@@ -22,13 +22,37 @@
       "description": "Log in to your account to view your orders and shop for club merchandise."
     }
   },
+  "RegisterPage": {
+    "title": "Create an account",
+    "description": "Enter your details below to create your account",
+    "google-button": "Sign up with Google",
+    "field-separator": "Or continue with",
+    "name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "register-button": "Create Account",
+    "has-account": "Already have an account?",
+    "sign-in": "Sign in",
+    "Metadata": {
+      "title": "Sign Up",
+      "description": "Create an account to join the fan community, track your orders, and shop for official club merchandise."
+    }
+  },
   "Auth": {
     "LoginErrors": {
       "invalidEmail": "Invalid email format.",
-      "weakPassword": "Password must be at least 8 characters long and include letters and numbers.",
+      "weakPassword": "Password must be at least {min} characters long and include letters and numbers.",
       "invalidData": "Please check the entered data.",
       "invalidCredentials": "Invalid email or password.",
       "defaultError": "Something went wrong. Please try again later."
+    },
+    "RegisterErrors": {
+      "invalidName": "Name must be at least {min} characters long.",
+      "invalidEmail": "Invalid email format.",
+      "emailInUse": "A user with this email already exists.",
+      "weakPassword": "Password must be at least {min} characters long and include letters and numbers.",
+      "invalidData": "Please check the entered data.",
+      "defaultError": "Error creating account. Please try again later."
     }
   }
 }

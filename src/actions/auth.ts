@@ -1,14 +1,25 @@
 "use server";
 
 import { z } from "zod";
-import { createAuthSchema } from "@/lib/schemas";
+import { createLoginSchema, createRegisterSchema } from "@/lib/schemas";
 import { getLocale, getTranslations } from "next-intl/server";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 import { redirect } from "@/i18n/navigation";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export type LoginState = {
   errors?: {
+    email?: string[];
+    password?: string[];
+  };
+  message?: string | null;
+};
+
+export type RegisterState = {
+  errors?: {
+    name?: string[];
     email?: string[];
     password?: string[];
   };
@@ -22,7 +33,7 @@ export async function login(
   const t = await getTranslations("Auth.LoginErrors");
   const locale = await getLocale();
 
-  const LoginSchema = createAuthSchema(t);
+  const LoginSchema = createLoginSchema(t);
   const validatedFields = LoginSchema.safeParse(
     Object.fromEntries(formData.entries()),
   );
@@ -52,4 +63,50 @@ export async function login(
     throw error;
   }
   redirect({ href: "/", locale: locale });
+}
+
+export async function register(
+  _prevState: RegisterState | undefined,
+  formData: FormData,
+): Promise<RegisterState | undefined> {
+  const t = await getTranslations("Auth.RegisterErrors");
+  const locale = await getLocale();
+
+  const RegisterSchema = createRegisterSchema(t);
+  const validatedFields = RegisterSchema.safeParse(
+    Object.fromEntries(formData.entries()),
+  );
+  if (!validatedFields.success) {
+    const flattened = z.flattenError(validatedFields.error);
+    return {
+      errors: flattened.fieldErrors,
+      message: t("invalidData"),
+    };
+  }
+  const { name, email, password } = validatedFields.data;
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+    if (existingUser) {
+      return {
+        message: t("emailInUse"),
+      };
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+      },
+    });
+  } catch (error) {
+    return {
+      message: t("defaultError"),
+    };
+  }
+  redirect({ href: "/login", locale: locale });
 }
