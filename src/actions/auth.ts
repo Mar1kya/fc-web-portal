@@ -110,3 +110,7 @@ export async function register(
   }
   redirect({ href: "/login", locale: locale });
 }
+
+export async function loginWithGoogle() {
+  await signIn("google", { redirectTo: "/profile" });
+}
