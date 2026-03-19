@@ -14,22 +14,35 @@ export default auth((req) => {
   const session = req.auth;
   const isLoggedIn = !!session;
   const userRole = session?.user?.role;
-  const locale = nextUrl.pathname.split("/")[1] || routing.defaultLocale;
-  const pathname = nextUrl.pathname.replace(new RegExp(`^/(${routing.locales.join("|")})`), "") || "/";
+
+  const firstSegment = nextUrl.pathname.split("/")[1];
+  
+  const hasLocale = (routing.locales as readonly string[]).includes(firstSegment);
+  
+  const pathname = hasLocale 
+    ? nextUrl.pathname.replace(`/${firstSegment}`, "") || "/" 
+    : nextUrl.pathname;
+
+  const redirectTo = (path: string) => {
+    const url = nextUrl.clone();
+    url.pathname = hasLocale ? `/${firstSegment}${path}` : path;
+    return NextResponse.redirect(url);
+  };
 
   if (isLoggedIn && authPages.includes(pathname)) {
-    return NextResponse.redirect(new URL(`/${locale}/profile`, nextUrl));
+    return redirectTo("/profile");
   }
 
   if (!isLoggedIn && protectedPages.some(route => pathname.startsWith(route))) {
-    return NextResponse.redirect(new URL(`/${locale}/login`, nextUrl));
+    return redirectTo("/login");
   }
 
   if (adminPages.some(route => pathname.startsWith(route))) {
     if (userRole !== "ADMIN") {
-      return NextResponse.redirect(new URL(`/${locale}/profile`, nextUrl));
+      return redirectTo("/profile");
     }
   }
+
   return intlMiddleware(req);
 });
 

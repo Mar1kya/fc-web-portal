@@ -41,10 +41,18 @@
   "Auth": {
     "LoginErrors": {
       "invalidEmail": "Invalid email format.",
-      "weakPassword": "Password must be at least 8 characters long and include letters and numbers.",
+      "weakPassword": "Password must be at least {min} characters long and include letters and numbers.",
       "invalidData": "Please check the entered data.",
       "invalidCredentials": "Invalid email or password.",
       "defaultError": "Something went wrong. Please try again later."
+    },
+    "RegisterErrors": {
+      "invalidName": "Name must be at least {min} characters long.",
+      "invalidEmail": "Invalid email format.",
+      "emailInUse": "A user with this email already exists.",
+      "weakPassword": "Password must be at least {min} characters long and include letters and numbers.",
+      "invalidData": "Please check the entered data.",
+      "defaultError": "Error creating account. Please try again later."
     }
   }
 }

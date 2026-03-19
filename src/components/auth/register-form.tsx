@@ -18,13 +18,21 @@ import {
 import { Input } from "@/components/ui/input"
 import { Link } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
+import { useActionState, useEffect } from "react"
+import { register } from "@/actions/auth"
+import { toast } from "sonner"
 
 export function RegisterForm({
     className,
     ...props
 }: React.ComponentProps<"div">) {
     const t = useTranslations("RegisterPage");
-
+    const [state, actionFn, isPending] = useActionState(register, undefined);
+    useEffect(() => {
+        if (state?.message) {
+            toast.error(state.message)
+        }
+    }, [state?.message])
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
@@ -35,7 +43,7 @@ export function RegisterForm({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form>
+                    <form action={actionFn}>
                         <FieldGroup>
                             <Field>
                                 <Button variant="outline" type="button">
@@ -58,6 +66,7 @@ export function RegisterForm({
                                     type="text"
                                     name="name"
                                 />
+                                {state?.errors?.name && <p className="text-red-500 text-sm">{state.errors.name[0]}</p>}
                             </Field>
                             <Field>
                                 <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
@@ -67,13 +76,15 @@ export function RegisterForm({
                                     placeholder="m@example.com"
                                     name="email"
                                 />
+                                {state?.errors?.email && <p className="text-red-500 text-sm">{state.errors.email[0]}</p>}
                             </Field>
                             <Field>
                                 <FieldLabel htmlFor="password">{t("password")}</FieldLabel>
                                 <Input id="password" type="password" name="password" />
+                                {state?.errors?.password && <p className="text-red-500 text-sm">{state.errors.password[0]}</p>}
                             </Field>
                             <Field>
-                                <Button type="submit" >{t("register-button")}</Button>
+                                <Button type="submit" disabled={isPending}>{t("register-button")}</Button>
                                 <FieldDescription className="text-center">
                                     {t("has-account")} <Link href="/login">{t("sign-in")}</Link>
                                 </FieldDescription>
