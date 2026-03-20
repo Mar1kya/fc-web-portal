@@ -1,3 +1,4 @@
+import { SelectLanguage } from "@/components/layout/select-language";
 import { Link } from "@/i18n/navigation";
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -10,6 +11,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
               Emerald Gang
             </span>
           </Link>
+          <SelectLanguage />
         </header>
         <main className="flex flex-1 items-baseline sm:items-center justify-center">
           <div className="flex w-full max-w-sm flex-col gap-6">
