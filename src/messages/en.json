@@ -54,5 +54,26 @@
       "invalidData": "Please check the entered data.",
       "defaultError": "Error creating account. Please try again later."
     }
+  },
+  "Header": {
+    "UserMenu": {
+      "adminPanel": "Admin panel",
+      "profile": "Profile",
+      "logOut": "Log out"
+    },
+    "DesktopMenu": {
+      "news": "News",
+      "allNews": "All News",
+      "officially": "Official",
+      "interview": "Interviews",
+      "team": "Team",
+      "coaches": "Coaching Staff",
+      "matches": "Matches",
+      "shop": "Shop",
+      "club": "Club",
+      "history": "History",
+      "stadium": "Stadium",
+      "contacts": "Contacts"
+    }
   }
 }

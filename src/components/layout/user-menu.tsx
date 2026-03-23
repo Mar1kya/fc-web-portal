@@ -12,6 +12,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslations } from "next-intl";
 
 type UserMenuProps = {
     user: {
@@ -23,6 +24,7 @@ type UserMenuProps = {
 }
 
 export function UserMenu({ user }: UserMenuProps) {
+    const t = useTranslations("Header.UserMenu")
     return (
         <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg">
@@ -50,14 +52,14 @@ export function UserMenu({ user }: UserMenuProps) {
                     <DropdownMenuItem asChild>
                         <Link href="/admin" className="flex items-center cursor-pointer">
                             <LayoutDashboard className="mr-2 w-4 h-4" />
-                            Адмін панель
+                            {t("adminPanel")}
                         </Link>
                     </DropdownMenuItem>
                 )}
                 <DropdownMenuItem asChild>
                     <Link href="/profile" className="flex items-center cursor-pointer">
                         <User className="mr-2 w-4 h-4" />
-                        Профіль
+                        {t("profile")}
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -66,7 +68,7 @@ export function UserMenu({ user }: UserMenuProps) {
                     onClick={() => signOut({ callbackUrl: "/" })}
                 >
                     <LogOut className="mr-2 w-4 h-4" />
-                    Вийти
+                    {t("logOut")}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

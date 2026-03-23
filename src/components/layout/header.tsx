@@ -3,11 +3,12 @@ import { SelectLanguage } from "./select-language";
 import { auth } from "@/auth";
 import { ShoppingBasket } from "lucide-react";
 import { UserMenu } from "./user-menu";
+import { DesktopMenu } from "./desktop-menu";
 
 export default async function Header() {
     const session = await auth();
     const user = session?.user
-    return <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60 px-2">
+    return <header className="sticky top-0 z-50 lg:border-b bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60 px-2">
         <div className="container mx-auto">
             <div className="flex items-center justify-between border-b py-4">
                 <Link href="/" className="hover:text-emerald-600 transition-colors">
@@ -35,8 +36,8 @@ export default async function Header() {
                     <SelectLanguage />
                 </div>
             </div>
-            <div className="py-4">
-                MENU
+            <div className="py-2">
+                <DesktopMenu />
             </div>
         </div>
     </header >

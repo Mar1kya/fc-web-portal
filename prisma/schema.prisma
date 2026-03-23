@@ -226,6 +226,7 @@ model PlayerTranslation {
 
 model Coach {
   id               String             @id @default(cuid())
+  slug             String             @unique
   translations     CoachTranslation[]
   avatar           String?
   media            Media[]
@@ -260,6 +261,7 @@ enum MatchStatus {
 
 model Opponent {
   id           String                @id @default(cuid())
+  slug         String                @unique
   logoUrl      String?
   translations OpponentTranslation[]
   matches      Match[]
@@ -277,6 +279,7 @@ model OpponentTranslation {
 
 model Tournament {
   id           String                  @id @default(cuid())
+  slug         String                  @unique
   translations TournamentTranslation[]
   matches      Match[]
   standings    Standing[]
@@ -319,6 +322,7 @@ model Standing {
 
 model Match {
   id            String        @id @default(cuid())
+  slug          String        @unique
   date          DateTime
   status        MatchStatus   @default(SCHEDULED)
   teamContext   TeamContext   @default(MAIN_TEAM)
@@ -494,6 +498,7 @@ model Payment {
 
 model Season {
   id        String     @id @default(cuid())
+  slug      String     @unique
   name      String     @unique
   startDate DateTime
   endDate   DateTime
