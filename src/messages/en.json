@@ -56,6 +56,7 @@
     }
   },
   "Header": {
+    "login": "Sign In",
     "UserMenu": {
       "adminPanel": "Admin panel",
       "profile": "Profile",
@@ -73,7 +74,8 @@
       "club": "Club",
       "history": "History",
       "stadium": "Stadium",
-      "contacts": "Contacts"
+      "contacts": "Contacts",
+      "button": "Open the menu"
     }
   }
 }
