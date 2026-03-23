@@ -7,7 +7,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
       <div className="container mx-auto flex min-h-svh flex-col px-4 gap-6 sm:gap-0">
         <header className="flex w-full items-center justify-between py-4 border-b border-border/50">
           <Link href="/" className="hover:opacity-80 transition-opacity">
-            <span className="text-xl font-extrabold uppercase">
+            <span className="text-xl font-extrabold uppercase hover:text-emerald-600 transition-colors">
               Emerald Gang
             </span>
           </Link>

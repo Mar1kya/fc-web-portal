@@ -1,0 +1,44 @@
+import { Link } from "@/i18n/navigation";
+import { SelectLanguage } from "./select-language";
+import { auth } from "@/auth";
+import { ShoppingBasket } from "lucide-react";
+import { UserMenu } from "./user-menu";
+
+export default async function Header() {
+    const session = await auth();
+    const user = session?.user
+    return <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60 px-2">
+        <div className="container mx-auto">
+            <div className="flex items-center justify-between border-b py-4">
+                <Link href="/" className="hover:text-emerald-600 transition-colors">
+                    <span className="text-xl font-extrabold uppercase">
+                        Emerald Gang
+                    </span>
+                </Link>
+                <div className="flex items-center gap-4">
+                    <nav>
+                        <ul className="flex items-center gap-4">
+                            {user ? (
+                                <>
+                                    <li>
+                                        {user.role === 'ADMIN' ? null : <ShoppingBasket className="w-5 h-5 cursor-pointer hover:text-emerald-600 transition-colors" />}
+                                    </li>
+                                    <li className="flex items-center h-full">
+                                        <UserMenu user={user} />
+                                    </li>
+                                </>
+                            ) : (
+                                <Link href="/login" className="text-sm font-medium hover:text-emerald-600 transition-colors">Увійти</Link>
+                            )}
+                        </ul>
+                    </nav>
+                    <SelectLanguage />
+                </div>
+            </div>
+            <div className="py-4">
+                MENU
+            </div>
+        </div>
+    </header >
+
+}
