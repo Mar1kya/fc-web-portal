@@ -11,8 +11,8 @@ export default async function Header() {
     const session = await auth();
     const user = session?.user
     const t = await getTranslations("Header");
-    return <header className="sticky top-0 z-50 lg:border-b bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60 px-2">
-        <div className="container mx-auto">
+    return <header className="sticky top-0 z-50 2xl:border-b bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60 px-2">
+        <div className="container mx-auto border-0 lg:border-b 2xl:border-0">
             <div className="flex items-center justify-between border-b py-4">
                 <div className="flex items-center gap-2 md:gap-4">
                     <Link href="/" className="hover:text-emerald-600 transition-colors">
@@ -45,9 +45,7 @@ export default async function Header() {
                     <MobileMenu />
                 </div>
             </div>
-            <div className="py-2">
-                <DesktopMenu />
-            </div>
+            <DesktopMenu />
         </div>
     </header >
 
