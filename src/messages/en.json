@@ -77,5 +77,20 @@
       "contacts": "Contacts",
       "button": "Open the menu"
     }
+  },
+  "Footer": {
+    "description": "Official football club web portal. Follow matches, buy merch, and support your favorite team.",
+    "club": "Club",
+    "news": "News",
+    "history": "History",
+    "stadium": "Stadium",
+    "contacts": "Contacts",
+    "shop": "Shop",
+    "team": "Team",
+    "coaches": "Coaching Staff",
+    "contactUs": "Contact Us",
+    "location": "Zhytomyr, Ukraine",
+    "reserved": "All rights reserved",
+    "matches": "Matches"
   }
 }
