@@ -131,7 +131,7 @@ export function MobileMenu() {
                                 ))}
                             </AccordionContent>
                         </AccordionItem>
-                        <AccordionItem value="club">
+                        <AccordionItem value="club" className="border-b">
                             <AccordionTrigger className={triggerClass}>
                                 {t("club")}
                             </AccordionTrigger>
