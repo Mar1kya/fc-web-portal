@@ -70,10 +70,9 @@ const MobileLink = ({ href, children, className, setIsOpen }: MobileLinkProps) =
     </Link>
 );
 
-export function MobileMenu() {
+export default function MobileMenu() {
     const t = useTranslations("Header.DesktopMenu");
     const [isOpen, setIsOpen] = React.useState(false);
-
     const triggerClass = "text-base font-medium cursor-pointer hover:no-underline hover:text-emerald-600 [&[data-state=open]]:text-emerald-600 py-4";
 
     return (

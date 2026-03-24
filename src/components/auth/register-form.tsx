@@ -22,7 +22,7 @@ import { useActionState, useEffect } from "react"
 import { register, loginWithGoogle } from "@/actions/auth"
 import { toast } from "sonner"
 
-export function RegisterForm({
+export default function RegisterForm({
     className,
     ...props
 }: React.ComponentProps<"div">) {

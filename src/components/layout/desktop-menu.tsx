@@ -51,7 +51,7 @@ const matchesMenuData = [
     }
 ]
 
-export function DesktopMenu() {
+export default function DesktopMenu() {
     const t = useTranslations("Header.DesktopMenu");
     return (
         <div className="hidden lg:flex w-full justify-center">

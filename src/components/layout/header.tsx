@@ -1,10 +1,10 @@
 import { Link } from "@/i18n/navigation";
-import { SelectLanguage } from "./select-language";
+import SelectLanguage from "./select-language";
 import { auth } from "@/auth";
 import { ShoppingBasket } from "lucide-react";
-import { UserMenu } from "./user-menu";
-import { DesktopMenu } from "./desktop-menu";
-import { MobileMenu } from "./mobile-menu";
+import UserMenu from "./user-menu";
+import DesktopMenu from "./desktop-menu";
+import MobileMenu from "./mobile-menu";
 import { getTranslations } from "next-intl/server";
 
 export default async function Header() {

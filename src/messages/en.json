@@ -92,5 +92,12 @@
     "location": "Zhytomyr, Ukraine",
     "reserved": "All rights reserved",
     "matches": "Matches"
+  },
+  "Profile": {
+    "Sidebar": {
+      "personalData": "Personal Details",
+      "orderHistory": "Order History",
+      "logout": "Log Out"
+    }
   }
 }

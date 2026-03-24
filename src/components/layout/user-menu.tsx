@@ -23,7 +23,7 @@ type UserMenuProps = {
     };
 }
 
-export function UserMenu({ user }: UserMenuProps) {
+export default function UserMenu({ user }: UserMenuProps) {
     const t = useTranslations("Header.UserMenu")
     return (
         <DropdownMenu>

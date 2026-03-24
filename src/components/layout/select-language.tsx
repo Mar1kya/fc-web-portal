@@ -14,7 +14,7 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { useTransition } from "react";
 import { cn } from "@/lib/utils";
 
-export function SelectLanguage({ className }: { className?: string }) {
+export default function SelectLanguage({ className }: { className?: string }) {
     const currentLocale = useLocale();
     const locales = routing.locales;
     const pathname = usePathname();

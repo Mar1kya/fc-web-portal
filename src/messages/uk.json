@@ -92,5 +92,12 @@
     "location": "м. Житомир, Україна",
     "reserved": "Всі права захищено",
     "matches": "Матчі"
+  },
+  "Profile": {
+    "Sidebar": {
+      "personalData": "Особисті дані",
+      "orderHistory": "Історія замовлень",
+      "logout": "Вийти"
+    }
   }
 }
