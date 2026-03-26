@@ -5,7 +5,7 @@ import LogoutButton from "./logout-button";
 import { getTranslations } from "next-intl/server";
 
 export default async function ProfileSidebar() {
-    const t = await getTranslations("Profile.Sidebar");
+    const t = await getTranslations("ProfilePage.Sidebar");
     const itemVariants = "flex items-center px-3 py-2 rounded-md text-sm transition-colors cursor-pointer";
     return (
         <nav className="flex flex-col w-full px-2 py-4 gap-1">

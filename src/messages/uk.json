@@ -93,11 +93,30 @@
     "reserved": "Всі права захищено",
     "matches": "Матчі"
   },
-  "Profile": {
+  "ProfilePage": {
+    "title": "Профіль користувача",
     "Sidebar": {
       "personalData": "Особисті дані",
       "orderHistory": "Історія замовлень",
-      "logout": "Вийти"
+      "logOut": "Вийти"
+    },
+    "ProfileForm": {
+      "name": "Ім'я та прізвище",
+      "nameDescription": "Можете змінити ім'я та прізвище",
+      "email": "Електронна пошта",
+      "emailDescription": "Ваша поточна електронна пошта",
+      "currentPassword": "Поточний пароль",
+      "currentPasswordDescription": "Введіть поточний пароль",
+      "newPassword": "Новий пароль",
+      "newPasswordDescription": "Введіть новий пароль",
+      "confirmPassword": "Підтвердіть пароль",
+      "confirmPasswordDescription": "Повторіть новий пароль",
+      "updateProfileButton": "Оновити профіль",
+      "profilePhoto": "Фото профілю"
+    },
+    "Metadata": {
+      "title": "Профіль користувача",
+      "description": "Керуйте своїми особистими даними, паролем та налаштуваннями акаунту."
     }
   }
 }

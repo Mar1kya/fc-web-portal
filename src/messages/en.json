@@ -93,11 +93,30 @@
     "reserved": "All rights reserved",
     "matches": "Matches"
   },
-  "Profile": {
+  "ProfilePage": {
+    "title": "User profile",
     "Sidebar": {
       "personalData": "Personal Details",
       "orderHistory": "Order History",
-      "logout": "Log Out"
+      "logOut": "Log out"
+    },
+    "ProfileForm": {
+      "name": "Full name",
+      "nameDescription": "You can change your full name",
+      "email": "Email address",
+      "emailDescription": "Your current email address",
+      "currentPassword": "Current password",
+      "currentPasswordDescription": "Enter your current password",
+      "newPassword": "New password",
+      "newPasswordDescription": "Enter your new password",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordDescription": "Repeat your new password",
+      "updateProfileButton": "Update profile",
+      "profilePhoto": "Profile photo"
+    },
+    "Metadata": {
+      "title": "User Profile",
+      "description": "Manage your personal details, password, and account settings."
     }
   }
 }
