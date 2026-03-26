@@ -1,6 +1,9 @@
 import H1 from "@/components/ui/heading"
 import ProfileForm from "./_components/profile-form"
-import { getTranslations } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
+import { redirect } from "@/i18n/navigation";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
@@ -9,13 +12,30 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
         title: t("title"),
         description: t("description")
     }
-
 }
 
 export default async function ProfilePage() {
-    const t = await getTranslations("ProfilePage")
+    const t = await getTranslations("ProfilePage");
+    const locale = await getLocale()
+    const session = await auth();
+    if (!session?.user) {
+        return redirect({ locale, href: "/login" })
+    }
+    const user = await prisma.user.findUnique({
+        where: {
+            email: session?.user.email
+        }
+    })
+    if (!user) {
+        return redirect({ locale, href: "/login" });
+    }
+    const userField = {
+        name: user.name,
+        email: user.email,
+        image: user.image,
+    }
     return <>
         <H1 className="pb-6 text-center lg:text-left">{t("title")}</H1>
-        <ProfileForm />
+        <ProfileForm user={userField} />
     </>
 }

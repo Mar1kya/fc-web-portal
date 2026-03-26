@@ -10,9 +10,20 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { User } from "lucide-react";
 import { useTranslations } from "next-intl"
+import Image from "next/image"
+import { getHighResImage } from "@/lib/utils"
 
-export default function ProfileForm() {
+type ProfileUser = {
+    user: {
+        name: string | null,
+        email: string | null,
+        image: string | null
+    }
+}
+
+export default function ProfileForm({ user }: ProfileUser) {
     const t = useTranslations("ProfilePage.ProfileForm")
+    const highResImage = user.image ? getHighResImage(user.image) : null;
     return (
         <div className="w-full">
             <form className="flex flex-col-reverse lg:flex-row gap-10 lg:gap-16 items-start">
@@ -23,14 +34,14 @@ export default function ProfileForm() {
                                 <FieldLabel htmlFor="name">{t("name")}</FieldLabel>
                                 <p className="text-sm text-muted-foreground">{t("nameDescription")}</p>
                             </div>
-                            <Input id="name" name="name" type="text" className="sm:max-w-xs" />
+                            <Input id="name" name="name" type="text" defaultValue={user.name || ""} className="sm:max-w-xs" />
                         </Field>
                         <Field className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div className="space-y-1">
                                 <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
                                 <p className="text-sm text-muted-foreground">{t("emailDescription")}</p>
                             </div>
-                            <Input id="email" type="email" disabled className="sm:max-w-xs" />
+                            <Input id="email" type="email" disabled defaultValue={user.email || ""} className="sm:max-w-xs" />
                         </Field>
                     </FieldGroup>
                     <Separator />
@@ -63,7 +74,19 @@ export default function ProfileForm() {
                 </div>
                 <div className="flex flex-col items-center justify-start shrink-0 w-full lg:w-64 xl:w-72 lg:border-l border-border lg:pl-10 xl:pl-12 pt-2 pb-8 lg:pb-0">
                     <div className="relative flex items-center justify-center w-40 h-40 xl:w-48 xl:h-48 overflow-hidden rounded-2xl border border-border bg-muted mb-4">
-                        <User className="w-16 h-16" />
+                        {highResImage ? (
+                            <Image
+                                src={highResImage}
+                                alt={user.name || "Profile photo"}
+                                width={192}
+                                height={192}
+                                quality={100} 
+                                priority
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <User className="w-16 h-16 text-muted-foreground" />
+                        )}
                     </div>
                     <span className="text-sm text-muted-foreground">{t("profilePhoto")}</span>
                 </div>
