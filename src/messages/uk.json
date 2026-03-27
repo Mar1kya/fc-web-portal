@@ -112,7 +112,23 @@
       "confirmPassword": "Підтвердіть пароль",
       "confirmPasswordDescription": "Повторіть новий пароль",
       "updateProfileButton": "Оновити профіль",
-      "profilePhoto": "Фото профілю"
+      "profilePhoto": "Фото профілю",
+      "photoUploadError": "Помилка завантаження фото",
+      "photoUploadedSuccess": "Фото успішно завантажено!",
+      "changePhoto": "Змінити",
+      "Errors": {
+        "nameTooShort": "Ім'я має містити щонайменше 2 символи",
+        "weakPassword": "Пароль має містити мінімум {min} символів, букви та цифри.",
+        "currentPasswordRequired": "Поточний пароль обов'язковий для встановлення нового",
+        "passwordsDoNotMatch": "Нові паролі не збігаються",
+        "unauthorized": "Ви не авторизовані. Будь ласка, увійдіть в акаунт.",
+        "invalidData": "Перевірте правильність введених даних",
+        "userNotFound": "Користувача не знайдено",
+        "noPasswordSetOAuth": "Ви зареєстровані через Google, тому не маєте поточного пароля.",
+        "wrongCurrentPassword": "Неправильний поточний пароль",
+        "profileUpdated": "Профіль успішно оновлено!",
+        "defaultError": "Сталася помилка при оновленні профілю. Спробуйте ще раз."
+      }
     },
     "Metadata": {
       "title": "Профіль користувача",

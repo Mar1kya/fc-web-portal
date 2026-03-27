@@ -1,6 +1,5 @@
 "use server";
 
-import { z } from "zod";
 import { createLoginSchema, createRegisterSchema } from "@/lib/schemas";
 import { getLocale, getTranslations } from "next-intl/server";
 import { signIn } from "@/auth";
@@ -38,7 +37,7 @@ export async function login(
     Object.fromEntries(formData.entries()),
   );
   if (!validatedFields.success) {
-    const flattened = z.flattenError(validatedFields.error);
+    const flattened = validatedFields.error.flatten();
     return {
       errors: flattened.fieldErrors,
       message: t("invalidData"),
@@ -77,7 +76,7 @@ export async function register(
     Object.fromEntries(formData.entries()),
   );
   if (!validatedFields.success) {
-    const flattened = z.flattenError(validatedFields.error);
+    const flattened = validatedFields.error.flatten();
     return {
       errors: flattened.fieldErrors,
       message: t("invalidData"),
