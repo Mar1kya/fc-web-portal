@@ -102,7 +102,7 @@ export async function register(
         password: hashedPassword,
       },
     });
-  } catch (error) {
+  } catch {
     return {
       message: t("defaultError"),
     };

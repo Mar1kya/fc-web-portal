@@ -58,7 +58,7 @@ export async function updateProfile(
       return { message: t("userNotFound") };
     }
 
-    const dataToUpdate: any = {
+    const dataToUpdate: { name: string; image?: string; password?: string } = {
       name,
     };
 
