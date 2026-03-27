@@ -92,5 +92,47 @@
     "location": "м. Житомир, Україна",
     "reserved": "Всі права захищено",
     "matches": "Матчі"
+  },
+  "ProfilePage": {
+    "title": "Профіль користувача",
+    "Sidebar": {
+      "personalData": "Особисті дані",
+      "orderHistory": "Історія замовлень",
+      "logOut": "Вийти"
+    },
+    "ProfileForm": {
+      "name": "Ім'я та прізвище",
+      "nameDescription": "Можете змінити ім'я та прізвище",
+      "email": "Електронна пошта",
+      "emailDescription": "Ваша поточна електронна пошта",
+      "currentPassword": "Поточний пароль",
+      "currentPasswordDescription": "Введіть поточний пароль",
+      "newPassword": "Новий пароль",
+      "newPasswordDescription": "Введіть новий пароль",
+      "confirmPassword": "Підтвердіть пароль",
+      "confirmPasswordDescription": "Повторіть новий пароль",
+      "updateProfileButton": "Оновити профіль",
+      "profilePhoto": "Фото профілю",
+      "photoUploadError": "Помилка завантаження фото",
+      "photoUploadedSuccess": "Фото успішно завантажено!",
+      "changePhoto": "Змінити",
+      "Errors": {
+        "nameTooShort": "Ім'я має містити щонайменше 2 символи",
+        "weakPassword": "Пароль має містити мінімум {min} символів, букви та цифри.",
+        "currentPasswordRequired": "Поточний пароль обов'язковий для встановлення нового",
+        "passwordsDoNotMatch": "Нові паролі не збігаються",
+        "unauthorized": "Ви не авторизовані. Будь ласка, увійдіть в акаунт.",
+        "invalidData": "Перевірте правильність введених даних",
+        "userNotFound": "Користувача не знайдено",
+        "noPasswordSetOAuth": "Ви зареєстровані через Google, тому не маєте поточного пароля.",
+        "wrongCurrentPassword": "Неправильний поточний пароль",
+        "profileUpdated": "Профіль успішно оновлено!",
+        "defaultError": "Сталася помилка при оновленні профілю. Спробуйте ще раз."
+      }
+    },
+    "Metadata": {
+      "title": "Профіль користувача",
+      "description": "Керуйте своїми особистими даними, паролем та налаштуваннями акаунту."
+    }
   }
 }

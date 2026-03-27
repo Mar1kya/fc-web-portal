@@ -1,4 +1,4 @@
-import { LoginForm } from "@/components/auth/login-form"
+import LoginForm from "@/components/auth/login-form"
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {

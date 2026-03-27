@@ -23,7 +23,7 @@ type UserMenuProps = {
     };
 }
 
-export function UserMenu({ user }: UserMenuProps) {
+export default function UserMenu({ user }: UserMenuProps) {
     const t = useTranslations("Header.UserMenu")
     return (
         <DropdownMenu>
@@ -34,7 +34,7 @@ export function UserMenu({ user }: UserMenuProps) {
                         alt={user.name || "user"}
                         width="26"
                         height="26"
-                        className="rounded-lg object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                        className="w-6.5 h-6.5 rounded-lg object-cover cursor-pointer hover:opacity-80 transition-opacity"
                     />
                 ) : (
                     <User className="w-5 h-5 cursor-pointer hover:text-emerald-600 transition-colors" />

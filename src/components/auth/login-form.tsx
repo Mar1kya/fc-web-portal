@@ -22,7 +22,7 @@ import { useActionState, useEffect } from "react"
 import { login, loginWithGoogle } from "@/actions/auth"
 import { toast } from "sonner"
 
-export function LoginForm({
+export default function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {

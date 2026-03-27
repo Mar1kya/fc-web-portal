@@ -25,10 +25,9 @@ const logos = [
         image: 'https://cdn.shadcnstudio.com/ss-assets/brand-logo/adobe-logo-bw.png',
         alt: 'Sponsor 6'
     },
-
 ]
 
-export function SponsorsPanel() {
+export default function SponsorsPanel() {
     return (
         <section className='px-2 bg-background/80'>
             <div className='container border-t py-10 sm:py-14 mx-auto px-4 sm:px-6 lg:px-8'>

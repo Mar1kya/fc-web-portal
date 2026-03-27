@@ -1,15 +1,26 @@
 import { Link } from "@/i18n/navigation";
-import { SelectLanguage } from "./select-language";
+import SelectLanguage from "./select-language";
 import { auth } from "@/auth";
 import { ShoppingBasket } from "lucide-react";
-import { UserMenu } from "./user-menu";
-import { DesktopMenu } from "./desktop-menu";
-import { MobileMenu } from "./mobile-menu";
+import UserMenu from "./user-menu";
+import DesktopMenu from "./desktop-menu";
+import MobileMenu from "./mobile-menu";
 import { getTranslations } from "next-intl/server";
+import { prisma } from "@/lib/prisma";
 
 export default async function Header() {
     const session = await auth();
-    const user = session?.user
+    let user = session?.user
+    if (user?.email) {
+        const dbUser = await prisma.user.findUnique({
+            where: { email: user.email },
+            select: { name: true, email: true, image: true }
+        });
+
+        if (dbUser) {
+            user = { ...user, ...dbUser };
+        }
+    }
     const t = await getTranslations("Header");
     return <header className="sticky top-0 z-50 2xl:border-b bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60 px-2">
         <div className="container mx-auto border-0 lg:border-b 2xl:border-0">

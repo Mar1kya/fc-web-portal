@@ -2,7 +2,7 @@ import { Link } from "@/i18n/navigation";
 import { MapPin, Phone, Mail, Instagram, Facebook, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { SelectLanguage } from "./select-language";
+import SelectLanguage from "./select-language";
 import { getTranslations } from "next-intl/server";
 
 const teamsData = [
@@ -21,11 +21,11 @@ export default async function Footer() {
     const t = await getTranslations("Footer");
     return (
         <footer className="pb-8 2xl:border-t px-2">
-            <div className="container mx-auto space-y-12 2xl:border-0 border-t pt-12">
+            <div className="container mx-auto space-y-12 2xl:border-0 border-t pt-10">
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 lg:gap-12">
                     <div className="flex flex-col items-center lg:items-start space-y-4 text-center lg:text-left">
                         <Link href="/" className="inline-block transition-colors hover:opacity-80">
-                            <span className="text-3xl font-extrabold uppercase transition-colors hover:text-emerald-600 tracking-wider">
+                            <span className="text-2xl font-extrabold uppercase transition-colors hover:text-emerald-600 tracking-wider">
                                 EG
                             </span>
                         </Link>
@@ -116,9 +116,14 @@ export default async function Footer() {
                                     </li>
                                     <li className="flex items-center justify-start gap-3 text-sm text-muted-foreground">
                                         <MapPin className="size-4 shrink-0 text-emerald-600" />
-                                        <div>
+                                        <a
+                                            href="https://maps.google.com/?q=Житомир,Україна"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="hover:text-emerald-600 hover:underline underline-offset-4 transition-colors"
+                                        >
                                             {t("location")}
-                                        </div>
+                                        </a>
                                     </li>
                                 </ul>
                                 <ul className="flex flex-wrap justify-center lg:justify-start gap-3">

@@ -92,5 +92,47 @@
     "location": "Zhytomyr, Ukraine",
     "reserved": "All rights reserved",
     "matches": "Matches"
+  },
+  "ProfilePage": {
+    "title": "User profile",
+    "Sidebar": {
+      "personalData": "Personal Details",
+      "orderHistory": "Order History",
+      "logOut": "Log out"
+    },
+    "ProfileForm": {
+      "name": "Full name",
+      "nameDescription": "You can change your full name",
+      "email": "Email address",
+      "emailDescription": "Your current email address",
+      "currentPassword": "Current password",
+      "currentPasswordDescription": "Enter your current password",
+      "newPassword": "New password",
+      "newPasswordDescription": "Enter your new password",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordDescription": "Repeat your new password",
+      "updateProfileButton": "Update profile",
+      "profilePhoto": "Profile photo",
+      "photoUploadError": "Error uploading photo",
+      "photoUploadedSuccess": "Photo uploaded successfully!",
+      "changePhoto": "Change",
+      "Errors": {
+        "nameTooShort": "Name must be at least 2 characters",
+        "weakPassword": "Password must contain at least {min} characters, letters and numbers.",
+        "currentPasswordRequired": "Current password is required to set a new one",
+        "passwordsDoNotMatch": "New passwords do not match",
+        "unauthorized": "You are not authorized. Please log in.",
+        "invalidData": "Please check the entered data",
+        "userNotFound": "User not found",
+        "noPasswordSetOAuth": "You signed in with Google and don't have a current password.",
+        "wrongCurrentPassword": "Wrong current password",
+        "profileUpdated": "Profile updated successfully!",
+        "defaultError": "An error occurred while updating the profile. Please try again."
+      }
+    },
+    "Metadata": {
+      "title": "User Profile",
+      "description": "Manage your personal details, password, and account settings."
+    }
   }
 }

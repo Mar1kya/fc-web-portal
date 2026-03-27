@@ -1,4 +1,4 @@
-import { SelectLanguage } from "@/components/layout/select-language";
+import SelectLanguage from "@/components/layout/select-language";
 import { Link } from "@/i18n/navigation";
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
