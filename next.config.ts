@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
         hostname: "uploadthing.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "buinwmypxz.ufs.sh",
+        pathname: "/**",
+      },
     ],
   },
 };
