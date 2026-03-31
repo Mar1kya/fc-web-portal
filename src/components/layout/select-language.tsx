@@ -13,17 +13,22 @@ import { useLocale } from "next-intl"
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useTransition } from "react";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
 
 export default function SelectLanguage({ className }: { className?: string }) {
     const currentLocale = useLocale();
     const locales = routing.locales;
     const pathname = usePathname();
     const router = useRouter();
+    const searchParams = useSearchParams(); 
     const [isPending, startTransition] = useTransition();
 
     function handleChange(nextLocale: string) {
         startTransition(() => {
-            router.replace(pathname, { locale: nextLocale })
+            const paramsString = searchParams.toString();
+            const href = paramsString ? `${pathname}?${paramsString}` : pathname;
+
+            router.replace(href, { locale: nextLocale });
         })
     }
 

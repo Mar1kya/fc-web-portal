@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
+import { PostType, TeamContext } from "../../../generated/prisma"
 
 const MenuItem = ({ href, title, className }: { href: string; title: string; className?: string }) => (
     <li>
@@ -53,6 +54,9 @@ const matchesMenuData = [
 
 export default function DesktopMenu() {
     const t = useTranslations("Header.DesktopMenu");
+    const tEnums = useTranslations("Enums");
+    const postTypes = Object.values(PostType);
+    const teamContexts = Object.values(TeamContext);
     return (
         <div className="hidden lg:flex w-full justify-center">
             <ul className="flex items-center gap-8">
@@ -60,10 +64,26 @@ export default function DesktopMenu() {
                     <Link href="/news" className="flex items-center gap-1 font-semibold transition-colors hover:text-emerald-600">
                         {t("news")}  <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
                     </Link>
-                    <ul className="absolute left-0 top-full hidden w-50 flex-col gap-1 rounded-md border border-border/50 bg-background/95 backdrop-blur-md p-2 shadow-lg group-hover:flex animate-in fade-in zoom-in-95 duration-200">
-                        <MenuItem href="/news" title={t("allNews")} />
-                        <MenuItem href="/news?type=statement" title={t("officially")} />
-                        <MenuItem href="/news?type=interview" title={t("interview")} />
+                    <ul className="absolute left-0 top-full hidden w-56 flex-col gap-1 rounded-md border border-border/50 bg-background/95 backdrop-blur-md p-2 shadow-lg group-hover:flex animate-in fade-in zoom-in-95 duration-200">
+                        <MenuItem href="/news" title={t("allNews")} className="font-semibold text-foreground" />
+
+                        <div className="my-1 h-px bg-border/50" />
+                        {postTypes.map((type) => (
+                            <MenuItem
+                                key={`desk-news-type-${type}`}
+                                href={`/news?type=${type}`}
+                                title={tEnums(`PostType.${type}`)}
+                            />
+                        ))}
+
+                        <div className="my-1 h-px bg-border/50" />
+                        {teamContexts.map((team) => (
+                            <MenuItem
+                                key={`desk-news-team-${team}`}
+                                href={`/news?team=${team}`}
+                                title={tEnums(`TeamContext.${team}`)}
+                            />
+                        ))}
                     </ul>
                 </li>
                 <li className="group relative py-4">
@@ -107,7 +127,7 @@ export default function DesktopMenu() {
                 </li>
                 <li className="py-4">
                     <Link href="/shop" className="font-semibold transition-colors hover:text-emerald-600">
-                       {t("shop")}
+                        {t("shop")}
                     </Link>
                 </li>
                 <li className="group relative py-4">

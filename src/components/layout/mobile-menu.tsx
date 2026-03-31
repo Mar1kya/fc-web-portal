@@ -18,6 +18,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
+import { PostType, TeamContext } from "../../../generated/prisma"
 
 const teamsData = [
     { slug: "main", name: "Основний склад" },
@@ -58,11 +59,11 @@ type MobileLinkProps = {
 }
 
 const MobileLink = ({ href, children, className, setIsOpen }: MobileLinkProps) => (
-    <Link 
-        href={href} 
+    <Link
+        href={href}
         onClick={() => setIsOpen(false)}
         className={cn(
-            "block py-2.5 text-sm transition-colors text-muted-foreground hover:text-emerald-600 hover:no-underline", 
+            "block py-2.5 text-sm transition-colors text-muted-foreground hover:text-emerald-600 hover:no-underline",
             className
         )}
     >
@@ -72,8 +73,11 @@ const MobileLink = ({ href, children, className, setIsOpen }: MobileLinkProps) =
 
 export default function MobileMenu() {
     const t = useTranslations("Header.DesktopMenu");
+    const tEnums = useTranslations("Enums");
     const [isOpen, setIsOpen] = React.useState(false);
     const triggerClass = "text-base font-medium cursor-pointer hover:no-underline hover:text-emerald-600 [&[data-state=open]]:text-emerald-600 py-4";
+    const postTypes = Object.values(PostType);
+    const teamContexts = Object.values(TeamContext);
 
     return (
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -94,9 +98,29 @@ export default function MobileMenu() {
                                 {t("news")}
                             </AccordionTrigger>
                             <AccordionContent className="flex flex-col gap-0 pl-4 pb-2">
-                                <MobileLink href="/news" setIsOpen={setIsOpen}>{t("allNews")}</MobileLink>
-                                <MobileLink href="/news?type=statement" setIsOpen={setIsOpen}>{t("officially")}</MobileLink>
-                                <MobileLink href="/news?type=interview" setIsOpen={setIsOpen}>{t("interview")}</MobileLink>
+                                <MobileLink href="/news" setIsOpen={setIsOpen}>
+                                    {t("allNews")}
+                                </MobileLink>
+                                <div className="h-px bg-border my-2 mr-4" />
+                                {postTypes.map((type) => (
+                                    <MobileLink
+                                        key={`mob-news-type-${type}`}
+                                        href={`/news?type=${type}`}
+                                        setIsOpen={setIsOpen}
+                                    >
+                                        {tEnums(`PostType.${type}`)}
+                                    </MobileLink>
+                                ))}
+                                <div className="h-px bg-border my-2 mr-4" />
+                                {teamContexts.map((team) => (
+                                    <MobileLink
+                                        key={`mob-news-team-${team}`}
+                                        href={`/news?team=${team}`}
+                                        setIsOpen={setIsOpen}
+                                    >
+                                        {tEnums(`TeamContext.${team}`)}
+                                    </MobileLink>
+                                ))}
                             </AccordionContent>
                         </AccordionItem>
                         <AccordionItem value="team">
@@ -142,8 +166,8 @@ export default function MobileMenu() {
                         </AccordionItem>
                     </Accordion>
                     <div className="border-b">
-                        <Link 
-                            href="/shop" 
+                        <Link
+                            href="/shop"
                             onClick={() => setIsOpen(false)}
                             className="flex w-full items-center py-4 text-base font-medium transition-colors hover:text-emerald-600 hover:no-underline cursor-pointer"
                         >
