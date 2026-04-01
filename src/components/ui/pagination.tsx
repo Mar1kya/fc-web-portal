@@ -3,6 +3,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react"
+import { Link } from "@/i18n/navigation"
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (
@@ -36,12 +37,13 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
 type PaginationLinkProps = {
   isActive?: boolean
 } & Pick<React.ComponentProps<typeof Button>, "size"> &
-  React.ComponentProps<"a">
+  React.ComponentProps<typeof Link>
 
 function PaginationLink({
   className,
   isActive,
   size = "icon",
+  href = "#",
   ...props
 }: PaginationLinkProps) {
   return (
@@ -51,7 +53,8 @@ function PaginationLink({
       size={size}
       className={cn(className)}
     >
-      <a
+      <Link
+        href={href}
         aria-current={isActive ? "page" : undefined}
         data-slot="pagination-link"
         data-active={isActive}

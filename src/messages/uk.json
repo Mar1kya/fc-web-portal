@@ -138,7 +138,13 @@
   "NewsPage": {
     "title": "Останні новини",
     "noNews": "Немає новин для відображення.",
-    "allNews": "Всі новини"
+    "allNews": "Всі новини",
+    "Metadata": {
+      "title": "Новини",
+      "titleWithDate": "{title} за {date}",
+      "description": "Читайте останні новини, ексклюзивні інтерв'ю та офіційні заяви футбольного клубу.",
+      "dynamicDescription": "Переглядайте {category} футбольного клубу Emerald Gang. Актуальна інформація, результати та події."
+    }
   },
   "Enums": {
     "PostType": {
@@ -153,7 +159,7 @@
       "GENERAL": "Клуб"
     }
   },
-  "Pagination":{
+  "Pagination": {
     "Next": "Далі",
     "Previous": "Назад"
   }

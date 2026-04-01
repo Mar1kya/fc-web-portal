@@ -9,7 +9,8 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination"
-import { usePathname, useSearchParams } from "next/navigation"
+import { usePathname } from "@/i18n/navigation"
+import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 
 type AppPaginationProps = {
