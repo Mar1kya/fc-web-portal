@@ -134,5 +134,33 @@
       "title": "User Profile",
       "description": "Manage your personal details, password, and account settings."
     }
+  },
+  "NewsPage": {
+    "title": "Latest news",
+    "noNews": "There are no news items to display.",
+    "allNews": "All news",
+    "Metadata": {
+      "title": "News",
+      "titleWithDate": "{title} on {date}",
+      "description": "Read the latest news, exclusive interviews, and official statements from the football club. Follow the life of the main team and the Academy.",
+      "dynamicDescription": "Browse {category} from Emerald Gang football club. Latest updates, results, and events."
+    }
+  },
+  "Enums": {
+    "PostType": {
+      "NEWS": "News",
+      "INTERVIEW": "Interview",
+      "STATEMENT": "Official"
+    },
+    "TeamContext": {
+      "MAIN_TEAM": "First Team",
+      "U19": "U-19",
+      "ACADEMY": "Academy",
+      "GENERAL": "Club"
+    }
+  },
+  "Pagination": {
+    "Next": "Next",
+    "Previous": "Previous"
   }
 }
