@@ -152,5 +152,9 @@
       "ACADEMY": "Academy",
       "GENERAL": "Club"
     }
+  },
+  "Pagination": {
+    "Next": "Next",
+    "Previous": "Previous"
   }
 }

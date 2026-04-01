@@ -26,7 +26,8 @@ export default function NewsFilters() {
 
         params.delete("type");
         params.delete("team");
-
+        params.delete("page");
+        
         if (value.startsWith("type_")) {
             params.set("type", value.replace("type_", ""));
         } else if (value.startsWith("team_")) {

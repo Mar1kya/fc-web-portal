@@ -17,6 +17,8 @@ export default function NewsCalendarFilter({ activeDates, minYear }: { activeDat
 
     function handleSelect(date: Date | undefined) {
         const params = new URLSearchParams(searchParams.toString());
+        params.delete("page");
+
         if (date) {
             params.set("date", format(date, "yyyy-MM-dd"));
         } else {

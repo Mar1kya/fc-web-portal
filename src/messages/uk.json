@@ -152,5 +152,9 @@
       "ACADEMY": "Академія",
       "GENERAL": "Клуб"
     }
+  },
+  "Pagination":{
+    "Next": "Далі",
+    "Previous": "Назад"
   }
 }
