@@ -1,14 +1,24 @@
 import LatestNews from "./_components/latest-news";
-import { getLocale, getTranslations } from "next-intl/server"; 
+import { getLocale, getTranslations } from "next-intl/server";
+import { PostType, TeamContext } from "../../../../../generated/prisma";
+import { parse, isValid } from "date-fns";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const resolvedSearchParams = await searchParams;
     const locale = await getLocale(); 
     const tNews = await getTranslations("NewsPage.Metadata");
     const tEnums = await getTranslations("Enums");
-    const typeFilter = typeof resolvedSearchParams.type === 'string' ? resolvedSearchParams.type : undefined;
-    const teamFilter = typeof resolvedSearchParams.team === 'string' ? resolvedSearchParams.team : undefined;
+    const rawType = typeof resolvedSearchParams.type === 'string' ? resolvedSearchParams.type : undefined;
+    const rawTeam = typeof resolvedSearchParams.team === 'string' ? resolvedSearchParams.team : undefined;
     const dateParam = typeof resolvedSearchParams.date === 'string' ? resolvedSearchParams.date : undefined;
+    const typeFilter = rawType && Object.values(PostType).includes(rawType as PostType) ? rawType : undefined;
+    const teamFilter = rawTeam && Object.values(TeamContext).includes(rawTeam as TeamContext) ? rawTeam : undefined;
+
+    let isValidDate = false;
+    if (dateParam) {
+        const parsedDate = parse(dateParam, "yyyy-MM-dd", new Date());
+        isValidDate = isValid(parsedDate);
+    }
 
     let pageTitle = tNews("title");
     let categoryName = tNews("title").toLowerCase(); 
@@ -29,12 +39,10 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
             ? `новини команди ${pageTitle}` 
             : `news from the ${pageTitle}`;
     }
-
-    if (dateParam) {
+    if (isValidDate && dateParam) {
         pageTitle = tNews("titleWithDate", { title: pageTitle, date: dateParam });
     }
-    
-    const pageDescription = (typeFilter || teamFilter || dateParam) 
+    const pageDescription = (typeFilter || teamFilter || isValidDate) 
         ? tNews("dynamicDescription", { category: categoryName })
         : tNews("description");
 
@@ -43,7 +51,6 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
         description: pageDescription,
     };
 }
-
 export default async function NewsPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const resolvedSearchParams = await searchParams;
     return <>
