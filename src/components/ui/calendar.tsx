@@ -21,9 +21,11 @@ function Calendar({
   locale,
   formatters,
   components,
+  renderDay,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
+  renderDay?: (date: Date) => React.ReactNode
 }) {
   const defaultClassNames = getDefaultClassNames()
 
@@ -123,7 +125,7 @@ function Calendar({
           defaultClassNames.today
         ),
         outside: cn(
-          "text-muted-foreground aria-selected:text-muted-foreground",
+          "text-muted-foreground opacity-50 aria-selected:!opacity-100 aria-selected:!text-primary-foreground",
           defaultClassNames.outside
         ),
         disabled: cn(
@@ -161,8 +163,10 @@ function Calendar({
             <ChevronDownIcon className={cn("size-4", className)} {...props} />
           )
         },
-        DayButton: ({ ...props }) => (
-          <CalendarDayButton locale={locale} {...props} />
+        DayButton: ({ day, ...props }) => (
+          <CalendarDayButton day={day} locale={locale} {...props}>
+            {renderDay ? renderDay(day.date) : undefined}
+          </CalendarDayButton>
         ),
         WeekNumber: ({ children, ...props }) => {
           return (
@@ -185,8 +189,9 @@ function CalendarDayButton({
   day,
   modifiers,
   locale,
+  children,
   ...props
-}: React.ComponentProps<typeof DayButton> & { locale?: Partial<Locale> }) {
+}: React.ComponentProps<typeof DayButton> & { locale?: Partial<Locale>, children?: React.ReactNode }) {
   const defaultClassNames = getDefaultClassNames()
 
   const ref = React.useRef<HTMLButtonElement>(null)
@@ -194,11 +199,14 @@ function CalendarDayButton({
     if (modifiers.focused) ref.current?.focus()
   }, [modifiers.focused])
 
+  const isClickableLink = !!children && React.isValidElement(children) && children.type !== 'span';
+
   return (
     <Button
       ref={ref}
       variant="ghost"
       size="icon"
+      asChild={!!children}
       data-day={day.date.toLocaleDateString(locale?.code)}
       data-selected-single={
         modifiers.selected &&
@@ -211,11 +219,15 @@ function CalendarDayButton({
       data-range-middle={modifiers.range_middle}
       className={cn(
         "relative isolate z-10 flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 border-0 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70",
+        !isClickableLink && "pointer-events-none hover:bg-transparent",
         defaultClassNames.day,
-        className
+        className,
+        isClickableLink && "opacity-100 text-foreground"
       )}
       {...props}
-    />
+    >
+      {children ? children : <button type="button">{day.date.getDate()}</button>}
+    </Button>
   )
 }
 

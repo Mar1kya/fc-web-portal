@@ -1,9 +1,10 @@
 "use client"
 
+import { useMemo } from "react" 
 import { Calendar } from "@/components/ui/calendar"
-import { useRouter, usePathname } from "@/i18n/navigation"
+import { useRouter, usePathname, Link } from "@/i18n/navigation"
 import { useSearchParams } from "next/navigation"
-import { format, parse, isAfter, startOfDay } from "date-fns"
+import { format, parse, isAfter, startOfDay, isValid } from "date-fns" 
 import { uk, enUS } from "date-fns/locale"
 import { useLocale } from "next-intl"
 
@@ -13,7 +14,23 @@ export default function NewsCalendarFilter({ activeDates, minYear }: { activeDat
     const searchParams = useSearchParams();
     const locale = useLocale();
     const dateParam = searchParams.get("date");
-    const selectedDate = dateParam ? parse(dateParam, "yyyy-MM-dd", new Date()) : undefined;
+    const parsedDate = dateParam ? parse(dateParam, "yyyy-MM-dd", new Date()) : undefined;
+    const selectedDate = parsedDate && isValid(parsedDate) ? parsedDate : undefined;
+    const activeDatesSet = useMemo(() => new Set(activeDates), [activeDates]);
+
+    const createDateURL = (date: Date) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("page"); 
+        const dateStr = format(date, "yyyy-MM-dd");
+        
+        if (dateParam === dateStr) {
+            params.delete("date");
+        } else {
+            params.set("date", dateStr);
+        }
+        
+        return `${pathname}?${params.toString()}`;
+    };
 
     function handleSelect(date: Date | undefined) {
         const params = new URLSearchParams(searchParams.toString());
@@ -32,8 +49,9 @@ export default function NewsCalendarFilter({ activeDates, minYear }: { activeDat
             return true;
         }
         const dateStr = format(date, "yyyy-MM-dd");
-        return !activeDates.includes(dateStr);
+        return !activeDatesSet.has(dateStr);
     };
+
     const currentYear = new Date().getFullYear();
     const startMonth = new Date(minYear, 0);
     const endMonth = new Date(currentYear, 11);
@@ -50,6 +68,24 @@ export default function NewsCalendarFilter({ activeDates, minYear }: { activeDat
                 startMonth={startMonth}
                 endMonth={endMonth}
                 className="w-full"
+                renderDay={(date) => {
+                    const dateStr = format(date, "yyyy-MM-dd");
+                    if (!activeDatesSet.has(dateStr)) {
+                        return (
+                            <span className="flex h-full w-full items-center justify-center">
+                                {date.getDate()}
+                            </span>
+                        );
+                    }
+                    return (
+                        <Link 
+                            href={createDateURL(date)} 
+                            className="flex h-full w-full items-center justify-center"
+                        >
+                            {date.getDate()}
+                        </Link>
+                    );
+                }}
             />
         </div>
     )

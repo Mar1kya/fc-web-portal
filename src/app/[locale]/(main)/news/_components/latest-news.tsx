@@ -4,27 +4,60 @@ import { getLocale, getTranslations } from "next-intl/server";
 import NewsCard from "./news-card";
 import NewsFilters from "./news-filters";
 import { PostType, TeamContext } from "../../../../../../generated/prisma";
-import { startOfDay, endOfDay, parse } from "date-fns";
+import { startOfDay, endOfDay, parse, isValid } from "date-fns"; 
 import AppPagination from "@/components/layout/app-pagination";
 import { PAGINATION } from "@/lib/constants";
 
 export default async function LatestNews({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
     const locale = await getLocale();
     const t = await getTranslations("NewsPage");
-    const typeFilter = typeof searchParams.type === 'string' ? searchParams.type as PostType : undefined;
-    const teamFilter = typeof searchParams.team === 'string' ? searchParams.team as TeamContext : undefined;
+    const typeParam = typeof searchParams.type === 'string' ? searchParams.type : undefined;
+    const teamParam = typeof searchParams.team === 'string' ? searchParams.team : undefined;
     const dateParam = typeof searchParams.date === 'string' ? searchParams.date : undefined;
     const pageParam = typeof searchParams.page === 'string' ? parseInt(searchParams.page) : 1;
     const currentPage = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
 
+    let isInvalidSearch = false;
+    let typeFilter: PostType | undefined = undefined;
+    if (typeParam) {
+        if (Object.values(PostType).includes(typeParam as PostType)) {
+            typeFilter = typeParam as PostType;
+        } else {
+            isInvalidSearch = true; 
+        }
+    }
+    let teamFilter: TeamContext | undefined = undefined;
+    if (teamParam) {
+        if (Object.values(TeamContext).includes(teamParam as TeamContext)) {
+            teamFilter = teamParam as TeamContext;
+        } else {
+            isInvalidSearch = true; 
+        }
+    }
     let dateFilter = undefined;
     if (dateParam) {
         const parsedDate = parse(dateParam, "yyyy-MM-dd", new Date());
-        dateFilter = {
-            gte: startOfDay(parsedDate),
-            lte: endOfDay(parsedDate)
-        };
+        if (isValid(parsedDate)) {
+            dateFilter = {
+                gte: startOfDay(parsedDate),
+                lte: endOfDay(parsedDate)
+            };
+        } else {
+            isInvalidSearch = true; 
+        }
     }
+    if (isInvalidSearch) {
+        return (
+            <section className="container mx-auto">
+                <div className="flex justify-between items-end mb-8 border-b pb-4 border-border">
+                    <H1>{t("title")}</H1>
+                    <NewsFilters />
+                </div>
+                <p className="text-muted-foreground">{t("noNews")}</p>
+            </section>
+        );
+    }
+
     const whereClause = {
         isPublished: true,
         ...(typeFilter && { type: typeFilter }),
@@ -46,6 +79,7 @@ export default async function LatestNews({ searchParams }: { searchParams: { [ke
         prisma.post.count({ where: whereClause })
     ]);
     const totalPages = Math.ceil(totalItems / PAGINATION.NEWS_PER_PAGE);
+    
     return (
         <section className="container mx-auto">
             <div className="flex justify-between items-end mb-8 border-b pb-4 border-border">
