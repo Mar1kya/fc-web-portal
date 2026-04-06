@@ -280,6 +280,7 @@ model OpponentTranslation {
 model Tournament {
   id           String                  @id @default(cuid())
   slug         String                  @unique
+  sofascoreId  Int?                    @unique
   translations TournamentTranslation[]
   matches      Match[]
   standings    Standing[]
@@ -318,6 +319,26 @@ model Standing {
   teamContext  TeamContext @default(MAIN_TEAM)
 
   updatedAt DateTime @updatedAt
+}
+
+model TeamDictionary {
+  id           String                      @id @default(cuid())
+  sofascoreId  Int                         @unique
+  originalName String
+  translations TeamDictionaryTranslation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TeamDictionaryTranslation {
+  id               String         @id @default(cuid())
+  teamDictionaryId String
+  teamDictionary   TeamDictionary @relation(fields: [teamDictionaryId], references: [id], onDelete: Cascade)
+  language         String         @db.VarChar(5)
+  name             String
+
+  @@unique([teamDictionaryId, language])
 }
 
 model Match {
@@ -497,14 +518,15 @@ model Payment {
 }
 
 model Season {
-  id        String     @id @default(cuid())
-  slug      String     @unique
-  name      String     @unique
-  startDate DateTime
-  endDate   DateTime
-  isActive  Boolean    @default(false)
-  matches   Match[]
-  standings Standing[]
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  name        String     @unique
+  sofascoreId Int?       @unique
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean    @default(false)
+  matches     Match[]
+  standings   Standing[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

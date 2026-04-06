@@ -144,6 +144,15 @@
       "titleWithDate": "{title} за {date}",
       "description": "Читайте останні новини, ексклюзивні інтерв'ю та офіційні заяви футбольного клубу.",
       "dynamicDescription": "Переглядайте {category} футбольного клубу Emerald Gang. Актуальна інформація, результати та події."
+    },
+    "StandingsMini": {
+      "title": "УПЛ",
+      "team": "КОМАНДА",
+      "playedTitle": "Ігри",
+      "played": "І",
+      "pointsTitle": "Очки",
+      "points": "О",
+      "fullTable": "Повна таблиця"
     }
   },
   "Enums": {

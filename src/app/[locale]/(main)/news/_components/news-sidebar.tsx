@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
+import StandingsMini from "./standings-mini"; 
 import NewsCalendarFilter from "./news-calendar-filter";
 export default async function NewsSidebar() {
     const publishedPosts = await prisma.post.findMany({
@@ -15,8 +16,6 @@ export default async function NewsSidebar() {
 
     return <div className="flex flex-col gap-8 w-full">
         <NewsCalendarFilter activeDates={activeDates} minYear={minYear} />
-        <div>
-            Турнірна таблиця
-        </div>
+        <StandingsMini />
     </div>
 }

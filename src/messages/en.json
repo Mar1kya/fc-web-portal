@@ -144,6 +144,15 @@
       "titleWithDate": "{title} on {date}",
       "description": "Read the latest news, exclusive interviews, and official statements from the football club. Follow the life of the main team and the Academy.",
       "dynamicDescription": "Browse {category} from Emerald Gang football club. Latest updates, results, and events."
+    },
+    "StandingsMini": {
+      "title": "UPL",
+      "team": "TEAM",
+      "playedTitle": "Matches Played",
+      "played": "P",
+      "pointsTitle": "Points",
+      "points": "PTS",
+      "fullTable": "Full Standings"
     }
   },
   "Enums": {
