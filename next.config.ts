@@ -29,6 +29,11 @@ const nextConfig: NextConfig = {
         hostname: "buinwmypxz.ufs.sh",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "api.sofascore.app",
+        pathname: "/**",
+      },
     ],
   },
 };
