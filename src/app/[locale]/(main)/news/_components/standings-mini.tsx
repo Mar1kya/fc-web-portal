@@ -20,10 +20,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getTranslation } from "@/lib/utils/get-translation";
+import { TARGET_TEAM_ORIGINAL_NAME } from "@/lib/constants";
 
 export default async function StandingsMini() {
     const t = await getTranslations("NewsPage.StandingsMini");
     const locale = await getLocale();
+
     const allStandings = await prisma.standing.findMany({
         orderBy: { rank: "asc" },
         include: {
@@ -35,6 +37,7 @@ export default async function StandingsMini() {
             season: true,
         },
     });
+
     const dictionaries = await prisma.teamDictionary.findMany({
         include: {
             translations: true,
@@ -43,10 +46,13 @@ export default async function StandingsMini() {
 
     if (allStandings.length === 0) return null;
 
-    const targetTeam = "Emerald Gang";
-    const targetIndex = allStandings.findIndex((standing) =>
-        standing.teamName.includes(targetTeam)
-    );
+    const targetIndex = allStandings.findIndex((standing) => {
+        const dictEntry = dictionaries.find(d =>
+            d.originalName === standing.teamName ||
+            d.translations.some(tr => tr.name === standing.teamName)
+        );
+        return dictEntry?.originalName === TARGET_TEAM_ORIGINAL_NAME;
+    });
 
     let startIndex = 0;
     if (targetIndex !== -1) {
@@ -56,7 +62,6 @@ export default async function StandingsMini() {
         }
     }
     const displayStandings = allStandings.slice(startIndex, startIndex + 5);
-
     const firstRow = allStandings[0];
     const translatedTournament = getTranslation(firstRow.tournament, locale);
     const tournamentName = translatedTournament?.name || t("title");
@@ -84,12 +89,12 @@ export default async function StandingsMini() {
                     </TableHeader>
                     <TableBody>
                         {displayStandings.map((team) => {
-                            const isTargetTeam = team.teamName.includes(targetTeam);
                             const dictEntry = dictionaries.find(d =>
                                 d.originalName === team.teamName ||
                                 d.translations.some(tr => tr.name === team.teamName)
                             );
                             const translatedTeamName = getTranslation(dictEntry, locale)?.name || team.teamName;
+                            const isTargetTeam = dictEntry?.originalName === TARGET_TEAM_ORIGINAL_NAME;
 
                             return (
                                 <TableRow
@@ -109,6 +114,7 @@ export default async function StandingsMini() {
                                                         fill
                                                         sizes="20px"
                                                         className="object-contain"
+                                                        unoptimized
                                                     />
                                                 </div>
                                             )}
