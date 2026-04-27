@@ -8,7 +8,7 @@ import { CalendarIcon, Newspaper, ArrowLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import NewsCard from "../_components/news-card";
-import DOMPurify from 'isomorphic-dompurify';
+import sanitizeHtml from 'sanitize-html';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -47,7 +47,13 @@ export default async function SingleNewsPage({ params }: { params: Promise<{ slu
 
     const translatedPost = getTranslation(post, locale);
     if (!translatedPost) notFound();
-    const cleanContent = DOMPurify.sanitize(translatedPost.content);
+    const cleanContent = sanitizeHtml(translatedPost.content, {
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+        allowedAttributes: {
+            ...sanitizeHtml.defaults.allowedAttributes,
+            'img': ['src', 'alt', 'width', 'height']
+        }
+    });
 
     const otherNews = await prisma.post.findMany({
         where: {
