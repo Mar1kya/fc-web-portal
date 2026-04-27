@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Calendar } from "@/components/ui/calendar"
 import { useRouter, Link } from "@/i18n/navigation"
 import { useSearchParams } from "next/navigation"
@@ -16,6 +16,13 @@ export default function NewsCalendarFilter({ activeDates, minYear }: { activeDat
     const parsedDate = dateParam ? parse(dateParam, "yyyy-MM-dd", new Date()) : undefined;
     const selectedDate = parsedDate && isValid(parsedDate) ? parsedDate : undefined;
     const activeDatesSet = useMemo(() => new Set(activeDates), [activeDates]);
+    const [month, setMonth] = useState<Date>(selectedDate || new Date());
+    const [prevDateParam, setPrevDateParam] = useState(dateParam);
+
+    if (dateParam !== prevDateParam) {
+        setPrevDateParam(dateParam);
+        setMonth(selectedDate || new Date());
+    }
 
     const createDateURL = (date: Date) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -60,6 +67,8 @@ export default function NewsCalendarFilter({ activeDates, minYear }: { activeDat
                 mode="single"
                 selected={selectedDate}
                 onSelect={handleSelect}
+                month={month}
+                onMonthChange={setMonth}
                 locale={locale === 'uk' ? uk : enUS}
                 disabled={disabledDays}
                 captionLayout="dropdown"

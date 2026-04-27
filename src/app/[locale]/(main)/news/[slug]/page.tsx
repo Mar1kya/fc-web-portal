@@ -84,12 +84,22 @@ export default async function SingleNewsPage({ params }: { params: Promise<{ slu
             </Link>
             <header className="mb-8">
                 <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="default" className="bg-primary text-primary-foreground">
-                        {tEnums(`PostType.${post.type}`)}
-                    </Badge>
-                    <Badge variant="secondary">
-                        {tEnums(`TeamContext.${post.teamContext}`)}
-                    </Badge>
+                    <Link href={`/news?type=${post.type}`}>
+                        <Badge
+                            variant="default"
+                            className="bg-primary text-primary-foreground hover:bg-primary/80 cursor-pointer transition-colors"
+                        >
+                            {tEnums(`PostType.${post.type}`)}
+                        </Badge>
+                    </Link>
+                    <Link href={`/news?team=${post.teamContext}`}>
+                        <Badge
+                            variant="secondary"
+                            className="hover:bg-secondary/80 cursor-pointer transition-colors"
+                        >
+                            {tEnums(`TeamContext.${post.teamContext}`)}
+                        </Badge>
+                    </Link>
                 </div>
                 <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 text-foreground leading-tight">
                     {translatedPost.title}
