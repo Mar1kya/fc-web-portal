@@ -155,6 +155,11 @@
       "fullTable": "Full Standings"
     }
   },
+  "SingleNewsPage": {
+    "otherNews": "Other news",
+    "readMore": "Read more",
+    "backToNews": "Back to news"
+  },
   "Enums": {
     "PostType": {
       "NEWS": "News",
