@@ -115,6 +115,7 @@ export default async function StandingsMini() {
                                                         sizes="20px"
                                                         className="object-contain"
                                                         unoptimized
+                                                        referrerPolicy="no-referrer"
                                                     />
                                                 </div>
                                             )}

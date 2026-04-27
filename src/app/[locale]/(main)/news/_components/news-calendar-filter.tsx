@@ -1,16 +1,15 @@
 "use client"
 
-import { useMemo } from "react" 
+import { useMemo } from "react"
 import { Calendar } from "@/components/ui/calendar"
-import { useRouter, usePathname, Link } from "@/i18n/navigation"
+import { useRouter, Link } from "@/i18n/navigation"
 import { useSearchParams } from "next/navigation"
-import { format, parse, isAfter, startOfDay, isValid } from "date-fns" 
+import { format, parse, isAfter, startOfDay, isValid } from "date-fns"
 import { uk, enUS } from "date-fns/locale"
 import { useLocale } from "next-intl"
 
 export default function NewsCalendarFilter({ activeDates, minYear }: { activeDates: string[]; minYear: number }) {
     const router = useRouter();
-    const pathname = usePathname();
     const searchParams = useSearchParams();
     const locale = useLocale();
     const dateParam = searchParams.get("date");
@@ -20,16 +19,15 @@ export default function NewsCalendarFilter({ activeDates, minYear }: { activeDat
 
     const createDateURL = (date: Date) => {
         const params = new URLSearchParams(searchParams.toString());
-        params.delete("page"); 
+        params.delete("page");
         const dateStr = format(date, "yyyy-MM-dd");
-        
+
         if (dateParam === dateStr) {
             params.delete("date");
         } else {
             params.set("date", dateStr);
         }
-        
-        return `${pathname}?${params.toString()}`;
+        return `/news?${params.toString()}`;
     };
 
     function handleSelect(date: Date | undefined) {
@@ -41,7 +39,7 @@ export default function NewsCalendarFilter({ activeDates, minYear }: { activeDat
         } else {
             params.delete("date");
         }
-        router.push(`${pathname}?${params.toString()}`);
+        router.push(`/news?${params.toString()}`);
     }
 
     function disabledDays(date: Date) {
@@ -78,8 +76,8 @@ export default function NewsCalendarFilter({ activeDates, minYear }: { activeDat
                         );
                     }
                     return (
-                        <Link 
-                            href={createDateURL(date)} 
+                        <Link
+                            href={createDateURL(date)}
                             className="flex h-full w-full items-center justify-center"
                         >
                             {date.getDate()}
