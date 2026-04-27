@@ -5,7 +5,7 @@ import { getTranslation } from "@/lib/utils/get-translation";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { CalendarIcon, Newspaper, ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import NewsCard from "../_components/news-card";
 import DOMPurify from 'isomorphic-dompurify';
