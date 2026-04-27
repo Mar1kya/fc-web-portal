@@ -135,6 +135,10 @@ model Post {
   deletedAt DateTime?
 
   @@index([deletedAt])
+  @@index([publishedAt]) 
+  @@index([isPublished]) 
+  @@index([type]) 
+  @@index([teamContext])
 }
 
 model PostTranslation {
