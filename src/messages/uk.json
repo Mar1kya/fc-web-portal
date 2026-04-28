@@ -167,7 +167,9 @@
   },
   "TeamPage": {
     "all": "Всі",
-    "coaches": "Тренерський штаб"
+    "coaches": "Тренерський штаб",
+    "noPhoto": "Немає фото",
+    "noPlayers": "Гравців не знайдено"
   },
   "Enums": {
     "PostType": {
@@ -186,6 +188,12 @@
       "DEFENDER": "Захисники",
       "MIDFIELDER": "Півзахисники",
       "FORWARD": "Нападники"
+    },
+    "PlayerRole": {
+      "GOALKEEPER": "Воротар",
+      "DEFENDER": "Захисник",
+      "MIDFIELDER": "Півзахисник",
+      "FORWARD": "Нападник"
     }
   },
   "Pagination": {

@@ -167,7 +167,9 @@
   },
   "TeamPage": {
     "all": "All",
-    "coaches": "Coaching staff"
+    "coaches": "Coaching staff",
+    "noPhoto": "No Photo",
+    "noPlayers": "No players found"
   },
   "Enums": {
     "PostType": {
@@ -182,6 +184,12 @@
       "GENERAL": "Club"
     },
     "PlayerPosition": {
+      "GOALKEEPER": "Goalkeepers",
+      "DEFENDER": "Defenders",
+      "MIDFIELDER": "Midfielders",
+      "FORWARD": "Forwards"
+    },
+    "PlayerRole": {
       "GOALKEEPER": "Goalkeeper",
       "DEFENDER": "Defender",
       "MIDFIELDER": "Midfielder",
