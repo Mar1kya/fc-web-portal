@@ -4,3 +4,4 @@ export const PAGINATION = {
     NEWS_PER_PAGE: 16,
 };
 export const TARGET_TEAM_ORIGINAL_NAME = "Polissya Zhytomyr";
+export const TEAM_ID = "258536";
