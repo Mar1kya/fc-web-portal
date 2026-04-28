@@ -232,11 +232,12 @@ model PlayerTranslation {
 model Coach {
   id               String             @id @default(cuid())
   slug             String             @unique
-  sofascoreId      Int?               @unique
   translations     CoachTranslation[]
   avatar           String?
   media            Media[]
   teamContext      TeamContext        @default(MAIN_TEAM)
+  nationality      String?            @db.VarChar(10)
+  birthDate        DateTime?
   mentionedInPosts Post[]
 
   createdAt DateTime  @default(now())

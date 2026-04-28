@@ -20,12 +20,6 @@ import {
 } from "@/components/ui/accordion"
 import { PostType, TeamContext } from "../../../generated/prisma"
 
-const teamsData = [
-    { slug: "main", name: "Основний склад" },
-    { slug: "u19", name: "Команда U-19" },
-    { slug: "academy", name: "Академія" },
-]
-
 const matchesMenuData = [
     {
         teamName: "Перша команда",
@@ -71,13 +65,13 @@ const MobileLink = ({ href, children, className, setIsOpen }: MobileLinkProps) =
     </Link>
 );
 
-export default function MobileMenu() {
+export default function MobileMenu({ activeTeamContexts }: { activeTeamContexts: string[] }) {
     const t = useTranslations("Header.DesktopMenu");
     const tEnums = useTranslations("Enums");
     const [isOpen, setIsOpen] = React.useState(false);
     const triggerClass = "text-base font-medium cursor-pointer hover:no-underline hover:text-emerald-600 [&[data-state=open]]:text-emerald-600 py-4";
     const postTypes = Object.values(PostType);
-    const teamContexts = Object.values(TeamContext);
+    const allTeamContexts = Object.values(TeamContext);
 
     return (
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -112,7 +106,7 @@ export default function MobileMenu() {
                                     </MobileLink>
                                 ))}
                                 <div className="h-px bg-border my-2 mr-4" />
-                                {teamContexts.map((team) => (
+                                {allTeamContexts.map((team) => (
                                     <MobileLink
                                         key={`mob-news-team-${team}`}
                                         href={`/news?team=${team}`}
@@ -128,11 +122,15 @@ export default function MobileMenu() {
                                 {t("team")}
                             </AccordionTrigger>
                             <AccordionContent className="flex flex-col gap-0 pl-4 pb-2">
-                                {teamsData.map((team) => (
-                                    <MobileLink key={`mob-team-${team.slug}`} href={`/team/${team.slug}`} setIsOpen={setIsOpen}>{team.name}</MobileLink>
+                                {activeTeamContexts.map((teamContext) => (
+                                    <MobileLink
+                                        key={`mob-team-${teamContext}`}
+                                        href={`/team?context=${teamContext}`}
+                                        setIsOpen={setIsOpen}
+                                    >
+                                        {tEnums(`TeamContext.${teamContext}`)}
+                                    </MobileLink>
                                 ))}
-                                <div className="h-px bg-border my-2 mr-4" />
-                                <MobileLink href="/coaches" setIsOpen={setIsOpen}>{t("coaches")}</MobileLink>
                             </AccordionContent>
                         </AccordionItem>
                         <AccordionItem value="matches">
