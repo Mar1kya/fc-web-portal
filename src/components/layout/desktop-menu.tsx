@@ -21,11 +21,6 @@ const MenuItem = ({ href, title, className }: { href: string; title: string; cla
     </li>
 )
 //Тестові дані
-const teamsData = [
-    { slug: "main", name: "Основний склад" },
-    { slug: "u19", name: "Команда U-19" },
-    { slug: "academy", name: "Академія" },
-]
 
 const matchesMenuData = [
     {
@@ -52,11 +47,11 @@ const matchesMenuData = [
     }
 ]
 
-export default function DesktopMenu() {
+export default function DesktopMenu({ activeTeamContexts }: { activeTeamContexts: string[] }) {
     const t = useTranslations("Header.DesktopMenu");
     const tEnums = useTranslations("Enums");
     const postTypes = Object.values(PostType);
-    const teamContexts = Object.values(TeamContext);
+    const allTeamContexts = Object.values(TeamContext);
     return (
         <div className="hidden lg:flex w-full justify-center">
             <ul className="flex items-center gap-8">
@@ -77,7 +72,7 @@ export default function DesktopMenu() {
                         ))}
 
                         <div className="my-1 h-px bg-border/50" />
-                        {teamContexts.map((team) => (
+                        {allTeamContexts.map((team) => (
                             <MenuItem
                                 key={`desk-news-team-${team}`}
                                 href={`/news?team=${team}`}
@@ -91,11 +86,14 @@ export default function DesktopMenu() {
                         {t("team")} <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
                     </Link>
                     <ul className="absolute left-0 top-full hidden w-55 flex-col gap-1 rounded-md border border-border/50 bg-background/95 backdrop-blur-md p-2 shadow-lg group-hover:flex animate-in fade-in zoom-in-95 duration-200">
-                        {teamsData.map((team) => (
-                            <MenuItem key={`team-${team.slug}`} href={`/team/${team.slug}`} title={team.name} />
+                        {activeTeamContexts.map((teamContext) => (
+                            <MenuItem
+                                key={`team-menu-${teamContext}`}
+                                href={`/team?context=${teamContext}`}
+                                title={tEnums(`TeamContext.${teamContext}`)}
+                            />
                         ))}
-                        <div className="my-1 h-px bg-border/50" />
-                        <MenuItem href="/coaches" title={t("coaches")} />
+
                     </ul>
                 </li>
                 <li className="group relative py-4">

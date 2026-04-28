@@ -7,6 +7,7 @@ import DesktopMenu from "./desktop-menu";
 import MobileMenu from "./mobile-menu";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
+import { TeamContext } from "../../../generated/prisma";
 
 export default async function Header() {
     const session = await auth();
@@ -22,6 +23,12 @@ export default async function Header() {
         }
     }
     const t = await getTranslations("Header");
+    const activeTeamsDb = await prisma.player.groupBy({
+        by: ['teamContext'],
+    });
+    const activeTeamContexts = activeTeamsDb.length > 0
+        ? activeTeamsDb.map(t => t.teamContext)
+        : [TeamContext.MAIN_TEAM];
     return <header className="sticky top-0 z-50 2xl:border-b bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60 px-2">
         <div className="container mx-auto border-0 lg:border-b 2xl:border-0">
             <div className="flex items-center justify-between border-b py-4">
@@ -53,10 +60,10 @@ export default async function Header() {
                         </ul>
                     </nav>
                     <SelectLanguage />
-                    <MobileMenu />
+                    <MobileMenu activeTeamContexts={activeTeamContexts} />
                 </div>
             </div>
-            <DesktopMenu />
+            <DesktopMenu activeTeamContexts={activeTeamContexts} />
         </div>
     </header >
 
