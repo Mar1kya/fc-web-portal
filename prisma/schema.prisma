@@ -135,9 +135,9 @@ model Post {
   deletedAt DateTime?
 
   @@index([deletedAt])
-  @@index([publishedAt]) 
-  @@index([isPublished]) 
-  @@index([type]) 
+  @@index([publishedAt])
+  @@index([isPublished])
+  @@index([type])
   @@index([teamContext])
 }
 
@@ -192,6 +192,7 @@ enum PlayerPosition {
 model Player {
   id               String              @id @default(cuid())
   slug             String              @unique
+  sofascoreId      Int?                @unique
   translations     PlayerTranslation[]
   number           Int
   position         PlayerPosition
@@ -231,6 +232,7 @@ model PlayerTranslation {
 model Coach {
   id               String             @id @default(cuid())
   slug             String             @unique
+  sofascoreId      Int?               @unique
   translations     CoachTranslation[]
   avatar           String?
   media            Media[]
