@@ -11,12 +11,12 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
     const pageTitle = tEnums(`TeamContext.${currentContext}`);
 
     return (
-        <section className="container mx-auto">
+        <>
             <div className="flex flex-col gap-6 mb-8">
                 <H1>{pageTitle}</H1>
                 <TeamTabs />
             </div>
             <RosterList searchParams={resolvedSearchParams} locale={locale} />
-        </section>
+        </>
     );
 }
