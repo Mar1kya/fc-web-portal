@@ -193,6 +193,13 @@
     "emptyNews": "No related news yet.",
     "emptyMedia": "No photos or videos available yet."
   },
+  "PlayerStats": {
+    "matches": "Matches",
+    "goals": "Goals",
+    "assists": "Assists",
+    "cleanSheets": "Clean Sheets",
+    "conceded": "Conceded"
+  },
   "Enums": {
     "PostType": {
       "NEWS": "News",

@@ -193,6 +193,13 @@
     "emptyNews": "Пов'язаних новин ще немає.",
     "emptyMedia": "Фото та відео поки відсутні."
   },
+  "PlayerStats": {
+    "matches": "Матчі",
+    "goals": "Голи",
+    "assists": "Асисти",
+    "cleanSheets": "Сухі матчі",
+    "conceded": "Пропущено"
+  },
   "Enums": {
     "PostType": {
       "NEWS": "Новини",

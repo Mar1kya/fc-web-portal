@@ -6,6 +6,8 @@ import PlayerHero from "./_components/player-hero";
 import ProfileTabs from "../_components/player-tabs";
 import sanitizeHtml from 'sanitize-html';
 import NewsGrid from "@/components/shared/news-grid";
+import MediaGallery from "@/components/shared/media-gallery";
+import PlayerQuickStats from "../_components/player-quick-stats";
 
 export default async function PlayerProfilePage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -47,6 +49,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
     return (
         <>
             <PlayerHero player={player} />
+            <PlayerQuickStats player={player} />
             <ProfileTabs
                 bioContent={
                     cleanBio ? (
@@ -65,11 +68,9 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
                         <p className="text-muted-foreground">{t("emptyNews")}</p>
                     )
                 }
-                mediaContent={
+               mediaContent={
                     player.media.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-
-                        </div>
+                        <MediaGallery media={player.media} />
                     ) : (
                         <p className="text-muted-foreground">{t("emptyMedia")}</p>
                     )
