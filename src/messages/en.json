@@ -185,6 +185,14 @@
     "description": "Unfortunately, the page for this player or coach does not exist or has been removed. The link might be outdated or incorrect.",
     "backButton": "Back to team"
   },
+  "ProfileTabs": {
+    "bio": "Biography",
+    "news": "News",
+    "media": "Media",
+    "emptyBio": "Player biography is not added yet.",
+    "emptyNews": "No related news yet.",
+    "emptyMedia": "No photos or videos available yet."
+  },
   "Enums": {
     "PostType": {
       "NEWS": "News",

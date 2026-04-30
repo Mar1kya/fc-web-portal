@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { uk, enUS } from "date-fns/locale";
 import { Link } from "@/i18n/navigation";
 import { Shirt, User } from "lucide-react";
-import { Prisma } from "../../../../../../generated/prisma";
+import { Prisma } from "../../../../../../../generated/prisma";
 
 type PlayerWithRelations = Prisma.PlayerGetPayload<{
     include: {
@@ -31,7 +31,7 @@ export default async function PlayerHero({ player }: PlayerHeroProps) {
     const hasJersey = player.relatedProducts.length > 0;
 
     return (
-        <div className="flex w-full flex-col overflow-hidden rounded-lg border bg-card xl:flex-row">
+        <div className="flex w-full flex-col-reverse overflow-hidden rounded-lg border bg-card xl:flex-row">
             <div className="flex w-full flex-col items-center justify-center p-8 text-center text-card-foreground md:p-14 xl:w-1/2 xl:items-start xl:text-left">
                 <div className="mb-8 flex w-full flex-wrap items-baseline justify-center gap-4 border-b border-white/10 pb-6 xl:justify-start">
                     <span className="text-2xl font-black text-emerald-600 sm:text-4xl md:text-5xl">
