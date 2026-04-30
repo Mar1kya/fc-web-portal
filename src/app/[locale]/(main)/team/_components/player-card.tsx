@@ -33,6 +33,8 @@ export default async function PlayerCard({ player, locale, positionName }: Playe
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+                        unoptimized
+                        referrerPolicy="no-referrer"
                     />
                 ) : (
                     <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/30 transition-transform duration-500 group-hover:scale-105 group-hover:text-emerald-600/40">

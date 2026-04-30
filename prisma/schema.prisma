@@ -190,26 +190,28 @@ enum PlayerPosition {
 }
 
 model Player {
-  id               String              @id @default(cuid())
-  slug             String              @unique
-  sofascoreId      Int?                @unique
-  translations     PlayerTranslation[]
-  number           Int
-  position         PlayerPosition
-  teamContext      TeamContext         @default(MAIN_TEAM)
-  avatar           String?
-  media            Media[]
-  birthDate        DateTime?
-  height           Int?
-  weight           Int?
-  nationality      String?             @db.VarChar(10)
-  initialMatches   Int                 @default(0)
-  initialGoals     Int                 @default(0)
-  initialAssists   Int                 @default(0)
-  lineupEntries    MatchLineup[]
-  events           MatchEvent[]
-  mentionedInPosts Post[]
-  relatedProducts  Product[]
+  id                   String              @id @default(cuid())
+  slug                 String              @unique
+  sofascoreId          Int?                @unique
+  translations         PlayerTranslation[]
+  number               Int
+  position             PlayerPosition
+  teamContext          TeamContext         @default(MAIN_TEAM)
+  avatar               String?
+  media                Media[]
+  birthDate            DateTime?
+  height               Int?
+  weight               Int?
+  nationality          String?             @db.VarChar(10)
+  initialMatches       Int                 @default(0)
+  initialGoals         Int                 @default(0)
+  initialAssists       Int                 @default(0)
+  initialCleanSheets   Int                 @default(0)
+  initialGoalsConceded Int                 @default(0)
+  lineupEntries        MatchLineup[]
+  events               MatchEvent[]
+  mentionedInPosts     Post[]
+  relatedProducts      Product[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
