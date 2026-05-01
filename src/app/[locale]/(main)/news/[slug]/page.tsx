@@ -15,15 +15,35 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const locale = await getLocale();
     const post = await prisma.post.findUnique({
         where: { slug, isPublished: true },
-        include: { translations: true }
+        include: { translations: true, media: { take: 1 } }
     });
 
     if (!post) return {};
+
     const translation = getTranslation(post, locale);
+    const title = translation?.title || "Новина";
+    const description = translation?.description || "";
+    const imageUrl = post.media && post.media.length > 0
+        ? post.media[0].url
+        : "/images/news.jpg";
 
     return {
-        title: translation?.title,
-        description: translation?.description,
+        title: title,
+        description: description,
+        openGraph: {
+            title: title,
+            description: description,
+            images: [
+                {
+                    url: imageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                }
+            ],
+            type: "article",
+            publishedTime: post.publishedAt.toISOString(),
+        },
     };
 }
 

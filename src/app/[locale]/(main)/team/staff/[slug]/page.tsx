@@ -8,6 +8,46 @@ import MediaGallery from "@/components/shared/media-gallery";
 import ProfileTabs from "../../_components/profile-tabs";
 import StaffHero from "../_components/staff-hero";
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const locale = await getLocale();
+    const tMeta = await getTranslations("StaffProfile.Metadata");
+
+    const coach = await prisma.coach.findUnique({
+        where: { slug, deletedAt: null },
+        include: { translations: true },
+    });
+
+    if (!coach) {
+        return {}
+    }
+
+    const translation = getTranslation(coach, locale);
+    const staffName = translation?.name || (locale === "uk" ? "Без назви" : "Untitled");
+    const staffRole = translation?.role || (locale === "uk" ? "Персонал" : "Staff");
+    const pageTitle = `${staffName} | ${staffRole}`;
+    const pageDescription = tMeta("description", { name: staffName, role: staffRole.toLowerCase() });
+    const imageUrl = coach.avatar ? coach.avatar : "/images/team.jpg";
+
+    return {
+        title: pageTitle,
+        description: pageDescription,
+        openGraph: {
+            title: pageTitle,
+            description: pageDescription,
+            images: [
+                {
+                    url: imageUrl,
+                    width: 800,
+                    height: 800,
+                    alt: staffName,
+                }
+            ],
+            type: "profile",
+        },
+    };
+}
+
 export default async function StaffProfilePage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const locale = await getLocale()

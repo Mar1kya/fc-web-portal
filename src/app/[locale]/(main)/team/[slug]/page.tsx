@@ -9,6 +9,53 @@ import NewsGrid from "@/components/shared/news-grid";
 import MediaGallery from "@/components/shared/media-gallery";
 import PlayerQuickStats from "./_components/player-quick-stats";
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const locale = await getLocale();
+    const tEnums = await getTranslations("Enums");
+    const tMeta = await getTranslations("PlayerProfile.Metadata");
+    const player = await prisma.player.findUnique({
+        where: { slug, deletedAt: null },
+        include: { translations: true },
+    });
+
+    if (!player) {
+        return {}
+    }
+
+    const translation = getTranslation(player, locale);
+    const playerName = translation?.name || (locale === "uk" ? "Без назви" : "Untitled");
+
+    let positionName = "";
+    try {
+        positionName = tEnums(`PlayerRole.${player.position}`);
+    } catch {
+        positionName = player.position;
+    }
+
+    const pageTitle = `${playerName} | ${positionName}`;
+    const pageDescription = tMeta("description", { name: playerName, position: positionName.toLowerCase() });
+    const imageUrl = player.avatar ? player.avatar : "/images/team.jpg";
+
+    return {
+        title: pageTitle,
+        description: pageDescription,
+        openGraph: {
+            title: pageTitle,
+            description: pageDescription,
+            images: [
+                {
+                    url: imageUrl,
+                    width: 800,
+                    height: 800,
+                    alt: playerName,
+                }
+            ],
+            type: "profile",
+        },
+    };
+}
+
 export default async function PlayerProfilePage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const locale = await getLocale()
@@ -68,7 +115,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
                         <p className="text-muted-foreground">{t("emptyNews")}</p>
                     )
                 }
-               mediaContent={
+                mediaContent={
                     player.media.length > 0 ? (
                         <MediaGallery media={player.media} />
                     ) : (
