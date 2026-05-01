@@ -5,7 +5,7 @@ import { parse, isValid } from "date-fns";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const resolvedSearchParams = await searchParams;
-    const locale = await getLocale(); 
+    const locale = await getLocale();
     const tNews = await getTranslations("NewsPage.Metadata");
     const tEnums = await getTranslations("Enums");
     const rawType = typeof resolvedSearchParams.type === 'string' ? resolvedSearchParams.type : undefined;
@@ -21,34 +21,47 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     }
 
     let pageTitle = tNews("title");
-    let categoryName = tNews("title").toLowerCase(); 
+    let categoryName = tNews("title").toLowerCase();
 
     if (typeFilter && teamFilter) {
         const type = tEnums(`PostType.${typeFilter}`);
         const team = tEnums(`TeamContext.${teamFilter}`);
         pageTitle = `${type} | ${team}`;
-        categoryName = locale === 'uk' 
-            ? `${type.toLowerCase()} команди ${team}` 
+        categoryName = locale === 'uk'
+            ? `${type.toLowerCase()} команди ${team}`
             : `${type.toLowerCase()} from the ${team}`;
     } else if (typeFilter) {
         pageTitle = tEnums(`PostType.${typeFilter}`);
         categoryName = pageTitle.toLowerCase();
     } else if (teamFilter) {
         pageTitle = tEnums(`TeamContext.${teamFilter}`);
-        categoryName = locale === 'uk' 
-            ? `новини команди ${pageTitle}` 
+        categoryName = locale === 'uk'
+            ? `новини команди ${pageTitle}`
             : `news from the ${pageTitle}`;
     }
     if (isValidDate && dateParam) {
         pageTitle = tNews("titleWithDate", { title: pageTitle, date: dateParam });
     }
-    const pageDescription = (typeFilter || teamFilter || isValidDate) 
+    const pageDescription = (typeFilter || teamFilter || isValidDate)
         ? tNews("dynamicDescription", { category: categoryName })
         : tNews("description");
 
     return {
         title: pageTitle,
         description: pageDescription,
+        openGraph: {
+            title: pageTitle,
+            description: pageDescription,
+            images: [
+                {
+                    url: "/images/news.jpg",
+                    width: 1200,
+                    height: 630,
+                    alt: pageTitle,
+                }
+            ],
+            type: "website",
+        },
     };
 }
 export default async function NewsPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {

@@ -1,4 +1,10 @@
 {
+  "RootLayout": {
+    "Metadata": {
+      "title": "Emerald Gang",
+      "description": "Emerald Gang — your favorite portal. Latest news, player statistics, match schedules, and much more."
+    }
+  },
   "HomePage": {
     "title": "Football club"
   },
@@ -178,12 +184,22 @@
     "weight": "Weight",
     "cm": "cm",
     "kg": "kg",
-    "buyJersey": "Buy jersey"
+    "buyJersey": "Buy jersey",
+    "Metadata": {
+      "roster": "Team Roster",
+      "staffTab": "Coaching Staff",
+      "description": "View the complete roster and coaching staff for the {team}. Get the latest information on the football club's players.",
+      "dynamicDescription": "Detailed information about the {category} of the {team}. View player stats, biographies, and news."
+    }
   },
   "TeamMemberNotFound": {
     "title": "Profile not found",
     "description": "Unfortunately, the page for this player or coach does not exist or has been removed. The link might be outdated or incorrect.",
-    "backButton": "Back to team"
+    "backButton": "Back to team",
+    "Metadata": {
+      "title": "Page Not Found",
+      "description": "This team member could not be found."
+    }
   },
   "ProfileTabs": {
     "bio": "Biography",
@@ -199,6 +215,16 @@
     "assists": "Assists",
     "cleanSheets": "Clean Sheets",
     "conceded": "Conceded"
+  },
+  "PlayerProfile": {
+    "Metadata": {
+      "description": "Official player profile: {name}. Position: {position}. View statistics, biography, latest news, and photo gallery of the football club."
+    }
+  },
+  "StaffProfile": {
+    "Metadata": {
+      "description": "Official profile: {name}. Role: {role}. View the biography, latest news, and photo gallery for FC Polissya."
+    }
   },
   "Enums": {
     "PostType": {
