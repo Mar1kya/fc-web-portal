@@ -2,23 +2,21 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getTranslation } from "@/lib/utils/get-translation";
 import { getLocale, getTranslations } from "next-intl/server";
-import PlayerHero from "./_components/player-hero";
-import ProfileTabs from "../_components/profile-tabs";
 import sanitizeHtml from 'sanitize-html';
 import NewsGrid from "@/components/shared/news-grid";
 import MediaGallery from "@/components/shared/media-gallery";
-import PlayerQuickStats from "./_components/player-quick-stats";
+import ProfileTabs from "../../_components/profile-tabs";
+import StaffHero from "../_components/staff-hero";
 
-export default async function PlayerProfilePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function StaffProfilePage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const locale = await getLocale()
     const t = await getTranslations("ProfileTabs");
 
-    const player = await prisma.player.findUnique({
+    const coach = await prisma.coach.findUnique({
         where: { slug, deletedAt: null },
         include: {
             translations: true,
-            relatedProducts: { take: 1 },
             mentionedInPosts: {
                 where: { deletedAt: null },
                 include: { translations: true, media: true },
@@ -30,11 +28,11 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
         },
     });
 
-    if (!player) {
+    if (!coach) {
         notFound();
     }
 
-    const translation = getTranslation(player, locale);
+    const translation = getTranslation(coach, locale);
     let cleanBio = null;
     if (translation?.bio) {
         cleanBio = sanitizeHtml(translation.bio, {
@@ -47,9 +45,8 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
     }
 
     return (
-        <>
-            <PlayerHero player={player} />
-            <PlayerQuickStats player={player} />
+        <div className="container mx-auto py-8">
+            <StaffHero coach={coach} />
             <ProfileTabs
                 bioContent={
                     cleanBio ? (
@@ -62,20 +59,20 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
                     )
                 }
                 newsContent={
-                    player.mentionedInPosts.length > 0 ? (
-                        <NewsGrid posts={player.mentionedInPosts} />
+                    coach.mentionedInPosts.length > 0 ? (
+                        <NewsGrid posts={coach.mentionedInPosts} />
                     ) : (
                         <p className="text-muted-foreground">{t("emptyNews")}</p>
                     )
                 }
-               mediaContent={
-                    player.media.length > 0 ? (
-                        <MediaGallery media={player.media} />
+                mediaContent={
+                    coach.media.length > 0 ? (
+                        <MediaGallery media={coach.media} />
                     ) : (
                         <p className="text-muted-foreground">{t("emptyMedia")}</p>
                     )
                 }
             />
-        </>
+        </div>
     );
 }
