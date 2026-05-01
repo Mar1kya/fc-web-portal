@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import PlayerCard from "./player-card";
-import CoachCard from "./coach-card";
+import CoachCard from "./staff-card";
 import { PlayerPosition, TeamContext } from "../../../../../../generated/prisma";
 import { getTranslations } from "next-intl/server";
 

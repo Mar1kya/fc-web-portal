@@ -94,13 +94,13 @@ export default async function PlayerHero({ player }: PlayerHeroProps) {
                     </div>
                 )}
             </div>
-            <div className="relative flex h-100 w-full items-end justify-center bg-white md:h-125 lg:h-150 xl:w-1/2">
+            <div className="relative flex h-100 w-full items-end justify-center bg-muted/20 overflow-hidden md:h-125 lg:h-150 xl:w-1/2">
                 {player.avatar ? (
                     <Image
                         src={player.avatar}
                         alt={name}
                         fill
-                        className="object-contain object-bottom"
+                        className="object-cover object-top"
                         sizes="(max-width: 1024px) 100vw, 50vw"
                         priority
                         unoptimized
@@ -108,7 +108,7 @@ export default async function PlayerHero({ player }: PlayerHeroProps) {
                     />
                 ) : (
                     <div className="flex h-full w-full items-center justify-center">
-                        <User className="h-32 w-32 text-muted-foreground/20" strokeWidth={1} />
+                        <User className="h-32 w-32 text-emerald-600" strokeWidth={1} />
                     </div>
                 )}
             </div>

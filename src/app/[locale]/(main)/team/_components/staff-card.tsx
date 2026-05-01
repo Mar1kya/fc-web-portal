@@ -12,7 +12,7 @@ type CoachCardProps = {
     locale: string;
 }
 
-export default async function CoachCard({ coach, locale }: CoachCardProps) {
+export default async function StaffCard({ coach, locale }: CoachCardProps) {
     const translation = getTranslation(coach, locale);
     const fallbackName = locale === 'uk' ? "Без назви" : "Untitled";
     const name = translation?.name || fallbackName;
@@ -20,7 +20,7 @@ export default async function CoachCard({ coach, locale }: CoachCardProps) {
 
     return (
         <Link
-            href={`/team/coach/${coach.slug}`}
+            href={`/team/staff/${coach.slug}`}
             className="group relative flex flex-col overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md"
         >
             <div className="relative aspect-3/4 w-full overflow-hidden bg-muted">

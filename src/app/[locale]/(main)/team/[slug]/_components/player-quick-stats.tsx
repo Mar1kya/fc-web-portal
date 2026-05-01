@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Activity, Goal, Shield, Target, AlertCircle } from "lucide-react";
-import { Player } from "../../../../../../generated/prisma";
+import { Player } from "../../../../../../../generated/prisma";
 
 type PlayerQuickStatsProps = {
     player: Player; 
