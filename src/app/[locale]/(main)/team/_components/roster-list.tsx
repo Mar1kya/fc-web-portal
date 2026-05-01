@@ -12,22 +12,47 @@ type RosterListProps = {
 export default async function RosterList({ searchParams, locale }: RosterListProps) {
     const tEnums = await getTranslations("Enums");
     const tTeam = await getTranslations("TeamPage");
-    const contextParam = (searchParams.context as TeamContext) || TeamContext.MAIN_TEAM;
-    const posParam = searchParams.pos as string;
+    let isInvalidSearch = false;
+    const rawContext = typeof searchParams.context === 'string' ? searchParams.context : undefined;
+    let contextFilter: TeamContext = TeamContext.MAIN_TEAM;
 
-    if (posParam === "COACH") {
+    if (rawContext) {
+        if (Object.values(TeamContext).includes(rawContext as TeamContext)) {
+            contextFilter = rawContext as TeamContext;
+        } else {
+            isInvalidSearch = true;
+        }
+    }
+    const rawPos = typeof searchParams.pos === 'string' ? searchParams.pos : undefined;
+    const isCoachTab = rawPos === "COACH";
+    let positionFilter: PlayerPosition | undefined = undefined;
+
+    if (rawPos && !isCoachTab) {
+        if (Object.values(PlayerPosition).includes(rawPos as PlayerPosition)) {
+            positionFilter = rawPos as PlayerPosition;
+        } else {
+            isInvalidSearch = true;
+        }
+    }
+
+    if (isInvalidSearch) {
+        return (
+            <div className="col-span-full py-20 text-center text-muted-foreground">
+                {tTeam("noPlayers")}
+            </div>
+        );
+    }
+
+    if (isCoachTab) {
         const coaches = await prisma.coach.findMany({
             where: {
-                teamContext: contextParam,
+                teamContext: contextFilter,
                 deletedAt: null,
             },
-            include: {
-                translations: true,
-            },
-            orderBy: {
-                createdAt: "asc",
-            },
+            include: { translations: true },
+            orderBy: { createdAt: "asc" },
         });
+
         if (coaches.length === 0) {
             return (
                 <div className="col-span-full py-20 text-center text-muted-foreground">
@@ -35,6 +60,7 @@ export default async function RosterList({ searchParams, locale }: RosterListPro
                 </div>
             );
         }
+
         return (
             <div className="flex flex-col gap-10">
                 <div>
@@ -43,29 +69,22 @@ export default async function RosterList({ searchParams, locale }: RosterListPro
                     </h2>
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                         {coaches.map((coach) => (
-                            <CoachCard
-                                key={coach.id}
-                                coach={coach}
-                                locale={locale}
-                            />
+                            <CoachCard key={coach.id} coach={coach} locale={locale} />
                         ))}
                     </div>
                 </div>
             </div>
         );
     }
+
     const players = await prisma.player.findMany({
         where: {
-            teamContext: contextParam,
-            ...(posParam && posParam !== "all" ? { position: posParam as PlayerPosition } : {}),
+            teamContext: contextFilter,
+            ...(positionFilter ? { position: positionFilter } : {}),
             deletedAt: null,
         },
-        include: {
-            translations: true,
-        },
-        orderBy: {
-            number: "asc",
-        },
+        include: { translations: true },
+        orderBy: { number: "asc" },
     });
 
     if (players.length === 0) {

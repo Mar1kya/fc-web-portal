@@ -178,7 +178,13 @@
     "weight": "Weight",
     "cm": "cm",
     "kg": "kg",
-    "buyJersey": "Buy jersey"
+    "buyJersey": "Buy jersey",
+    "Metadata": {
+      "roster": "Team Roster",
+      "staffTab": "Coaching Staff",
+      "description": "View the complete roster and coaching staff for the {team}. Get the latest information on the football club's players.",
+      "dynamicDescription": "Detailed information about the {category} of the {team}. View player stats, biographies, and news."
+    }
   },
   "TeamMemberNotFound": {
     "title": "Profile not found",
