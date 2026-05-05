@@ -353,30 +353,31 @@ model TeamDictionaryTranslation {
 }
 
 model Match {
-  id             String        @id @default(cuid())
-  slug           String        @unique
-  sofascoreId    Int?          @unique
-  date           DateTime
-  startTimestamp Int?
-  status         MatchStatus   @default(SCHEDULED)
-  round          Int?
-  teamContext    TeamContext   @default(MAIN_TEAM)
-  tournamentId   String?
-  tournament     Tournament?   @relation(fields: [tournamentId], references: [id])
-  seasonId       String?
-  season         Season?       @relation(fields: [seasonId], references: [id])
-  opponentId     String
-  opponent       Opponent      @relation(fields: [opponentId], references: [id])
-  isHomeGame     Boolean       @default(true)
-  homeScore      Int?
-  awayScore      Int?
-  opponentLineup Json?
-  stadium        String?
-  highlightsUrl  String?
-  fullMatchUrl   String?
-  galleries      Gallery[]
-  lineup         MatchLineup[]
-  events         MatchEvent[]
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  sofascoreId     Int?          @unique
+  date            DateTime
+  startTimestamp  Int?
+  status          MatchStatus   @default(SCHEDULED)
+  isDetailsSynced Boolean       @default(false)
+  round           Int?
+  teamContext     TeamContext   @default(MAIN_TEAM)
+  tournamentId    String?
+  tournament      Tournament?   @relation(fields: [tournamentId], references: [id])
+  seasonId        String?
+  season          Season?       @relation(fields: [seasonId], references: [id])
+  opponentId      String
+  opponent        Opponent      @relation(fields: [opponentId], references: [id])
+  isHomeGame      Boolean       @default(true)
+  homeScore       Int?
+  awayScore       Int?
+  opponentLineup  Json?
+  stadium         String?
+  highlightsUrl   String?
+  fullMatchUrl    String?
+  galleries       Gallery[]
+  lineup          MatchLineup[]
+  events          MatchEvent[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

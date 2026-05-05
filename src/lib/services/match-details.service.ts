@@ -1,0 +1,197 @@
+import { prisma } from "@/lib/prisma";
+import { Prisma, EventType } from "../../../generated/prisma";
+
+type SofaPlayerItem = {
+  substitute: boolean;
+  player: {
+    id: number;
+    name: string;
+    position: string;
+    jerseyNumber: string;
+  };
+};
+
+async function fetchSofaMatchDetails(
+  sofascoreId: number,
+  endpoint: "lineups" | "incidents",
+) {
+  const response = await fetch(
+    `https://sofascore.p.rapidapi.com/matches/get-${endpoint}?matchId=${sofascoreId}`,
+    {
+      headers: {
+        "x-rapidapi-host": "sofascore.p.rapidapi.com",
+        "x-rapidapi-key": process.env.RAPIDAPI_KEY!,
+      },
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) return null;
+  return response.json();
+}
+
+export async function processMatchSync(matchDbId: string) {
+  try {
+    const match = await prisma.match.findUnique({
+      where: { id: matchDbId },
+    });
+
+    if (!match || !match.sofascoreId) {
+      throw new Error(`Match ${matchDbId} not found or missing sofascoreId`);
+    }
+
+    const [lineupsData, incidentsData] = await Promise.all([
+      fetchSofaMatchDetails(match.sofascoreId, "lineups"),
+      fetchSofaMatchDetails(match.sofascoreId, "incidents"),
+    ]);
+
+    if (!lineupsData || !incidentsData) {
+      throw new Error("Failed to fetch data from SofaScore API");
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.matchEvent.deleteMany({ where: { matchId: matchDbId } });
+      await tx.matchLineup.deleteMany({ where: { matchId: matchDbId } });
+
+      let opponentPlayersJSON: {
+        name: string;
+        position: string;
+        number: string;
+        isStarter: boolean;
+      }[] = [];
+
+      if (lineupsData.home && lineupsData.away) {
+        const { home, away } = lineupsData;
+        const isPolissyaHome = match.isHomeGame;
+
+        const polissyaLineup = isPolissyaHome ? home : away;
+        const opponentLineupRaw = isPolissyaHome ? away : home;
+
+        opponentPlayersJSON = opponentLineupRaw.players.map(
+          (p: SofaPlayerItem) => ({
+            name: p.player.name,
+            position: p.player.position,
+            number: p.player.jerseyNumber,
+            isStarter: !p.substitute,
+          }),
+        );
+
+        for (const item of polissyaLineup.players as SofaPlayerItem[]) {
+          const playerInDb = await tx.player.findUnique({
+            where: { sofascoreId: item.player.id },
+          });
+
+          if (playerInDb) {
+            await tx.matchLineup.create({
+              data: {
+                matchId: matchDbId,
+                playerId: playerInDb.id,
+                isStarter: !item.substitute,
+                played: true,
+              },
+            });
+          }
+        }
+      } else {
+        console.log(`No lineups found for match ${match.slug}.`);
+      }
+
+      const incidents = incidentsData.incidents || [];
+
+      for (const incident of incidents) {
+        let eventType: EventType | null = null;
+        let isOpponentEvent = false;
+
+        if (incident.incidentType === "goal") eventType = EventType.GOAL;
+        else if (incident.incidentClass === "yellow")
+          eventType = EventType.YELLOW_CARD;
+        else if (incident.incidentClass === "red")
+          eventType = EventType.RED_CARD;
+        else if (incident.incidentType === "substitution") {
+          const isOpponentSub = incident.isHome !== match.isHomeGame;
+          if (incident.playerIn) {
+            await processEvent(
+              tx,
+              matchDbId,
+              EventType.SUBSTITUTION_IN,
+              incident.time,
+              incident.playerIn.id,
+              incident.playerIn.name,
+              isOpponentSub,
+            );
+          }
+          if (incident.playerOut) {
+            await processEvent(
+              tx,
+              matchDbId,
+              EventType.SUBSTITUTION_OUT,
+              incident.time,
+              incident.playerOut.id,
+              incident.playerOut.name,
+              isOpponentSub,
+            );
+          }
+          continue;
+        }
+
+        if (eventType && incident.player) {
+          isOpponentEvent = incident.isHome !== match.isHomeGame;
+          await processEvent(
+            tx,
+            matchDbId,
+            eventType,
+            incident.time,
+            incident.player.id,
+            incident.player.name,
+            isOpponentEvent,
+          );
+        }
+      }
+
+      await tx.match.update({
+        where: { id: matchDbId },
+        data: {
+          isDetailsSynced: true,
+          opponentLineup: opponentPlayersJSON,
+        },
+      });
+    });
+
+    return { success: true };
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
+    console.error(`Match sync failed for ${matchDbId}:`, errorMessage);
+    return { success: false, error: errorMessage };
+  }
+}
+
+async function processEvent(
+  tx: Prisma.TransactionClient,
+  matchId: string,
+  type: EventType,
+  minute: number,
+  playerSofaId: number,
+  customName: string,
+  isOpponent: boolean,
+) {
+  let playerIdDb: string | null = null;
+
+  if (!isOpponent) {
+    const playerInDb = await tx.player.findUnique({
+      where: { sofascoreId: playerSofaId },
+    });
+    if (playerInDb) playerIdDb = playerInDb.id;
+  }
+
+  await tx.matchEvent.create({
+    data: {
+      matchId,
+      type,
+      minute,
+      isOpponent,
+      playerId: playerIdDb,
+      customPlayerName: isOpponent ? customName : null,
+    },
+  });
+}
