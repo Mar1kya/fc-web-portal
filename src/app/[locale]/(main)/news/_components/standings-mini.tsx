@@ -27,6 +27,10 @@ export default async function StandingsMini() {
     const locale = await getLocale();
 
     const allStandings = await prisma.standing.findMany({
+        where: {
+            season: { isActive: true },
+            tournament: { slug: "upl" }
+        },
         orderBy: { rank: "asc" },
         include: {
             tournament: {
