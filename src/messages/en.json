@@ -241,7 +241,20 @@
     "goalsTitle": "Goals For/Against",
     "goals_short": "G",
     "pointsTitle": "Points",
-    "points_short": "Pts"
+    "points_short": "Pts",
+    "Metadata": {
+      "title": "{tournament} Standings",
+      "description": "Current standings and match results for the {tournament}, {season} season. Follow the team's progress on the official website."
+    }
+  },
+  "StandingsNotFound": {
+    "title": "Tournament Not Found",
+    "description": "Sorry, the standings table for this tournament does not exist or hasn't been added yet. Please check the link.",
+    "backButton": "Back to matches",
+    "Metadata": {
+      "title": "Tournament Not Found",
+      "description": "Tournament standings not found."
+    }
   },
   "Enums": {
     "PostType": {
