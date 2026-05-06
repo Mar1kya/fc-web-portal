@@ -292,6 +292,7 @@ model Tournament {
   id           String                  @id @default(cuid())
   slug         String                  @unique
   sofascoreId  Int?                    @unique
+  hasStandings Boolean                 @default(false)
   translations TournamentTranslation[]
   matches      Match[]
   standings    Standing[]

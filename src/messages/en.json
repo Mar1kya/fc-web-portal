@@ -81,7 +81,8 @@
       "history": "History",
       "stadium": "Stadium",
       "contacts": "Contacts",
-      "button": "Open the menu"
+      "button": "Open the menu",
+      "standingsTablePrefix": "Standings"
     }
   },
   "Footer": {
@@ -225,6 +226,22 @@
     "Metadata": {
       "description": "Official profile: {name}. Role: {role}. View the biography, latest news, and photo gallery for FC Polissya."
     }
+  },
+  "StandingsPage": {
+    "noData": "No data available for this tournament.",
+    "team": "Team",
+    "playedTitle": "Matches Played",
+    "played_short": "MP",
+    "winTitle": "Wins",
+    "win_short": "W",
+    "drawTitle": "Draws",
+    "draw_short": "D",
+    "loseTitle": "Losses",
+    "lose_short": "L",
+    "goalsTitle": "Goals For/Against",
+    "goals_short": "G",
+    "pointsTitle": "Points",
+    "points_short": "Pts"
   },
   "Enums": {
     "PostType": {

@@ -7,6 +7,12 @@ import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import { PostType, TeamContext } from "../../../generated/prisma"
 
+export type MatchesMenuType = {
+    context: string;
+    matchesLink: string;
+    standings: { name: string; link: string }[];
+};
+
 const MenuItem = ({ href, title, className }: { href: string; title: string; className?: string }) => (
     <li>
         <Link
@@ -20,34 +26,10 @@ const MenuItem = ({ href, title, className }: { href: string; title: string; cla
         </Link>
     </li>
 )
-//Тестові дані
 
-const matchesMenuData = [
-    {
-        teamName: "Перша команда",
-        matchesLink: "/matches/main",
-        standings: [
-            { name: "Турнірна таблиця УПЛ", link: "/standings/main/upl" },
-            { name: "Турнірна таблиця ЛК", link: "/standings/main/conference-league" },
-        ]
-    },
-    {
-        teamName: "Юнацька команда",
-        matchesLink: "/matches/u19",
-        standings: [
-            { name: "Турнірна таблиця U19", link: "/standings/u19/championship" },
-        ]
-    },
-    {
-        teamName: "Академія",
-        matchesLink: "/matches/academy",
-        standings: [
-            { name: "Турнірна таблиця ДЮФЛ", link: "/standings/academy/dyufl" },
-        ]
-    }
-]
 
-export default function DesktopMenu({ activeTeamContexts }: { activeTeamContexts: string[] }) {
+
+export default function DesktopMenu({ activeTeamContexts, matchesMenuData }: { activeTeamContexts: string[]; matchesMenuData: MatchesMenuType[] }) {
     const t = useTranslations("Header.DesktopMenu");
     const tEnums = useTranslations("Enums");
     const postTypes = Object.values(PostType);
@@ -102,17 +84,18 @@ export default function DesktopMenu({ activeTeamContexts }: { activeTeamContexts
                     </Link>
                     <ul className="absolute left-0 top-full hidden w-70 flex-col gap-1 rounded-md border border-border/50 bg-background/95 backdrop-blur-md p-2 shadow-lg group-hover:flex animate-in fade-in zoom-in-95 duration-200">
                         {matchesMenuData.map((group, index) => (
-                            <React.Fragment key={`match-group-${index}`}>
+                            <React.Fragment key={`match-group-${group.context}`}>
                                 <MenuItem
                                     href={group.matchesLink}
-                                    title={group.teamName}
+                                    title={tEnums(`TeamContext.${group.context}`)}
                                     className="font-semibold"
                                 />
+
                                 {group.standings.map((standing, sIdx) => (
                                     <MenuItem
-                                        key={`standing-${index}-${sIdx}`}
+                                        key={`standing-${group.context}-${sIdx}`}
                                         href={standing.link}
-                                        title={standing.name}
+                                        title={`${t("standingsTablePrefix")} ${standing.name}`}
                                         className="text-muted-foreground"
                                     />
                                 ))}
@@ -121,6 +104,7 @@ export default function DesktopMenu({ activeTeamContexts }: { activeTeamContexts
                                 )}
                             </React.Fragment>
                         ))}
+
                     </ul>
                 </li>
                 <li className="py-4">

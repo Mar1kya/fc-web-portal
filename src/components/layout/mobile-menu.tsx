@@ -20,31 +20,11 @@ import {
 } from "@/components/ui/accordion"
 import { PostType, TeamContext } from "../../../generated/prisma"
 
-const matchesMenuData = [
-    {
-        teamName: "Перша команда",
-        matchesLink: "/matches/main",
-        standings: [
-            { name: "Турнірна таблиця УПЛ", link: "/standings/main/upl" },
-            { name: "Турнірна таблиця ЛК", link: "/standings/main/conference-league" },
-        ]
-    },
-    {
-        teamName: "Юнацька команда",
-        matchesLink: "/matches/u19",
-        standings: [
-            { name: "Турнірна таблиця U19", link: "/standings/u19/championship" },
-        ]
-    },
-    {
-        teamName: "Академія",
-        matchesLink: "/matches/academy",
-        standings: [
-            { name: "Турнірна таблиця ДЮФЛ", link: "/standings/academy/dyufl" },
-        ]
-    }
-]
-
+type MatchesMenuType = {
+    context: string;
+    matchesLink: string;
+    standings: { name: string; link: string }[];
+};
 type MobileLinkProps = {
     href: string;
     children: React.ReactNode;
@@ -65,7 +45,7 @@ const MobileLink = ({ href, children, className, setIsOpen }: MobileLinkProps) =
     </Link>
 );
 
-export default function MobileMenu({ activeTeamContexts }: { activeTeamContexts: string[] }) {
+export default function MobileMenu({ activeTeamContexts, matchesMenuData }: { activeTeamContexts: string[]; matchesMenuData: MatchesMenuType[] }) {
     const t = useTranslations("Header.DesktopMenu");
     const tEnums = useTranslations("Enums");
     const [isOpen, setIsOpen] = React.useState(false);
@@ -138,14 +118,15 @@ export default function MobileMenu({ activeTeamContexts }: { activeTeamContexts:
                                 {t("matches")}
                             </AccordionTrigger>
                             <AccordionContent className="flex flex-col gap-4 pl-4 pb-2">
-                                {matchesMenuData.map((group, index) => (
-                                    <div key={`mob-match-${index}`} className="flex flex-col gap-0">
+                                {matchesMenuData.map((group, _index) => (
+                                    <div key={`mob-match-${group.context}`} className="flex flex-col gap-0">
                                         <MobileLink href={group.matchesLink} setIsOpen={setIsOpen} className="text-foreground font-medium pb-1 hover:text-emerald-600 transition-colors">
-                                            {group.teamName}
+                                            {tEnums(`TeamContext.${group.context}`)}
                                         </MobileLink>
+
                                         {group.standings.map((standing, sIdx) => (
-                                            <MobileLink key={`mob-stand-${index}-${sIdx}`} href={standing.link} setIsOpen={setIsOpen}>
-                                                {standing.name}
+                                            <MobileLink key={`mob-stand-${group.context}-${sIdx}`} href={standing.link} setIsOpen={setIsOpen}>
+                                                {`${t("standingsTablePrefix")} ${standing.name}`}
                                             </MobileLink>
                                         ))}
                                     </div>
