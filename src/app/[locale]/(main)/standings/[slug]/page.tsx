@@ -6,6 +6,65 @@ import SeasonFilters from "../_components/season-filters";
 import StandingsTable from "../_components/standings-table";
 import H1 from "@/components/ui/heading";
 
+export async function generateMetadata({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ season?: string }> }) {
+    const { slug } = await params;
+    const { season } = await searchParams;
+    const locale = await getLocale();
+    const tMeta = await getTranslations("StandingsPage.Metadata");
+
+    const tournament = await prisma.tournament.findUnique({
+        where: { slug },
+        include: { translations: true },
+    });
+
+    if (!tournament) {
+        return {
+            title: "Not Found",
+        };
+    }
+
+    const translatedTournamentName = getTranslation(tournament, locale)?.name || tournament.slug;
+    const availableSeasons = await prisma.season.findMany({
+        where: {
+            standings: { some: { tournamentId: tournament.id } },
+        },
+        orderBy: { startDate: "desc" },
+    });
+
+    let currentSeason = availableSeasons.find((s) => s.slug === season);
+    if (!currentSeason) {
+        currentSeason = availableSeasons.find((s) => s.isActive) || availableSeasons[0];
+    }
+
+    const seasonName = currentSeason?.name || "";
+    const pageTitle = seasonName
+        ? `${tMeta("title", { tournament: translatedTournamentName })} | ${seasonName}`
+        : tMeta("title", { tournament: translatedTournamentName });
+
+    const pageDescription = tMeta("description", {
+        tournament: translatedTournamentName,
+        season: seasonName
+    });
+
+    return {
+        title: pageTitle,
+        description: pageDescription,
+        openGraph: {
+            title: pageTitle,
+            description: pageDescription,
+            images: [
+                {
+                    url: "/images/standings.jpg",
+                    width: 1200,
+                    height: 630,
+                    alt: pageTitle,
+                }
+            ],
+            type: "website",
+        },
+    };
+}
+
 export default async function FullStandingsPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ season?: string }> }) {
     const { slug } = await params;
     const { season } = await searchParams;
