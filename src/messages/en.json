@@ -256,6 +256,18 @@
       "description": "Tournament standings not found."
     }
   },
+  "MatchesPage": {
+    "title": "Schedule of matches",
+    "previousMatch": "Previous Match",
+    "nextMatch": "Next Match",
+    "futureMatch": "Future Match",
+    "matchCenter": "Match Center",
+    "more": "More",
+    "noPreviousMatch": "No matches played yet",
+    "noUpcomingMatches": "No matches scheduled",
+    "ourTeamName": "Emerald Gang",
+    "noStadium": "Stadium not specified"
+  },
   "Enums": {
     "PostType": {
       "NEWS": "News",

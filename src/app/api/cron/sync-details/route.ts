@@ -22,6 +22,7 @@ export async function GET(request: Request) {
         isDetailsSynced: false,
       },
       select: { id: true, slug: true },
+      take: 3,
     });
 
     if (unsyncedMatches.length === 0) {
