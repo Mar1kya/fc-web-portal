@@ -266,7 +266,14 @@
     "noPreviousMatch": "No matches played yet",
     "noUpcomingMatches": "No matches scheduled",
     "ourTeamName": "Emerald Gang",
-    "noStadium": "Stadium not specified"
+    "noStadium": "Stadium not specified",
+    "noMatches": "No matches found for this season.",
+    "MatchList": {
+      "homeGame": "Home",
+      "awayGame": "Away",
+      "round": "Round {round}",
+      "qualification": "Qualifying Round {round}"
+    }
   },
   "Enums": {
     "PostType": {

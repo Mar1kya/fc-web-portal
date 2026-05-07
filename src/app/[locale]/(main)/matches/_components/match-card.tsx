@@ -28,6 +28,7 @@ export type MatchDisplayData = {
     stadium: string | null;
     tournament: TranslatableTournament | null;
     opponent: TranslatableOpponent;
+    round: number | null;
 };
 
 type MatchCardProps = {
@@ -135,7 +136,7 @@ export default function MatchCard({ match, title, locale, emptyText }: MatchCard
                     </div>
                 </CardContent>
                 <CardFooter className="p-2">
-                    <Button asChild variant="outline" className="w-full text-xs h-8 border-border hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-colors">
+                    <Button asChild variant="outline" className="w-full h-8 font-bold lg:font-normal border-border hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-colors">
                         <Link href={`/matches/${match.slug}`}>
                             {t("matchCenter")}
                         </Link>

@@ -266,7 +266,14 @@
     "noPreviousMatch": "Поки немає зіграних матчів",
     "noUpcomingMatches": "Матчі ще не заплановані",
     "ourTeamName": "Смарагдова Банда",
-    "noStadium": "Стадіон не вказано"
+    "noStadium": "Стадіон не вказано",
+    "noMatches": "Матчі для цього сезону не знайдено.",
+    "MatchList": {
+      "homeGame": "Вдома",
+      "awayGame": "У гостях",
+      "round": "Тур {round}",
+      "qualification": "{round}-й кв. раунд"
+    }
   },
   "Enums": {
     "PostType": {
