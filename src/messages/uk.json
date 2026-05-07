@@ -273,6 +273,10 @@
       "awayGame": "У гостях",
       "round": "Тур {round}",
       "qualification": "{round}-й кв. раунд"
+    },
+    "Metadata": {
+      "title": "Розклад матчів ({team})",
+      "description": "Повний календар та результати матчів. {team}, сезон {season}."
     }
   },
   "Enums": {

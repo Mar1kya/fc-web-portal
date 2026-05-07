@@ -7,6 +7,51 @@ import SeasonFilter from "./_components/season-filter";
 import MatchListItem from "./_components/match-list-item";
 import MatchesHighlight from "./_components/matches-highlight";
 
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ context?: string; season?: string }> }) {
+    const { context, season: seasonSlug } = await searchParams;
+    const tMeta = await getTranslations("MatchesPage.Metadata");
+    const tEnums = await getTranslations("Enums");
+    const currentContext = context && Object.values(TeamContext).includes(context as TeamContext)
+        ? (context as TeamContext)
+        : TeamContext.MAIN_TEAM;
+
+    const teamName = tEnums(`TeamContext.${currentContext}`);
+    const allSeasons = await prisma.season.findMany({
+        orderBy: { startDate: "desc" },
+    });
+
+    let currentSeason = allSeasons.find(s => s.slug === seasonSlug);
+    if (!currentSeason) {
+        currentSeason = allSeasons.find(s => s.isActive) || allSeasons[0];
+    }
+
+    const seasonName = currentSeason?.name || "";
+    const baseTitle = tMeta("title", { team: teamName });
+    const pageTitle = seasonName ? `${baseTitle} | ${seasonName}` : baseTitle;
+    const pageDescription = tMeta("description", {
+        team: teamName,
+        season: seasonName
+    });
+
+    return {
+        title: pageTitle,
+        description: pageDescription,
+        openGraph: {
+            title: pageTitle,
+            description: pageDescription,
+            images: [
+                {
+                    url: "/images/matches.jpg",
+                    width: 1200,
+                    height: 630,
+                    alt: pageTitle,
+                }
+            ],
+            type: "website",
+        },
+    };
+}
+
 export default async function MatchesPage({ searchParams }: { searchParams: Promise<{ context?: string; season?: string }> }) {
     const { context, season: seasonSlug } = await searchParams;
     const locale = await getLocale();

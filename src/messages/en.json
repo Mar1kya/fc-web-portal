@@ -273,6 +273,10 @@
       "awayGame": "Away",
       "round": "Round {round}",
       "qualification": "Qualifying Round {round}"
+    },
+    "Metadata": {
+      "title": "Match Schedule ({team})",
+      "description": "Full calendar and match results. {team}, {season} season."
     }
   },
   "Enums": {

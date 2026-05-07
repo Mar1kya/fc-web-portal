@@ -19,7 +19,7 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
 
     if (!tournament) {
         return {
-            title: "Not Found",
+            title: {},
         };
     }
 
