@@ -13,10 +13,10 @@ type SofaPlayerItem = {
 
 async function fetchSofaMatchDetails(
   sofascoreId: number,
-  endpoint: "lineups" | "incidents",
+  endpointPath: string, 
 ) {
   const response = await fetch(
-    `https://sofascore.p.rapidapi.com/matches/get-${endpoint}?matchId=${sofascoreId}`,
+    `https://sofascore.p.rapidapi.com/matches/${endpointPath}?matchId=${sofascoreId}`,
     {
       headers: {
         "x-rapidapi-host": "sofascore.p.rapidapi.com",
@@ -40,14 +40,21 @@ export async function processMatchSync(matchDbId: string) {
       throw new Error(`Match ${matchDbId} not found or missing sofascoreId`);
     }
 
-    const [lineupsData, incidentsData] = await Promise.all([
-      fetchSofaMatchDetails(match.sofascoreId, "lineups"),
-      fetchSofaMatchDetails(match.sofascoreId, "incidents"),
+    const [lineupsData, incidentsData, defaultData] = await Promise.all([
+      fetchSofaMatchDetails(match.sofascoreId, "get-lineups"),
+      fetchSofaMatchDetails(match.sofascoreId, "get-incidents"),
+      fetchSofaMatchDetails(match.sofascoreId, "detail"),
     ]);
 
-    if (!lineupsData || !incidentsData) {
+    if (!lineupsData || !incidentsData || !defaultData) {
       throw new Error("Failed to fetch data from SofaScore API");
     }
+
+    const eventDetails = defaultData.event;
+    const stadiumName =
+      eventDetails?.venue?.stadium?.name || eventDetails?.venue?.name || null;
+    const homeCoach = eventDetails?.homeTeam?.manager?.name || null;
+    const awayCoach = eventDetails?.awayTeam?.manager?.name || null;
 
     await prisma.$transaction(async (tx) => {
       await tx.matchEvent.deleteMany({ where: { matchId: matchDbId } });
@@ -153,6 +160,9 @@ export async function processMatchSync(matchDbId: string) {
         data: {
           isDetailsSynced: true,
           opponentLineup: opponentPlayersJSON,
+          stadium: stadiumName,
+          homeCoachName: homeCoach,
+          awayCoachName: awayCoach,
         },
       });
     });

@@ -256,6 +256,29 @@
       "description": "Турнірну таблицю не знайдено."
     }
   },
+  "MatchesPage": {
+    "title": "Розклад матчів",
+    "previousMatch": "Попередній матч",
+    "nextMatch": "Наступний матч",
+    "futureMatch": "Через матч",
+    "matchCenter": "Матч-центр",
+    "more": "Більше",
+    "noPreviousMatch": "Поки немає зіграних матчів",
+    "noUpcomingMatches": "Матчі ще не заплановані",
+    "ourTeamName": "Смарагдова Банда",
+    "noStadium": "Стадіон не вказано",
+    "noMatches": "Матчі для цього сезону не знайдено.",
+    "MatchList": {
+      "homeGame": "Вдома",
+      "awayGame": "У гостях",
+      "round": "Тур {round}",
+      "qualification": "{round}-й кв. раунд"
+    },
+    "Metadata": {
+      "title": "Розклад матчів ({team})",
+      "description": "Повний календар та результати матчів. {team}, сезон {season}."
+    }
+  },
   "Enums": {
     "PostType": {
       "NEWS": "Новини",

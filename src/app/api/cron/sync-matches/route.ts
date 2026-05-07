@@ -98,7 +98,7 @@ export async function GET(request: Request) {
             continue;
           }
 
-          const isHomeGame = event.homeTeam.id === TEAM_ID;
+          const isHomeGame = Number(event.homeTeam.id) === Number(TEAM_ID);
           const opponentData = isHomeGame ? event.awayTeam : event.homeTeam;
 
           let tournament = await tx.tournament.findUnique({
@@ -135,6 +135,7 @@ export async function GET(request: Request) {
               data: {
                 slug: opponentData.slug,
                 sofascoreId: opponentData.id,
+                logoUrl: `https://api.sofascore.app/api/v1/team/${opponentData.id}/image`,
                 translations: {
                   create: [
                     { language: "uk", name: opponentData.name },
@@ -151,7 +152,7 @@ export async function GET(request: Request) {
           const homeScore = event.homeScore?.current ?? null;
           const awayScore = event.awayScore?.current ?? null;
           const uniqueMatchSlug = `${event.slug}-${sofascoreId}`;
-          
+
           const existingMatch = await tx.match.findUnique({
             where: { sofascoreId },
           });

@@ -374,6 +374,8 @@ model Match {
   awayScore       Int?
   opponentLineup  Json?
   stadium         String?
+  homeCoachName   String?
+  awayCoachName   String?
   highlightsUrl   String?
   fullMatchUrl    String?
   galleries       Gallery[]

@@ -256,6 +256,29 @@
       "description": "Tournament standings not found."
     }
   },
+  "MatchesPage": {
+    "title": "Schedule of matches",
+    "previousMatch": "Previous Match",
+    "nextMatch": "Next Match",
+    "futureMatch": "Future Match",
+    "matchCenter": "Match Center",
+    "more": "More",
+    "noPreviousMatch": "No matches played yet",
+    "noUpcomingMatches": "No matches scheduled",
+    "ourTeamName": "Emerald Gang",
+    "noStadium": "Stadium not specified",
+    "noMatches": "No matches found for this season.",
+    "MatchList": {
+      "homeGame": "Home",
+      "awayGame": "Away",
+      "round": "Round {round}",
+      "qualification": "Qualifying Round {round}"
+    },
+    "Metadata": {
+      "title": "Match Schedule ({team})",
+      "description": "Full calendar and match results. {team}, {season} season."
+    }
+  },
   "Enums": {
     "PostType": {
       "NEWS": "News",
