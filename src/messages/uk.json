@@ -279,6 +279,15 @@
       "description": "Повний календар та результати матчів. {team}, сезон {season}."
     }
   },
+  "SingleMatchPage": {
+    "Hero": {
+      "ourTeamName": "Смарагдова Банда",
+      "round": "Тур {round}",
+      "coach": "Тренер",
+      "unknownPlayer": "Невідомий гравець",
+      "live": "Прямий ефір"
+    }
+  },
   "Enums": {
     "PostType": {
       "NEWS": "Новини",

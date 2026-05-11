@@ -118,7 +118,7 @@ export default function MobileMenu({ activeTeamContexts, matchesMenuData }: { ac
                                 {t("matches")}
                             </AccordionTrigger>
                             <AccordionContent className="flex flex-col gap-4 pl-4 pb-2">
-                                {matchesMenuData.map((group, _index) => (
+                                {matchesMenuData.map((group) => (
                                     <div key={`mob-match-${group.context}`} className="flex flex-col gap-0">
                                         <MobileLink href={group.matchesLink} setIsOpen={setIsOpen} className="text-foreground font-medium pb-1 hover:text-emerald-600 transition-colors">
                                             {tEnums(`TeamContext.${group.context}`)}

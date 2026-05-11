@@ -279,6 +279,15 @@
       "description": "Full calendar and match results. {team}, {season} season."
     }
   },
+  "SingleMatchPage": {
+    "Hero": {
+      "ourTeamName": "Emerald Gang",
+      "round": "Round {round}",
+      "coach": "Coach",
+      "unknownPlayer": "Unknown player",
+      "live": "Live"
+    }
+  },
   "Enums": {
     "PostType": {
       "NEWS": "News",
