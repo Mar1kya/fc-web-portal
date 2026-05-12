@@ -286,6 +286,31 @@
       "coach": "Coach",
       "unknownPlayer": "Unknown player",
       "live": "Live"
+    },
+    "Tabs": {
+      "lineups": "Lineups",
+      "news": "News",
+      "photos": "Photos",
+      "videos": "Videos",
+      "emptyLineups": "Lineups have not been published yet.",
+      "emptyNews": "No news related to this match.",
+      "emptyPhotos": "No photos added for this match yet.",
+      "highlights": "Match Highlights",
+      "postMatch": "Post-match Comments",
+      "emptyVideos": "Match highlights or comments are not available yet."
+    },
+    "Lineups": {
+      "startingXI": "Starting XI",
+      "substitutes": "Substitutes",
+      "coach": "Head Coach",
+      "Events": {
+        "goal": "Goal",
+        "assist": "Assist",
+        "yellowCard": "Yellow card",
+        "redCard": "Red card",
+        "subIn": "Subbed in",
+        "subOut": "Subbed out"
+      }
     }
   },
   "Enums": {

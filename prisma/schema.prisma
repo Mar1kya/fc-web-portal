@@ -129,6 +129,7 @@ model Post {
   publishedAt      DateTime          @default(now())
   mentionedPlayers Player[]
   mentionedCoaches Coach[]
+  relatedMatches   Match[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -377,10 +378,11 @@ model Match {
   homeCoachName   String?
   awayCoachName   String?
   highlightsUrl   String?
-  fullMatchUrl    String?
+  postMatchUrl    String?
   galleries       Gallery[]
   lineup          MatchLineup[]
   events          MatchEvent[]
+  relatedPosts    Post[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
