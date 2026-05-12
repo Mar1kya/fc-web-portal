@@ -34,6 +34,11 @@ const nextConfig: NextConfig = {
         hostname: "api.sofascore.app",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "img.youtube.com",
+        pathname: "/**",
+      },
     ],
   },
 };

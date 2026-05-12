@@ -279,6 +279,48 @@
       "description": "Full calendar and match results. {team}, {season} season."
     }
   },
+  "SingleMatchPage": {
+    "Hero": {
+      "ourTeamName": "Emerald Gang",
+      "round": "Round {round}",
+      "coach": "Coach",
+      "unknownPlayer": "Unknown player",
+      "live": "Live"
+    },
+    "Tabs": {
+      "lineups": "Lineups",
+      "news": "News",
+      "photos": "Photos",
+      "videos": "Videos",
+      "emptyLineups": "Lineups have not been published yet.",
+      "emptyNews": "No news related to this match.",
+      "emptyPhotos": "No photos added for this match yet.",
+      "highlights": "Match Highlights",
+      "postMatch": "Post-match Comments",
+      "emptyVideos": "Match highlights or comments are not available yet."
+    },
+    "Lineups": {
+      "startingXI": "Starting XI",
+      "substitutes": "Substitutes",
+      "coach": "Head Coach",
+      "Events": {
+        "goal": "Goal",
+        "assist": "Assist",
+        "yellowCard": "Yellow card",
+        "redCard": "Red card",
+        "subIn": "Subbed in",
+        "subOut": "Subbed out"
+      }
+    },
+    "Metadata": {
+      "description": "{tournament} match: {homeTeam} vs {awayTeam}. Lineups, stats, highlights, and latest news for the game."
+    }
+  },
+  "MatchNotFound": {
+    "title": "Match Not Found",
+    "description": "Sorry, the page for this match does not exist, has been removed, or is not created yet.",
+    "backButton": "Back to matches"
+  },
   "Enums": {
     "PostType": {
       "NEWS": "News",
