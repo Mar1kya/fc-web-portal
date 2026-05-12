@@ -311,7 +311,15 @@
         "subIn": "Subbed in",
         "subOut": "Subbed out"
       }
+    },
+    "Metadata": {
+      "description": "{tournament} match: {homeTeam} vs {awayTeam}. Lineups, stats, highlights, and latest news for the game."
     }
+  },
+  "MatchNotFound": {
+    "title": "Match Not Found",
+    "description": "Sorry, the page for this match does not exist, has been removed, or is not created yet.",
+    "backButton": "Back to matches"
   },
   "Enums": {
     "PostType": {

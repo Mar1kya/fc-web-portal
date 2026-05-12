@@ -7,6 +7,55 @@ import NewsGrid from "@/components/shared/news-grid";
 import MediaGallery from "@/components/shared/media-gallery";
 import MatchLineups from "./_components/match-lineups";
 import MatchVideos from "./_components/match-videos";
+import { getTranslation } from "@/lib/utils/get-translation";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const locale = await getLocale();
+    const tMeta = await getTranslations("SingleMatchPage.Metadata");
+    const tHero = await getTranslations("SingleMatchPage.Hero"); 
+
+    const match = await prisma.match.findUnique({
+        where: { slug, deletedAt: null },
+        include: { 
+            opponent: { include: { translations: true } },
+            tournament: { include: { translations: true } }
+        },
+    });
+
+    if (!match) {
+        return {};
+    }
+
+    const opponentTranslation = getTranslation(match.opponent, locale);
+    const tournamentTranslation = match.tournament ? getTranslation(match.tournament, locale) : null;
+    const opponentName = opponentTranslation?.name || match.opponent.slug;
+    const ourTeamName = tHero("ourTeamName");
+    const tournamentName = tournamentTranslation?.name || (locale === "uk" ? "Матч" : "Match");
+    const homeTeam = match.isHomeGame ? ourTeamName : opponentName;
+    const awayTeam = match.isHomeGame ? opponentName : ourTeamName;
+    const pageTitle = `${homeTeam} - ${awayTeam} | ${tournamentName}`;
+    const pageDescription = tMeta("description", { homeTeam, awayTeam, tournament: tournamentName });
+    const imageUrl = match.opponent.logoUrl ? match.opponent.logoUrl : "/images/matches.jpg";
+
+    return {
+        title: pageTitle,
+        description: pageDescription,
+        openGraph: {
+            title: pageTitle,
+            description: pageDescription,
+            images: [
+                {
+                    url: imageUrl,
+                    width: 800,
+                    height: 800,
+                    alt: `${homeTeam} vs ${awayTeam}`,
+                }
+            ],
+            type: "website", 
+        },
+    };
+}
 
 export default async function SingleMatchPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
