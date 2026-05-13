@@ -321,6 +321,15 @@
     "description": "Sorry, the page for this match does not exist, has been removed, or is not created yet.",
     "backButton": "Back to matches"
   },
+  "Shop": {
+    "Navigation": {
+      "all": "All Products",
+      "kits": "Match Kits",
+      "apparel": "Apparel",
+      "accessories": "Accessories",
+      "sale": "Sale"
+    }
+  },
   "Enums": {
     "PostType": {
       "NEWS": "News",
