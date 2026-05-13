@@ -324,10 +324,18 @@
   "Shop": {
     "Navigation": {
       "all": "All Products",
-      "kits": "Match Kits",
-      "apparel": "Apparel",
-      "accessories": "Accessories",
       "sale": "Sale"
+    },
+    "ProductCard": {
+      "sale": "Sale",
+      "hot": "Hot",
+      "outOfStock": "Sold Out",
+      "statusIn": "In Stock",
+      "statusOut": "Out of Stock",
+      "addToCart": "View details"
+    },
+    "CategoryPage": {
+      "empty": "There are no products in this category yet."
     }
   },
   "Enums": {

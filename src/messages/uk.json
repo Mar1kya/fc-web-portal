@@ -324,10 +324,18 @@
   "Shop": {
     "Navigation": {
       "all": "Усі товари",
-      "kits": "Ігрова форма",
-      "apparel": "Одяг",
-      "accessories": "Аксесуари",
-      "sale": "Sale"
+      "sale": "Розпродаж"
+    },
+    "ProductCard": {
+      "sale": "Розпродаж",
+      "hot": "Топ",
+      "outOfStock": "Розпродано",
+      "statusIn": "В наявності",
+      "statusOut": "Закінчився",
+      "addToCart": "Детальніше"
+    },
+    "CategoryPage": {
+      "empty": "У цій категорії поки немає товарів."
     }
   },
   "Enums": {
