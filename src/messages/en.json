@@ -329,6 +329,7 @@
     "ProductCard": {
       "sale": "Sale",
       "hot": "Hot",
+      "new": "New",
       "outOfStock": "Sold Out",
       "statusIn": "In Stock",
       "statusOut": "Out of Stock",
@@ -336,6 +337,13 @@
     },
     "CategoryPage": {
       "empty": "There are no products in this category yet."
+    },
+    "ProductSort": {
+      "title": "Sort by",
+      "newest": "Newest arrivals",
+      "price_asc": "Price: Low to High",
+      "price_desc": "Price: High to Low",
+      "sale_first": "Sale items first"
     }
   },
   "Enums": {

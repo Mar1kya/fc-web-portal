@@ -7,17 +7,22 @@ import { ShoppingBag, ImageOff } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Prisma } from "../../../../../../generated/prisma";
 
+function isProductNew(createdAt: Date) {
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    return new Date(createdAt).getTime() > Date.now() - THIRTY_DAYS_MS;
+}
+
 type ProductWithRelations = {
     id: string;
     slug: string;
-    price: Prisma.Decimal; 
-    salePrice: Prisma.Decimal | null; 
+    price: Prisma.Decimal;
+    salePrice: Prisma.Decimal | null;
     isOnSale: boolean;
-    stock: number;
     isFeatured: boolean;
-    sizes: string[];
+    createdAt: Date;
     media: { url: string }[];
     translations: { language: string; name: string; description: string }[];
+    variants: { stock: number }[];
 };
 
 export default async function ProductCard({ product }: { product: ProductWithRelations }) {
@@ -28,7 +33,15 @@ export default async function ProductCard({ product }: { product: ProductWithRel
     const mainImage = product.media?.[0]?.url;
     const regularPrice = Number(product.price);
     const salePrice = product.salePrice ? Number(product.salePrice) : null;
-    const isOutOfStock = product.stock <= 0;
+    const totalStock = product.variants?.reduce((sum, variant) => sum + variant.stock, 0) || 0;
+    const isOutOfStock = totalStock <= 0;
+
+    let discountPercentage = 0;
+    if (product.isOnSale && salePrice && regularPrice > 0) {
+        discountPercentage = Math.round(((regularPrice - salePrice) / regularPrice) * 100);
+    }
+
+    const isNew = isProductNew(product.createdAt);
 
     return (
         <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-card border border-border transition-all duration-300 hover:border-emerald-600/60 shadow-sm">
@@ -58,12 +71,12 @@ export default async function ProductCard({ product }: { product: ProductWithRel
                         </Badge>
                     ) : (
                         <>
-                            {product.isOnSale && (
-                                <Badge className="bg-red-600 hover:bg-red-700 text-white uppercase tracking-wider shadow-md pointer-events-none">
-                                    {t("sale")}
+                            {isNew && (
+                                <Badge className="bg-orange-500 hover:bg-orange-600 text-white uppercase tracking-wider shadow-md pointer-events-none">
+                                    {t("new")}
                                 </Badge>
                             )}
-                            {product.isFeatured && !product.isOnSale && (
+                            {product.isFeatured && (
                                 <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white uppercase tracking-wider shadow-md pointer-events-none">
                                     {t("hot")}
                                 </Badge>
@@ -71,6 +84,13 @@ export default async function ProductCard({ product }: { product: ProductWithRel
                         </>
                     )}
                 </div>
+                {!isOutOfStock && product.isOnSale && discountPercentage > 0 && (
+                    <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
+                        <Badge className="bg-red-600 hover:bg-red-700 text-white uppercase tracking-wider shadow-md pointer-events-none">
+                            -{discountPercentage}%
+                        </Badge>
+                    </div>
+                )}
             </Link>
             <div className="flex flex-col gap-3 p-4 grow">
                 <div className="flex flex-col gap-1">
