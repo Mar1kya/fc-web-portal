@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ShoppingBag, ImageOff } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Prisma } from "../../../../../../generated/prisma";
+import { getCurrencySymbol } from "@/lib/utils";
 
 function isProductNew(createdAt: Date) {
     const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
@@ -35,6 +36,7 @@ export default async function ProductCard({ product }: { product: ProductWithRel
     const salePrice = product.salePrice ? Number(product.salePrice) : null;
     const totalStock = product.variants?.reduce((sum, variant) => sum + variant.stock, 0) || 0;
     const isOutOfStock = totalStock <= 0;
+    const currencySymbol = getCurrencySymbol();
 
     let discountPercentage = 0;
     if (product.isOnSale && salePrice && regularPrice > 0) {
@@ -108,15 +110,15 @@ export default async function ProductCard({ product }: { product: ProductWithRel
                         {product.isOnSale && salePrice ? (
                             <div className="flex items-center gap-2">
                                 <span className="text-xl font-bold text-red-500">
-                                    {salePrice.toLocaleString(locale)} ₴
+                                    {salePrice.toLocaleString(locale)} {currencySymbol}
                                 </span>
                                 <span className="text-sm font-medium text-muted-foreground line-through">
-                                    {regularPrice.toLocaleString(locale)} ₴
+                                    {regularPrice.toLocaleString(locale)} {currencySymbol}
                                 </span>
                             </div>
                         ) : (
                             <span className="text-xl font-bold text-foreground">
-                                {regularPrice.toLocaleString(locale)} ₴
+                                {regularPrice.toLocaleString(locale)} {currencySymbol}
                             </span>
                         )}
                     </div>

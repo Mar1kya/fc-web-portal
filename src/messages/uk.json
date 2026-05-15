@@ -344,6 +344,37 @@
       "price_asc": "Від дешевих до дорогих",
       "price_desc": "Від дорогих до дешевих",
       "sale_first": "Спочатку акційні"
+    },
+    "Filters": {
+      "title": "Фільтри",
+      "clear": "Скинути",
+      "price": "Ціна",
+      "min": "Від",
+      "max": "До",
+      "sizeTitle": "Розмір",
+      "demographicTitle": "Кому",
+      "demographic": {
+        "UNISEX": "Унісекс",
+        "MEN": "Чоловікам",
+        "WOMEN": "Жінкам",
+        "KIDS": "Дітям"
+      },
+      "apparelTypeTitle": "Тип одягу",
+      "apparelType": {
+        "T_SHIRT": "Футболки",
+        "HOODIE": "Толстовки й худі",
+        "CAP": "Кепки",
+        "SCARF": "Шарфи"
+      },
+      "colorTitle": "Колір",
+      "color": {
+        "BLACK": "Чорний",
+        "WHITE": "Білий",
+        "GREEN": "Зелений",
+        "YELLOW": "Жовтий"
+      },
+      "from": "Від",
+      "to": "До"
     }
   },
   "Enums": {

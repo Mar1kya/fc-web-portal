@@ -344,6 +344,37 @@
       "price_asc": "Price: Low to High",
       "price_desc": "Price: High to Low",
       "sale_first": "Sale items first"
+    },
+    "Filters": {
+      "title": "Filters",
+      "clear": "Clear all",
+      "price": "Price",
+      "min": "Min",
+      "max": "Max",
+      "sizeTitle": "Size",
+      "demographicTitle": "Gender",
+      "demographic": {
+        "UNISEX": "Unisex",
+        "MEN": "Men",
+        "WOMEN": "Women",
+        "KIDS": "Kids"
+      },
+      "apparelTypeTitle": "Apparel Type",
+      "apparelType": {
+        "T_SHIRT": "T-Shirts",
+        "HOODIE": "Hoodies",
+        "CAP": "Caps",
+        "SCARF": "Scarves"
+      },
+      "colorTitle": "Color",
+      "color": {
+        "BLACK": "Black",
+        "WHITE": "White",
+        "GREEN": "Green",
+        "YELLOW": "Yellow"
+      },
+      "from": "From",
+      "to": "To"
     }
   },
   "Enums": {
