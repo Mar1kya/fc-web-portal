@@ -46,54 +46,53 @@ export default async function ProductCard({ product }: { product: ProductWithRel
     const isNew = isProductNew(product.createdAt);
 
     return (
-        <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-card border border-border transition-all duration-300 hover:border-emerald-600/60 shadow-sm">
-            <Link
-                href={`/shop/product/${product.slug}`}
-                className="relative aspect-4/5 w-full overflow-hidden bg-muted/10 border-b border-border/50"
-            >
-                <div className={`w-full h-full ${isOutOfStock ? "grayscale brightness-50" : ""}`}>
-                    {mainImage ? (
-                        <Image
-                            src={mainImage}
-                            alt={productName}
-                            fill
-                            className="object-cover transition-transform duration-700 group-hover:scale-105"
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                        />
-                    ) : (
-                        <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground/30 transition-transform duration-500 group-hover:scale-105 group-hover:text-emerald-600/40">
-                            <ImageOff className="w-16 h-16" strokeWidth={1.5} />
-                        </div>
-                    )}
-                </div>
-                <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
-                    {isOutOfStock ? (
-                        <Badge className="bg-zinc-800 hover:bg-zinc-800 text-white uppercase tracking-wider shadow-md pointer-events-none">
-                            {t("outOfStock")}
-                        </Badge>
-                    ) : (
-                        <>
-                            {isNew && (
-                                <Badge className="bg-orange-500 hover:bg-orange-600 text-white uppercase tracking-wider shadow-md pointer-events-none">
-                                    {t("new")}
-                                </Badge>
-                            )}
-                            {product.isFeatured && (
-                                <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white uppercase tracking-wider shadow-md pointer-events-none">
-                                    {t("hot")}
-                                </Badge>
-                            )}
-                        </>
-                    )}
-                </div>
-                {!isOutOfStock && product.isOnSale && discountPercentage > 0 && (
-                    <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
-                        <Badge className="bg-red-600 hover:bg-red-700 text-white uppercase tracking-wider shadow-md pointer-events-none">
-                            -{discountPercentage}%
-                        </Badge>
+        <div className="h-full w-full group relative flex flex-col overflow-hidden rounded-2xl bg-card border border-border transition-all duration-300 hover:border-emerald-600/60 shadow-sm">            <Link
+            href={`/shop/product/${product.slug}`}
+            className="relative aspect-4/5 w-full overflow-hidden bg-muted/10 border-b border-border/50"
+        >
+            <div className={`w-full h-full ${isOutOfStock ? "grayscale brightness-50" : ""}`}>
+                {mainImage ? (
+                    <Image
+                        src={mainImage}
+                        alt={productName}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    />
+                ) : (
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground/30 transition-transform duration-500 group-hover:scale-105 group-hover:text-emerald-600/40">
+                        <ImageOff className="w-16 h-16" strokeWidth={1.5} />
                     </div>
                 )}
-            </Link>
+            </div>
+            <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+                {isOutOfStock ? (
+                    <Badge className="bg-zinc-800 hover:bg-zinc-800 text-white uppercase tracking-wider shadow-md pointer-events-none">
+                        {t("outOfStock")}
+                    </Badge>
+                ) : (
+                    <>
+                        {isNew && (
+                            <Badge className="bg-orange-500 hover:bg-orange-600 text-white uppercase tracking-wider shadow-md pointer-events-none">
+                                {t("new")}
+                            </Badge>
+                        )}
+                        {product.isFeatured && (
+                            <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white uppercase tracking-wider shadow-md pointer-events-none">
+                                {t("hot")}
+                            </Badge>
+                        )}
+                    </>
+                )}
+            </div>
+            {!isOutOfStock && product.isOnSale && discountPercentage > 0 && (
+                <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
+                    <Badge className="bg-red-600 hover:bg-red-700 text-white uppercase tracking-wider shadow-md pointer-events-none">
+                        -{discountPercentage}%
+                    </Badge>
+                </div>
+            )}
+        </Link>
             <div className="flex flex-col gap-3 p-4 grow">
                 <div className="flex flex-col gap-1">
                     <span className={`text-[10px] font-bold uppercase tracking-widest ${isOutOfStock ? "text-zinc-500" : "text-emerald-500"}`}>

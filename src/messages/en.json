@@ -323,7 +323,7 @@
   },
   "Shop": {
     "Navigation": {
-      "all": "All Products",
+      "all": "Storefront",
       "sale": "Sale"
     },
     "ProductCard": {
@@ -379,6 +379,24 @@
     "SalePage": {
       "title": "Sale %",
       "empty": "Sorry, no sale products found matching these criteria."
+    },
+   "Home": {
+      "hero": {
+        "subtitle": "New Collection 25/26",
+        "title1": "Playing for",
+        "title2": "victory",
+        "description": "Official match and training kits of the season. Wear the colors of your favorite team.",
+        "button": "View collection"
+      },
+      "hotTitle": "Best Sellers",
+      "newTitle": "New Arrivals",
+      "saleBanner": {
+        "title1": "Up to",
+        "title2": "-50%",
+        "title3": "off last season",
+        "description": "Grab official merch at the best prices while your size is still in stock.",
+        "button": "Go to Sale"
+      }
     }
   },
   "Enums": {
