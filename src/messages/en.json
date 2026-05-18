@@ -375,6 +375,10 @@
       },
       "from": "From",
       "to": "To"
+    },
+    "SalePage": {
+      "title": "Sale %",
+      "empty": "Sorry, no sale products found matching these criteria."
     }
   },
   "Enums": {

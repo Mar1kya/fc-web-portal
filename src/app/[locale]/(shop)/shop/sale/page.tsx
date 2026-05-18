@@ -1,39 +1,25 @@
-import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import H1 from "@/components/ui/heading";
 import ProductCard from "../_components/product-card";
 import ProductSort from "../_components/product-sort";
 import ShopSidebar from "../_components/shop-sidebar";
 import ActiveFilters from "../_components/active-filters";
-import { getLocale, getTranslations } from "next-intl/server";
-import { getTranslation } from "@/lib/utils/get-translation";
 import { getCategoryProductsData } from "@/lib/services/shop.service";
 import AppPagination from "@/components/layout/app-pagination";
 
-export default async function CategoryPage({ params, searchParams }: { params: Promise<{ slug: string }>, searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-    const { slug } = await params;
+export default async function SalePage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const resolvedSearchParams = await searchParams;
-
-    const locale = await getLocale();
-    const t = await getTranslations("Shop.CategoryPage");
-
-    const category = await prisma.category.findUnique({
-        where: { slug, deletedAt: null },
-        include: { translations: true }
-    });
-
-    if (!category) notFound();
-    const categoryName = getTranslation(category, locale)?.name || category.slug;
+    const t = await getTranslations("Shop.SalePage");
 
     const { sortedProducts, availableFilters, dynamicFilters, totalPages, currentPage } = await getCategoryProductsData({
-        categoryId: category.id,
+        isSale: true,
         searchParams: resolvedSearchParams
     });
 
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border pb-4">
-                <H1>{categoryName}</H1>
+                <H1 className="uppercase">{t("title")}</H1>
                 <ProductSort />
             </div>
             <div className="flex flex-col lg:flex-row gap-8 items-start">
