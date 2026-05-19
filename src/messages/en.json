@@ -405,6 +405,25 @@
         "title": "Official Fan Shop",
         "description": "The official online store of the football club. Shop match kits, training apparel, accessories, and authentic souvenirs of your favorite team."
       }
+    },
+    "ProductPage": {
+      "sku": "SKU",
+      "backToShop": "Storefront",
+      "inStock": "In Stock",
+      "outOfStock": "Sold Out",
+      "size": "Size",
+      "quantity": "Quantity",
+      "addToCart": "Add to Cart",
+      "soldOutBtn": "Out of Stock",
+      "selectSizeError": "Please select a size",
+      "description": "Product Description",
+      "noDescription": "Description is being prepared.",
+      "relatedProducts": "You might also like",
+      "noPhoto": "No photo",
+      "Metadata": {
+        "title": "{name} | Official Fan Shop",
+        "description": "Buy {name} at the official football club online store. Authentic team gear, fast shipping, and premium club quality guaranteed."
+      }
     }
   },
   "Enums": {
