@@ -321,6 +321,92 @@
     "description": "Sorry, the page for this match does not exist, has been removed, or is not created yet.",
     "backButton": "Back to matches"
   },
+  "Shop": {
+    "Navigation": {
+      "all": "Storefront",
+      "sale": "Sale"
+    },
+    "ProductCard": {
+      "sale": "Sale",
+      "hot": "Hot",
+      "new": "New",
+      "outOfStock": "Sold Out",
+      "statusIn": "In Stock",
+      "statusOut": "Out of Stock",
+      "addToCart": "View details"
+    },
+    "CategoryPage": {
+      "empty": "There are no products in this category yet."
+    },
+    "ProductSort": {
+      "title": "Sort by",
+      "newest": "Newest arrivals",
+      "price_asc": "Price: Low to High",
+      "price_desc": "Price: High to Low",
+      "sale_first": "Sale items first"
+    },
+    "Filters": {
+      "title": "Filters",
+      "clear": "Clear all",
+      "price": "Price",
+      "min": "Min",
+      "max": "Max",
+      "sizeTitle": "Size",
+      "demographicTitle": "Gender",
+      "demographic": {
+        "UNISEX": "Unisex",
+        "MEN": "Men",
+        "WOMEN": "Women",
+        "KIDS": "Kids"
+      },
+      "apparelTypeTitle": "Apparel Type",
+      "apparelType": {
+        "T_SHIRT": "T-Shirts",
+        "HOODIE": "Hoodies",
+        "CAP": "Caps",
+        "SCARF": "Scarves"
+      },
+      "colorTitle": "Color",
+      "color": {
+        "BLACK": "Black",
+        "WHITE": "White",
+        "GREEN": "Green",
+        "YELLOW": "Yellow"
+      },
+      "from": "From",
+      "to": "To"
+    },
+    "SalePage": {
+      "title": "Sale %",
+      "empty": "Sorry, no sale products found matching these criteria.",
+      "Metadata": {
+        "title": "Sale | Official Fan Shop",
+        "description": "Up to 50% off official football club apparel and souvenirs. Shop authentic merch at the best prices."
+      }
+    },
+    "Home": {
+      "hero": {
+        "subtitle": "New Collection 25/26",
+        "title1": "Playing for",
+        "title2": "victory",
+        "description": "Official match and training kits of the season. Wear the colors of your favorite team.",
+        "button": "View collection"
+      },
+      "hotTitle": "Best Sellers",
+      "newTitle": "New Arrivals",
+      "saleBanner": {
+        "title1": "Up to",
+        "title2": "-50%",
+        "title3": "off last season",
+        "description": "Grab official merch at the best prices while your size is still in stock.",
+        "button": "Go to Sale"
+      },
+      "Metadata": {
+        "title": "Official Fan Shop",
+        "description": "The official online store of the football club. Shop match kits, training apparel, accessories, and authentic souvenirs of your favorite team."
+      }
+    }
+  },
   "Enums": {
     "PostType": {
       "NEWS": "News",
