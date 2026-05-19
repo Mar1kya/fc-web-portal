@@ -7,6 +7,28 @@ import ActiveFilters from "../_components/active-filters";
 import { getCategoryProductsData } from "@/lib/services/shop.service";
 import AppPagination from "@/components/layout/app-pagination";
 
+export async function generateMetadata() {
+    const t = await getTranslations("Shop.SalePage.Metadata");
+
+    return {
+        title: t("title"),
+        description: t("description"),
+        openGraph: {
+            title: t("title"),
+            description: t("description"),
+            images: [
+                {
+                    url: "/images/shop.png",
+                    width: 1200,
+                    height: 630,
+                    alt: t("title"),
+                }
+            ],
+            type: "website",
+        },
+    };
+}
+
 export default async function SalePage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const resolvedSearchParams = await searchParams;
     const t = await getTranslations("Shop.SalePage");

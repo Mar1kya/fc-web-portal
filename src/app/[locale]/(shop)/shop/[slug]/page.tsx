@@ -10,6 +10,42 @@ import { getTranslation } from "@/lib/utils/get-translation";
 import { getCategoryProductsData } from "@/lib/services/shop.service";
 import AppPagination from "@/components/layout/app-pagination";
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const locale = await getLocale();
+    const tHomeMeta = await getTranslations("Shop.Home.Metadata");
+
+    const category = await prisma.category.findUnique({
+        where: { slug, deletedAt: null },
+        include: { translations: true }
+    });
+
+    if (!category) return {};
+
+    const translation = getTranslation(category, locale);
+    const categoryName = translation?.name || category.slug;
+    const pageTitle = `${categoryName} | ${tHomeMeta("title")}`;
+    const pageDescription = tHomeMeta("description");
+
+    return {
+        title: pageTitle,
+        description: pageDescription,
+        openGraph: {
+            title: pageTitle,
+            description: pageDescription,
+            images: [
+                {
+                    url: "/images/shop.png", 
+                    width: 1200,
+                    height: 630,
+                    alt: pageTitle,
+                }
+            ],
+            type: "website",
+        },
+    };
+}
+
 export default async function CategoryPage({ params, searchParams }: { params: Promise<{ slug: string }>, searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const { slug } = await params;
     const resolvedSearchParams = await searchParams;

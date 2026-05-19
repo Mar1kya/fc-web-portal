@@ -378,9 +378,13 @@
     },
     "SalePage": {
       "title": "Sale %",
-      "empty": "Sorry, no sale products found matching these criteria."
+      "empty": "Sorry, no sale products found matching these criteria.",
+      "Metadata": {
+        "title": "Sale | Official Fan Shop",
+        "description": "Up to 50% off official football club apparel and souvenirs. Shop authentic merch at the best prices."
+      }
     },
-   "Home": {
+    "Home": {
       "hero": {
         "subtitle": "New Collection 25/26",
         "title1": "Playing for",
@@ -396,6 +400,10 @@
         "title3": "off last season",
         "description": "Grab official merch at the best prices while your size is still in stock.",
         "button": "Go to Sale"
+      },
+      "Metadata": {
+        "title": "Official Fan Shop",
+        "description": "The official online store of the football club. Shop match kits, training apparel, accessories, and authentic souvenirs of your favorite team."
       }
     }
   },

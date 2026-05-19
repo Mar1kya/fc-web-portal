@@ -11,9 +11,31 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel";
-import { ComponentProps } from "react"; 
+import { ComponentProps } from "react";
 
 type ExpectedProductType = ComponentProps<typeof ProductCard>["product"];
+
+export async function generateMetadata() {
+    const t = await getTranslations("Shop.Home.Metadata");
+
+    return {
+        title: t("title"),
+        description: t("description"),
+        openGraph: {
+            title: t("title"),
+            description: t("description"),
+            images: [
+                {
+                    url: "/images/shop.png",
+                    width: 1200,
+                    height: 630,
+                    alt: t("title"),
+                }
+            ],
+            type: "website",
+        },
+    };
+}
 
 export default async function ShopHomePage() {
     const t = await getTranslations("Shop.Home");
