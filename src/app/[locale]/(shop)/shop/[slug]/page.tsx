@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
     const translation = getTranslation(category, locale);
     const categoryName = translation?.name || category.slug;
-    const pageTitle = `${categoryName} | ${tHomeMeta("title")}`;
+    const pageTitle = categoryName;
     const pageDescription = tHomeMeta("description");
 
     return {

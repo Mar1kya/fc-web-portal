@@ -83,6 +83,17 @@
       "contacts": "Contacts",
       "button": "Open the menu",
       "standingsTablePrefix": "Standings"
+    },
+    "CartMenu": {
+      "title": "Cart",
+      "items": "pcs",
+      "emptyCart": "Your cart is empty",
+      "size": "Size",
+      "qty": "Qty",
+      "remove": "Remove item",
+      "total": "Total",
+      "viewCart": "View Cart",
+      "checkout": "Checkout"
     }
   },
   "Footer": {
@@ -380,7 +391,7 @@
       "title": "Sale %",
       "empty": "Sorry, no sale products found matching these criteria.",
       "Metadata": {
-        "title": "Sale | Official Fan Shop",
+        "title": "Sale",
         "description": "Up to 50% off official football club apparel and souvenirs. Shop authentic merch at the best prices."
       }
     },
@@ -402,7 +413,7 @@
         "button": "Go to Sale"
       },
       "Metadata": {
-        "title": "Official Fan Shop",
+        "title": "Storefront Fan Shop",
         "description": "The official online store of the football club. Shop match kits, training apparel, accessories, and authentic souvenirs of your favorite team."
       }
     },
@@ -420,9 +431,41 @@
       "noDescription": "Description is being prepared.",
       "relatedProducts": "You might also like",
       "noPhoto": "No photo",
+      "adding": "Adding...",
+      "addedSuccess": "Product \"{name}\" has been added to your cart!",
+      "addError": "An error occurred while adding the product to the cart",
+      "limitReached": "Limit of {max} reached",
+      "allAvailableAdded": "All available in cart",
+      "limitError": "You have already added the maximum quantity of this product",
       "Metadata": {
-        "title": "{name} | Official Fan Shop",
+        "title": "{name}",
         "description": "Buy {name} at the official football club online store. Authentic team gear, fast shipping, and premium club quality guaranteed."
+      }
+    },
+    "CartPage": {
+      "title": "Your Cart",
+      "items": "items",
+      "size": "Size",
+      "emptyTitle": "Your cart is empty",
+      "emptyDescription": "You haven't added any products from the official Emerald Gang fan shop yet.",
+      "continueShopping": "Continue Shopping",
+      "summaryTitle": "Order Summary",
+      "subtotal": "Subtotal",
+      "shippingNotice": "Shipping calculated at checkout",
+      "total": "Total amount",
+      "checkoutBtn": "Proceed to Checkout",
+      "removedToast": "Item removed from cart",
+      "limitError": "Maximum order limit is {max} pcs.",
+      "stockError": "Only {stock} pcs. left in stock.",
+      "Metadata": {
+        "title": "Shopping Cart",
+        "description": "Your shopping list in the official online store. Check quantities, manage sizes, and proceed to secure checkout."
+      }
+    },
+    "Layout": {
+      "Metadata": {
+        "titleSuffix": "Official Fan Shop",
+        "defaultTitle": "Emerald Gang Official Fan Shop"
       }
     }
   },
