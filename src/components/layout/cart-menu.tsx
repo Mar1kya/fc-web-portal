@@ -99,7 +99,7 @@ export default function CartMenu() {
                                                 )}
                                             </div>
                                             <div className="flex flex-col grow">
-                                                <h4 className="text-sm font-semibold line-clamp-1">{itemName}</h4>
+                                                <h4 className="text-sm font-semibold line-clamp-1 hover:text-emerald-600">{itemName}</h4>
                                                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                                                     {item.size && <span>{t("size")}: {item.size}</span>}
                                                     {item.size && <span>•</span>}
