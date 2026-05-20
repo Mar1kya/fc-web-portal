@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma, Demographic } from "../../../generated/prisma";
+import { PAGINATION } from "../constants";
 
 type GetCategoryProductsParams = {
   categoryId?: string;
@@ -263,17 +264,15 @@ export async function getCategoryProductsData({
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
-  const ITEMS_PER_PAGE = 12;
-
   const pageParam =
     typeof searchParams.page === "string" ? parseInt(searchParams.page) : 1;
   const currentPage = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
 
-  const totalPages = Math.ceil(sortedProducts.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(sortedProducts.length / PAGINATION.SHOP_PER_PAGE);
 
   const paginatedProducts = sortedProducts.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
+    (currentPage - 1) * PAGINATION.SHOP_PER_PAGE,
+    currentPage * PAGINATION.SHOP_PER_PAGE,
   );
 
   return {

@@ -7,7 +7,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import ProductForm from "../_components/product-form";
 import ProductGallery from "../_components/product-gallery";
 import { ComponentProps } from "react";
-import sanitizeHtml from "sanitize-html"; 
+import sanitizeHtml from "sanitize-html";
 
 type ExpectedProductType = ComponentProps<typeof ProductCard>["product"];
 
@@ -15,7 +15,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const { slug } = await params;
     const locale = await getLocale();
     const tMeta = await getTranslations("Shop.ProductPage.Metadata");
-    
     const product = await prisma.product.findUnique({
         where: { slug, deletedAt: null, isArchived: false },
         include: { translations: true, media: { take: 1 } },
@@ -87,8 +86,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         take: 8,
         include: { translations: true, media: true, variants: true }
     });
-    
+
     const isOutOfStock = product.variants.reduce((sum, v) => sum + v.stock, 0) <= 0;
+    const mainImage = product.media.length > 0 ? product.media[0].url : null;
 
     return (
         <>
@@ -107,10 +107,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     <ProductForm
                         product={{
                             id: product.id,
+                            slug: product.slug,
                             price: Number(product.price),
                             salePrice: product.salePrice ? Number(product.salePrice) : null,
                             isOnSale: product.isOnSale,
-                            sku: product.variants[0]?.sku || undefined
+                            sku: product.variants[0]?.sku || undefined,
+                            translations: product.translations.map(t => ({
+                                language: t.language,
+                                name: t.name
+                            })),
+                            image: mainImage
                         }}
                         variants={product.variants}
                     />

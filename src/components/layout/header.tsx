@@ -9,6 +9,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { TeamContext } from "../../../generated/prisma";
 import { getTranslation } from "@/lib/utils/get-translation";
+import CartMenu from "./cart-menu";
 
 export default async function Header() {
     const session = await auth();
@@ -90,7 +91,7 @@ export default async function Header() {
                             {user ? (
                                 <>
                                     <li>
-                                        {user.role === 'ADMIN' ? null : <ShoppingBasket className="w-5 h-5 sm:w-6 sm:h-6 cursor-pointer hover:text-emerald-600 transition-colors" />}
+                                        {user.role === 'ADMIN' ? null : <CartMenu />}
                                     </li>
                                     <li className="flex items-center h-full">
                                         <UserMenu user={user} />
@@ -113,6 +114,5 @@ export default async function Header() {
                 matchesMenuData={dynamicMatchesMenu}
             />
         </div>
-    </header >
-
+    </header>
 }
