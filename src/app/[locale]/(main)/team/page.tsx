@@ -30,9 +30,16 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
         ? tMeta("dynamicDescription", { team: teamName, category: tabName.toLowerCase() })
         : tMeta("description", { team: teamName });
 
+    const canonicalUrl = currentContext === "MAIN_TEAM"
+        ? "/team"
+        : `/team?context=${currentContext}`;
+
     return {
         title: pageTitle,
         description: pageDescription,
+        alternatives: {
+            canonical: canonicalUrl,
+        },
         openGraph: {
             title: pageTitle,
             description: pageDescription,

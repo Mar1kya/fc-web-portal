@@ -12,6 +12,7 @@ import {
     CarouselPrevious,
 } from "@/components/ui/carousel";
 import { ComponentProps } from "react";
+import H1 from "@/components/ui/heading";
 
 type ExpectedProductType = ComponentProps<typeof ProductCard>["product"];
 
@@ -72,9 +73,9 @@ export default async function ShopHomePage() {
                     <span className="font-bold uppercase tracking-widest text-sm md:text-base">
                         {t("hero.subtitle")}
                     </span>
-                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold uppercase leading-tight">
+                    <H1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold uppercase leading-tight">
                         {t("hero.title1")} <br className="hidden md:block" /> {t("hero.title2")}
-                    </h1>
+                    </H1>
                     <p className="text-zinc-300 text-sm md:text-base max-w-md">
                         {t("hero.description")}
                     </p>

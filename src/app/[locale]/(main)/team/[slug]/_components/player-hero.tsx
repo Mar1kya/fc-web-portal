@@ -7,6 +7,8 @@ import { uk, enUS } from "date-fns/locale";
 import { Link } from "@/i18n/navigation";
 import { Shirt, User } from "lucide-react";
 import { Prisma } from "../../../../../../../generated/prisma";
+import PlayerAvatar from "./player-avatar";
+import H1 from "@/components/ui/heading";
 
 type PlayerWithRelations = Prisma.PlayerGetPayload<{
     include: {
@@ -31,24 +33,24 @@ export default async function PlayerHero({ player }: PlayerHeroProps) {
     const hasJersey = player.relatedProducts.length > 0;
 
     return (
-        <div className="flex w-full flex-col-reverse overflow-hidden rounded-lg border bg-card xl:flex-row">
-            <div className="flex w-full flex-col items-center justify-center p-8 text-center text-card-foreground md:p-14 xl:w-1/2 xl:items-start xl:text-left">
-                <div className="mb-8 flex w-full flex-wrap items-baseline justify-center gap-4 border-b border-white/10 pb-6 xl:justify-start">
+        <div className="flex w-full flex-col-reverse overflow-hidden rounded-lg border bg-card lg:flex-row">
+            <div className="flex w-full flex-col items-center justify-center p-8 text-center text-card-foreground md:p-14 lg:w-1/2 lg:items-start lg:text-left">
+                <div className="mb-8 flex w-full flex-wrap items-baseline justify-center gap-4 border-b border-white/10 pb-6 lg:justify-start">
                     <span className="text-2xl font-black text-emerald-600 sm:text-4xl md:text-5xl">
                         #{player.number}
                     </span>
-                    <h1 className="font-serif text-2xl font-black uppercase tracking-tight sm:text-4xl md:text-5xl">
+                    <H1 className="font-serif text-2xl font-black uppercase tracking-tight sm:text-4xl md:text-5xl">
                         {name}
-                    </h1>
+                    </H1>
                 </div>
-                <div className="flex w-full flex-wrap justify-center gap-8 sm:gap-10 xl:justify-start xl:gap-12">
-                    <div className="flex flex-col items-center gap-1 xl:items-start">
+                <div className="flex w-full flex-wrap justify-center gap-8 sm:gap-10 lg:justify-start lg:gap-12">
+                    <div className="flex flex-col items-center gap-1 lg:items-start">
                         <span className="text-sm font-medium text-muted-foreground">{tTeam("position")}</span>
                         <span className="text-lg font-bold uppercase">{positionName}</span>
                     </div>
-                    <div className="flex flex-col items-center gap-1 xl:items-start">
+                    <div className="flex flex-col items-center gap-1 lg:items-start">
                         <span className="text-sm font-medium text-muted-foreground">{tTeam("nationality")}</span>
-                        <div className="flex h-7 items-center justify-center xl:justify-start">
+                        <div className="flex h-7 items-center justify-center lg:justify-start">
                             {player.nationality ? (
                                 <Flag
                                     code={player.nationality}
@@ -60,25 +62,26 @@ export default async function PlayerHero({ player }: PlayerHeroProps) {
                             )}
                         </div>
                     </div>
-                    <div className="flex flex-col items-center gap-1 xl:items-start">
+                    <div className="flex flex-col items-center gap-1 lg:items-start">
                         <span className="text-sm font-medium text-muted-foreground">{tTeam("birthDate")}</span>
                         <span className="text-lg font-bold uppercase">{formattedBirthDate}</span>
                     </div>
-                    <div className="flex flex-col items-center gap-1 xl:items-start">
+                    <div className="flex flex-col items-center gap-1 lg:items-start">
                         <span className="text-sm font-medium text-muted-foreground">{tTeam("height")}</span>
                         <span className="text-lg font-bold uppercase">
                             {player.height ? `${player.height} ${tTeam("cm")}` : "—"}
                         </span>
                     </div>
-                    <div className="flex flex-col items-center gap-1">
+                    <div className="flex flex-col items-center gap-1 lg:items-start">
                         <span className="text-sm font-medium text-muted-foreground">{tTeam("weight")}</span>
                         <span className="text-lg font-bold uppercase">
                             {player.weight ? `${player.weight} ${tTeam("kg")}` : "—"}
                         </span>
                     </div>
                 </div>
+
                 {hasJersey && (
-                    <div className="mt-10 inline-flex xl:mt-20">
+                    <div className="mt-10 inline-flex lg:mt-20">
                         <Link
                             href={`/shop/player/${player.slug}`}
                             className="group flex items-center gap-4 rounded-xl bg-foreground p-2 pr-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-600/20 active:translate-y-0 active:scale-95"
@@ -94,18 +97,9 @@ export default async function PlayerHero({ player }: PlayerHeroProps) {
                     </div>
                 )}
             </div>
-            <div className="relative flex h-100 w-full items-end justify-center bg-muted/20 overflow-hidden md:h-125 lg:h-150 xl:w-1/2">
+            <div className="relative flex h-100 w-full items-end justify-center bg-white overflow-hidden md:h-125 lg:h-150 lg:w-1/2">
                 {player.avatar ? (
-                    <Image
-                        src={player.avatar}
-                        alt={name}
-                        fill
-                        className="object-cover object-top"
-                        sizes="(max-width: 1024px) 100vw, 50vw"
-                        priority
-                        unoptimized
-                        referrerPolicy="no-referrer"
-                    />
+                    <PlayerAvatar src={player.avatar} alt={name} />
                 ) : (
                     <div className="flex h-full w-full items-center justify-center">
                         <User className="h-32 w-32 text-emerald-600" strokeWidth={1} />

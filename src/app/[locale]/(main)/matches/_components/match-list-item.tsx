@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { getTranslation } from "@/lib/utils/get-translation";
 import { MatchStatus } from "../../../../../../generated/prisma";
 import { MatchDisplayData } from "./match-card";
+import TeamLogo from "./team-logo";
 
 type MatchListItemProps = {
     match: MatchDisplayData;
@@ -56,7 +57,7 @@ export default function MatchListItem({ match, locale }: MatchListItemProps) {
                         {homeTeamName}
                     </span>
                     <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0">
-                        <Image src={homeLogo} alt={homeTeamName} fill sizes="40px" className="object-contain" unoptimized />
+                        <TeamLogo src={homeLogo} alt={homeTeamName} />
                     </div>
                 </div>
                 <div className="flex items-center justify-center w-20 shrink-0">
@@ -74,7 +75,7 @@ export default function MatchListItem({ match, locale }: MatchListItemProps) {
                 </div>
                 <div className="flex items-center justify-start gap-3 flex-1 min-w-0">
                     <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0">
-                        <Image src={awayLogo} alt={awayTeamName} fill sizes="40px" className="object-contain" unoptimized />
+                        <TeamLogo src={awayLogo} alt={awayTeamName} />
                     </div>
                     <span className={`text-sm md:text-base truncate hidden sm:block ${!match.isHomeGame ? 'font-bold' : 'font-medium'}`}>
                         {awayTeamName}

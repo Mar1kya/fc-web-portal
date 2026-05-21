@@ -1,11 +1,11 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ChevronRight, MapPin } from "lucide-react";
-import Image from "next/image";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getTranslation } from "@/lib/utils/get-translation";
 import { MatchStatus } from "../../../../../../generated/prisma";
+import TeamLogo from "./team-logo";
 
 type TranslatableTournament = {
     slug: string;
@@ -94,7 +94,7 @@ export default function MatchCard({ match, title, locale, emptyText }: MatchCard
                         <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                                 <div className="relative w-8 h-8 shrink-0 flex items-center justify-center">
-                                    <Image src={homeLogo} alt="" fill sizes="32px" className="object-contain" unoptimized referrerPolicy="no-referrer" />
+                                    <TeamLogo src={homeLogo} alt={homeTeamName} />
                                 </div>
                                 <span
                                     className={`text-sm truncate ${match.isHomeGame ? 'font-bold text-foreground' : 'font-medium text-foreground/80'}`}
@@ -112,7 +112,7 @@ export default function MatchCard({ match, title, locale, emptyText }: MatchCard
                         <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                                 <div className="relative w-8 h-8 shrink-0 flex items-center justify-center">
-                                    <Image src={awayLogo} alt="" fill sizes="32px" className="object-contain" unoptimized referrerPolicy="no-referrer" />
+                                    <TeamLogo src={awayLogo} alt={awayTeamName} />
                                 </div>
                                 <span
                                     className={`text-sm truncate ${!match.isHomeGame ? 'font-bold text-foreground' : 'font-medium text-foreground/80'}`}

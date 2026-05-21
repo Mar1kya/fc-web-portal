@@ -33,8 +33,8 @@ export default function MatchLineups({ match, locale }: { match: MatchWithDetail
     const ourTeamName = tHero("ourTeamName");
     const homeTeamName = match.isHomeGame ? ourTeamName : translatedOpponent;
     const awayTeamName = match.isHomeGame ? translatedOpponent : ourTeamName;
-    const homeCoach = match.isHomeGame ? match.homeCoachName : match.awayCoachName;
-    const awayCoach = match.isHomeGame ? match.awayCoachName : match.homeCoachName;
+    const homeCoach = match.homeCoachName;
+    const awayCoach = match.awayCoachName;
 
     const ourLineup: PlayerItem[] = (match.lineup || []).map(entry => {
         const translatedPlayer = getTranslation(entry.player, locale);
@@ -44,6 +44,7 @@ export default function MatchLineups({ match, locale }: { match: MatchWithDetail
             number: entry.player.number.toString(),
             positionOrder: positionOrder[entry.player.position] || 99,
             isStarter: entry.isStarter,
+            slug: entry.player.slug,
             events: match.events.filter(e => !e.isOpponent && e.playerId === entry.player.id)
         };
     }).sort((a, b) => a.positionOrder - b.positionOrder);

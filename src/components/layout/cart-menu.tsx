@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslations, useLocale } from "next-intl"
 import { ShoppingBasket, Trash2, ImageOff } from "lucide-react"
 import Image from "next/image"
@@ -23,16 +23,21 @@ export default function CartMenu() {
     const t = useTranslations("Header.CartMenu");
     const locale = useLocale();
     const [isOpen, setIsOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const currencySymbol = getCurrencySymbol();
     const items = useStore(useCartStore, (state) => state.items);
     const removeItem = useCartStore((state) => state.removeItem);
 
-    if (items === undefined) {
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+   if (!mounted || items === undefined) {
         return (
             <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg">
                 <ShoppingBasket className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
             </Button>
-        )
+        );
     }
 
     const totalItems = items.reduce((total, item) => total + item.quantity, 0);

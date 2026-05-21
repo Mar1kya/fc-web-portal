@@ -11,6 +11,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     const { context, season: seasonSlug } = await searchParams;
     const tMeta = await getTranslations("MatchesPage.Metadata");
     const tEnums = await getTranslations("Enums");
+    
     const currentContext = context && Object.values(TeamContext).includes(context as TeamContext)
         ? (context as TeamContext)
         : TeamContext.MAIN_TEAM;
@@ -33,9 +34,30 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
         season: seasonName
     });
 
+    const isCurrentActive = currentSeason?.isActive;
+    const includeSeason = seasonSlug && !isCurrentActive; 
+
+    let canonicalUrl = "/matches";
+    const queryParams: string[] = [];
+
+    if (currentContext !== "MAIN_TEAM") {
+        queryParams.push(`context=${currentContext}`);
+    }
+
+    if (includeSeason) {
+        queryParams.push(`season=${seasonSlug}`);
+    }
+
+    if (queryParams.length > 0) {
+        canonicalUrl += `?${queryParams.join("&")}`;
+    }
+
     return {
         title: pageTitle,
         description: pageDescription,
+        alternatives: {
+            canonical: canonicalUrl,
+        },
         openGraph: {
             title: pageTitle,
             description: pageDescription,
