@@ -46,9 +46,17 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
         season: seasonName
     });
 
+    const isCurrentActive = currentSeason?.isActive;
+    const canonicalUrl = (!season || isCurrentActive)
+        ? `/standings/${slug}`
+        : `/standings/${slug}?season=${currentSeason?.slug}`;
+
     return {
         title: pageTitle,
         description: pageDescription,
+        alternatives: {
+            canonical: canonicalUrl,
+        },
         openGraph: {
             title: pageTitle,
             description: pageDescription,

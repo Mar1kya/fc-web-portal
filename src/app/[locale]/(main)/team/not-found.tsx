@@ -2,8 +2,9 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import H1 from "@/components/ui/heading";
 
-export default function NotFound() {
+export default function TeamNotFound() {
     const t = useTranslations("TeamMemberNotFound");
 
     return (
@@ -14,9 +15,9 @@ export default function NotFound() {
                     <UserX className="w-12 h-12 text-emerald-600" strokeWidth={1.5} />
                 </div>
             </div>
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground leading-tight">
+            <H1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground leading-tight">
                 {t("title")}
-            </h1>
+            </H1>
             <p className="text-muted-foreground max-w-md mx-auto mb-10 text-base md:text-lg leading-relaxed">
                 {t("description")}
             </p>

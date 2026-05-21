@@ -105,11 +105,12 @@
     "contacts": "Контакти",
     "shop": "Магазин",
     "team": "Команда",
-    "coaches": "Тренерський штаб",
+    "coaches": "Тренерський штаб:",
     "contactUs": "Зв'язок",
     "location": "м. Житомир, Україна",
     "reserved": "Всі права захищено",
-    "matches": "Матчі"
+    "matches": "Матчі:",
+    "standingsTablePrefix": "Турнірна таблиця:"
   },
   "ProfilePage": {
     "title": "Профіль користувача",

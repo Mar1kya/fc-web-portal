@@ -3,13 +3,10 @@ import { MapPin, Phone, Mail, Instagram, Facebook, Twitter } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import SelectLanguage from "./select-language";
-import { getTranslations } from "next-intl/server";
-
-const teamsData = [
-    { slug: "main", name: "Основний склад" },
-    { slug: "u19", name: "Команда U-19" },
-    { slug: "academy", name: "Академія" },
-];
+import { getLocale, getTranslations } from "next-intl/server";
+import { TeamContext } from "../../../generated/prisma";
+import { prisma } from "@/lib/prisma";
+import { getTranslation } from "@/lib/utils/get-translation";
 
 const socialMediaLinks = [
     { icon: Facebook, link: "#", title: "Facebook" },
@@ -18,7 +15,41 @@ const socialMediaLinks = [
 ];
 
 export default async function Footer() {
+    const locale = await getLocale();
     const t = await getTranslations("Footer");
+    const tEnums = await getTranslations("Enums");
+
+    // 1. Отримуємо активні склади команд
+    const activeTeamsDb = await prisma.player.groupBy({
+        by: ['teamContext'],
+    });
+    const activeTeamContexts = activeTeamsDb.length > 0
+        ? activeTeamsDb.map(t => t.teamContext)
+        : [TeamContext.MAIN_TEAM];
+
+    // 2. Отримуємо турніри та матчі
+    const matchesContextsDb = await prisma.match.groupBy({
+        by: ['teamContext'],
+    });
+    const contextsWithMatches = matchesContextsDb.map(m => m.teamContext);
+
+    const standingsContextsDb = await prisma.standing.findMany({
+        distinct: ['teamContext', 'tournamentId'],
+        select: {
+            teamContext: true,
+            tournament: {
+                include: { translations: true }
+            }
+        }
+    });
+
+    const activeMatchContextsSet = new Set([
+        ...contextsWithMatches,
+        ...standingsContextsDb.map(s => s.teamContext)
+    ]);
+
+    const orderedMatchContexts = Object.values(TeamContext).filter(c => activeMatchContextsSet.has(c));
+
     return (
         <footer className="pb-8 2xl:border-t px-2">
             <div className="container mx-auto space-y-12 2xl:border-0 border-t pt-10">
@@ -71,23 +102,42 @@ export default async function Footer() {
                                 {t("team")}
                             </h3>
                             <ul className="space-y-3">
-                                <li>
-                                    <Link href="/matches/main" className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
-                                        {t("matches")}
-                                    </Link>
-                                </li>
-                                {teamsData.map((team) => (
-                                    <li key={team.slug}>
-                                        <Link href={`/team/${team.slug}`} className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
-                                            {team.name}
+                                {activeTeamContexts.map((teamContext) => (
+                                    <li key={`footer-team-${teamContext}`}>
+                                        <Link href={`/team?context=${teamContext}`} className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
+                                            {tEnums(`TeamContext.${teamContext}`)}
                                         </Link>
                                     </li>
                                 ))}
-                                <li>
-                                    <Link href="/coaches" className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
-                                        {t("coaches")}
-                                    </Link>
-                                </li>
+                                {orderedMatchContexts.map((context) => (
+                                    <li key={`footer-matches-${context}`}>
+                                        <Link href={`/matches?context=${context}`} className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
+                                            {t("matches")} {tEnums(`TeamContext.${context}`)}
+                                        </Link>
+                                    </li>
+                                ))}
+                                {orderedMatchContexts.map(context => {
+                                    const standings = standingsContextsDb
+                                        .filter(s => s.teamContext === context && s.tournament)
+                                        .map(s => {
+                                            const translatedTourName = getTranslation(s.tournament!, locale)?.name || s.tournament!.slug;
+                                            return (
+                                                <li key={`footer-standing-${context}-${s.tournament!.id}`}>
+                                                    <Link href={`/standings/${s.tournament!.slug}`} className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
+                                                        {t("standingsTablePrefix")} {translatedTourName}
+                                                    </Link>
+                                                </li>
+                                            );
+                                        });
+                                    return standings;
+                                })}
+                                {activeTeamContexts.map((context) => (
+                                    <li key={`footer-coach-${context}`}>
+                                        <Link href={`/team?context=${context}&pos=COACH`} className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
+                                            {t("coaches")} {tEnums(`TeamContext.${context}`)}
+                                        </Link>
+                                    </li>
+                                ))}
                             </ul>
                         </div>
                     </div>

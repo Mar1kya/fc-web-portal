@@ -12,6 +12,7 @@ import { useStore } from "@/hooks/useStore";
 import { getTranslation } from "@/lib/utils/get-translation";
 import { formatPrice } from "@/lib/utils";
 import { MAX_QTY_PER_ITEM } from "@/lib/constants";
+import H1 from "@/components/ui/heading";
 
 export default function CartView() {
     const t = useTranslations("Shop.CartPage");
@@ -58,9 +59,9 @@ export default function CartView() {
                         <ShoppingBag className="w-12 h-12 text-emerald-600" strokeWidth={1.5} />
                     </div>
                 </div>
-                <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground leading-tight">
+                <H1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground leading-tight">
                     {t("emptyTitle")}
-                </h1>
+                </H1>
                 <p className="text-muted-foreground max-w-md mx-auto mb-10 text-base md:text-lg leading-relaxed">
                     {t("emptyDescription")}
                 </p>
@@ -75,9 +76,9 @@ export default function CartView() {
 
     return (
         <div className="space-y-8">
-            <h1 className="text-3xl md:text-4xl font-extrabold uppercase tracking-tight border-b pb-4">
+            <H1 className="text-3xl md:text-4xl font-extrabold uppercase tracking-tight border-b pb-4">
                 {t("title")} <span className="text-muted-foreground font-normal text-xl">({totalItems})</span>
-            </h1>
+            </H1>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-8 space-y-4">
                     {items.map((item) => {

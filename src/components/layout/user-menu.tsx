@@ -13,6 +13,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTranslations } from "next-intl";
+import { useCartStore } from "@/store/useCartStore";
 
 type UserMenuProps = {
     user: {
@@ -24,7 +25,13 @@ type UserMenuProps = {
 }
 
 export default function UserMenu({ user }: UserMenuProps) {
-    const t = useTranslations("Header.UserMenu")
+    const t = useTranslations("Header.UserMenu");
+    const clearCart = useCartStore((state) => state.clearCart);
+
+    const handleLogout = async () => {
+        clearCart();
+        await signOut({ callbackUrl: "/" });
+    };
     return (
         <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg">
@@ -64,8 +71,8 @@ export default function UserMenu({ user }: UserMenuProps) {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                    className="text-red-500 focus:text-white cursor-pointer"
-                    onClick={() => signOut({ callbackUrl: "/" })}
+                    onClick={handleLogout}
+                    className="text-red-500 focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-500/10 dark:focus:text-red-400 cursor-pointer transition-colors"
                 >
                     <LogOut className="mr-2 w-4 h-4" />
                     {t("logOut")}

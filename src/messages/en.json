@@ -105,11 +105,12 @@
     "contacts": "Contacts",
     "shop": "Shop",
     "team": "Team",
-    "coaches": "Coaching Staff",
+    "coaches": "Coaching Staff:",
     "contactUs": "Contact Us",
     "location": "Zhytomyr, Ukraine",
     "reserved": "All rights reserved",
-    "matches": "Matches"
+    "matches": "Matches:",
+    "standingsTablePrefix": "Standings:"
   },
   "ProfilePage": {
     "title": "User profile",

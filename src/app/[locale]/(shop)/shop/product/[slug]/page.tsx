@@ -8,6 +8,7 @@ import ProductForm from "../_components/product-form";
 import ProductGallery from "../_components/product-gallery";
 import { ComponentProps } from "react";
 import sanitizeHtml from "sanitize-html";
+import H1 from "@/components/ui/heading";
 
 type ExpectedProductType = ComponentProps<typeof ProductCard>["product"];
 
@@ -101,9 +102,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     />
                 </div>
                 <div className="lg:col-span-5 flex flex-col gap-6 lg:top-24">
-                    <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight uppercase leading-none">
+                    <H1 className="text-3xl sm:text-4xl font-extrabold tracking-tight uppercase leading-none">
                         {productName}
-                    </h1>
+                    </H1>
                     <ProductForm
                         product={{
                             id: product.id,

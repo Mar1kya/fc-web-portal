@@ -2,8 +2,9 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import H1 from "@/components/ui/heading";
 
-export default function NotFound() {
+export default function StandingsNotFound() {
     const t = useTranslations("StandingsNotFound");
 
     return (
@@ -14,9 +15,9 @@ export default function NotFound() {
                     <Trophy className="w-12 h-12 text-emerald-600 opacity-80" strokeWidth={1.5} />
                 </div>
             </div>
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground leading-tight">
+            <H1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground leading-tight">
                 {t("title")}
-            </h1>
+            </H1>
             <p className="text-muted-foreground max-w-md mx-auto mb-10 text-base md:text-lg leading-relaxed">
                 {t("description")}
             </p>

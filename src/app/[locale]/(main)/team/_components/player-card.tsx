@@ -4,6 +4,7 @@ import { Player } from "../../../../../../generated/prisma";
 import { getTranslation } from "@/lib/utils/get-translation";
 import Flag from "react-world-flags";
 import { User } from "lucide-react";
+import PlayerCardAvatar from "./player-card-avatar";
 
 type PlayerCardProps = {
     player: Player & {
@@ -27,17 +28,9 @@ export default async function PlayerCard({ player, locale, positionName }: Playe
             </div>
             <div className="relative aspect-3/4 w-full overflow-hidden bg-muted">
                 {player.avatar ? (
-                    <Image
-                        src={player.avatar}
-                        alt={name}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
-                        unoptimized
-                        referrerPolicy="no-referrer"
-                    />
+                    <PlayerCardAvatar src={player.avatar} alt={name} />
                 ) : (
-                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground/30 transition-transform duration-500 group-hover:scale-105 group-hover:text-emerald-600/40">
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground/30 transition-transform duration-500 group-hover:scale-105 group-hover:text-emerald-600/40">
                         <User className="w-16 h-16" strokeWidth={1.5} />
                     </div>
                 )}

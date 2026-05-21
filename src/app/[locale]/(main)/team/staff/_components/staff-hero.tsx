@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { uk, enUS } from "date-fns/locale";
 import { User } from "lucide-react";
 import { Prisma } from "../../../../../../../generated/prisma";
+import H1 from "@/components/ui/heading";
 
 type CoachWithRelations = Prisma.CoachGetPayload<{
     include: {
@@ -30,9 +31,9 @@ export default async function StaffHero({ coach }: CoachHeroProps) {
         <div className="flex w-full flex-col-reverse overflow-hidden rounded-lg border bg-card xl:flex-row">
             <div className="flex w-full flex-col items-center justify-center p-8 text-center text-card-foreground md:p-14 xl:w-1/2 xl:items-start xl:text-left">
                 <div className="mb-8 flex w-full flex-wrap items-baseline justify-center gap-4 border-b border-border pb-6 xl:justify-start">
-                    <h1 className="font-serif text-2xl font-black uppercase tracking-tight sm:text-4xl md:text-5xl">
+                    <H1 className="font-serif text-2xl font-black uppercase tracking-tight sm:text-4xl md:text-5xl">
                         {name}
-                    </h1>
+                    </H1>
                 </div>
                 <div className="flex w-full flex-wrap justify-center gap-8 sm:gap-10 xl:justify-start xl:gap-12">
                     <div className="flex flex-col items-center gap-1 xl:items-start">

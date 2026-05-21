@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 import { CalendarDays, MapPin } from "lucide-react";
 import { MatchStatus, Prisma } from "../../../../../../../generated/prisma";
 import { getTranslation } from "@/lib/utils/get-translation";
+import TeamLogo from "./team-logo";
 
 const SoccerBallIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -108,7 +109,7 @@ export default function MatchHero({ match, locale }: MatchHeroProps) {
             <div className="grid grid-cols-[1fr_auto_1fr] items-start w-full gap-2 md:gap-8">
                 <div className="flex flex-col items-center w-full min-w-0">
                     <div className="relative w-14 h-14 md:w-28 md:h-28 mb-3 shrink-0">
-                        <Image src={homeLogo} alt={homeTeamName} fill sizes="112px" className="object-contain drop-shadow-md" unoptimized referrerPolicy="no-referrer" />
+                        <TeamLogo src={homeLogo} alt={homeTeamName} />
                     </div>
                     <h2 className="text-sm sm:text-base md:text-3xl font-bold leading-tight mb-1 text-center w-full text-balance">
                         {homeTeamName}
@@ -155,7 +156,7 @@ export default function MatchHero({ match, locale }: MatchHeroProps) {
                 </div>
                 <div className="flex flex-col items-center w-full min-w-0">
                     <div className="relative w-14 h-14 md:w-28 md:h-28 mb-3 shrink-0">
-                        <Image src={awayLogo} alt={awayTeamName} fill sizes="112px" className="object-contain drop-shadow-md" unoptimized referrerPolicy="no-referrer" />
+                        <TeamLogo src={awayLogo} alt={awayTeamName} />
                     </div>
                     <h2 className="text-sm sm:text-base md:text-3xl font-bold leading-tight mb-1 text-center w-full text-balance">
                         {awayTeamName}

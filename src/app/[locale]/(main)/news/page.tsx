@@ -34,10 +34,12 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
         pageTitle = tEnums(`PostType.${typeFilter}`);
         categoryName = pageTitle.toLowerCase();
     } else if (teamFilter) {
-        pageTitle = tEnums(`TeamContext.${teamFilter}`);
+        const teamName = tEnums(`TeamContext.${teamFilter}`);
+        pageTitle = `${tNews("title")} | ${teamName}`;
+
         categoryName = locale === 'uk'
-            ? `новини команди ${pageTitle}`
-            : `news from the ${pageTitle}`;
+            ? `новини команди ${teamName}`
+            : `news from the ${teamName}`;
     }
     if (isValidDate && dateParam) {
         pageTitle = tNews("titleWithDate", { title: pageTitle, date: dateParam });
@@ -49,6 +51,9 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     return {
         title: pageTitle,
         description: pageDescription,
+        alternatives: {
+            canonical: '/news',
+        },
         openGraph: {
             title: pageTitle,
             description: pageDescription,

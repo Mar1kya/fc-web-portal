@@ -142,7 +142,7 @@ export default async function StandingsMini() {
             </CardContent>
             <CardFooter className="p-2 border-t border-dashed">
                 <Button asChild variant="ghost" className="w-full h-8 text-xs text-muted-foreground hover:text-foreground">
-                    <Link href="/standings" className="flex items-center justify-center">
+                    <Link href="/standings/upl" className="flex items-center justify-center">
                         {t("fullTable")}
                         <ChevronRight className="w-3 h-3 ml-1" />
                     </Link>

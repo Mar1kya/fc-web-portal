@@ -1,7 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import SelectLanguage from "./select-language";
 import { auth } from "@/auth";
-import { ShoppingBasket } from "lucide-react";
 import UserMenu from "./user-menu";
 import DesktopMenu from "./desktop-menu";
 import MobileMenu from "./mobile-menu";
@@ -88,17 +87,22 @@ export default async function Header() {
                 <div className="flex items-center gap-3 sm:gap-4">
                     <nav>
                         <ul className="flex items-center gap-3 sm:gap-4">
+                            {user?.role !== 'ADMIN' && (
+                                <li>
+                                    <CartMenu />
+                                </li>
+                            )}
+
                             {user ? (
-                                <>
-                                    <li>
-                                        {user.role === 'ADMIN' ? null : <CartMenu />}
-                                    </li>
-                                    <li className="flex items-center h-full">
-                                        <UserMenu user={user} />
-                                    </li>
-                                </>
+                                <li className="flex items-center h-full">
+                                    <UserMenu user={user} />
+                                </li>
                             ) : (
-                                <Link href="/login" className="text-sm font-medium hover:text-emerald-600 transition-colors">{t("login")}</Link>
+                                <li>
+                                    <Link href="/login" className="text-sm font-medium hover:text-emerald-600 transition-colors">
+                                        {t("login")}
+                                    </Link>
+                                </li>
                             )}
                         </ul>
                     </nav>

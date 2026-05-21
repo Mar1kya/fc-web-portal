@@ -9,6 +9,7 @@ import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import NewsCard from "../_components/news-card";
 import sanitizeHtml from 'sanitize-html';
+import H1 from "@/components/ui/heading";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -121,9 +122,9 @@ export default async function SingleNewsPage({ params }: { params: Promise<{ slu
                         </Badge>
                     </Link>
                 </div>
-                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 text-foreground leading-tight">
+                <H1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 text-foreground leading-tight">
                     {translatedPost.title}
-                </h1>
+                </H1>
                 <div className="flex items-center text-sm text-muted-foreground">
                     <CalendarIcon className="w-4 h-4 mr-2" />
                     <time dateTime={post.publishedAt.toISOString()}>

@@ -41,7 +41,7 @@ export default async function SalePage({ searchParams }: { searchParams: Promise
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border pb-4">
-                <H1 className="uppercase">{t("title")}</H1>
+                <H1>{t("title")}</H1>
                 <ProductSort />
             </div>
             <div className="flex flex-col lg:flex-row gap-8 items-start">
