@@ -7,7 +7,7 @@ import { Trash2, Plus, Minus, ShoppingBag, ImageOff } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useCartStore } from "@/store/useCartStore";
+import { useCartStore, CartItem } from "@/store/useCartStore";
 import { useStore } from "@/hooks/useStore";
 import { getTranslation } from "@/lib/utils/get-translation";
 import { formatPrice } from "@/lib/utils";
@@ -18,7 +18,7 @@ export default function CartView() {
     const t = useTranslations("Shop.CartPage");
     const locale = useLocale();
 
-    const items = useStore(useCartStore, (state) => state.items);
+    const items = useStore(useCartStore, (state) => state.items) || [];
     const updateQuantity = useCartStore((state) => state.updateQuantity);
     const removeItem = useCartStore((state) => state.removeItem);
 
@@ -38,16 +38,22 @@ export default function CartView() {
         }
     };
 
-    const handleIncrease = (cartItemId: string, currentQty: number, stock: number) => {
-        if (currentQty >= MAX_QTY_PER_ITEM) {
+    const handleIncrease = (item: CartItem) => {
+        if (item.quantity >= MAX_QTY_PER_ITEM) {
             toast.warning(t("limitError", { max: MAX_QTY_PER_ITEM }));
             return;
         }
-        if (currentQty >= stock) {
-            toast.warning(t("stockError", { stock }));
+
+        const totalPhysicalVariantInCart = items
+            .filter((i) => i.variantId === item.variantId)
+            .reduce((sum, i) => sum + i.quantity, 0);
+
+        if (totalPhysicalVariantInCart >= item.stock) {
+            toast.warning(t("allAvailableAdded"));
             return;
         }
-        updateQuantity(cartItemId, currentQty + 1);
+
+        updateQuantity(item.cartItemId, item.quantity + 1);
     };
 
     if (items.length === 0) {
@@ -114,8 +120,14 @@ export default function CartView() {
                                             <Link href={`/shop/product/${item.slug}`} className="font-bold text-base sm:text-lg hover:text-emerald-600 transition-colors line-clamp-2 uppercase tracking-wide">
                                                 {itemName}
                                             </Link>
+                                            {(item.customName || item.customNumber) && (
+                                                <div className="text-[11px] font-bold text-emerald-600 uppercase mt-1.5 bg-emerald-600/10 w-fit px-2 py-0.5 rounded-md border border-emerald-600/20 tracking-wider">
+                                                    {item.customName} {item.customNumber && `#${item.customNumber}`}
+                                                </div>
+                                            )}
+
                                             {item.size && (
-                                                <p className="text-sm text-muted-foreground mt-1">
+                                                <p className="text-sm text-muted-foreground mt-2">
                                                     {t("size")}: <span className="font-semibold text-foreground">{item.size}</span>
                                                 </p>
                                             )}
@@ -129,7 +141,7 @@ export default function CartView() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-8 sm:h-9 w-8 sm:w-9 rounded-r-none text-muted-foreground hover:text-foreground"
+                                                className="h-8 sm:h-9 w-8 sm:w-9 rounded-r-none text-muted-foreground hover:text-foreground cursor-pointer"
                                                 onClick={() => handleDecrease(item.cartItemId, item.quantity)}
                                             >
                                                 <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -140,8 +152,8 @@ export default function CartView() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-8 sm:h-9 w-8 sm:w-9 rounded-l-none text-muted-foreground hover:text-foreground"
-                                                onClick={() => handleIncrease(item.cartItemId, item.quantity, item.stock)}
+                                                className="h-8 sm:h-9 w-8 sm:w-9 rounded-l-none text-muted-foreground hover:text-foreground cursor-pointer"
+                                                onClick={() => handleIncrease(item)}
                                             >
                                                 <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
                                             </Button>
@@ -149,7 +161,7 @@ export default function CartView() {
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 sm:h-9 w-8 sm:w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                            className="h-8 sm:h-9 w-8 sm:w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                                             onClick={() => {
                                                 removeItem(item.cartItemId);
                                                 toast.info(t("removedToast"));
@@ -193,7 +205,6 @@ export default function CartView() {
                         </Link>
                     </div>
                 </div>
-
             </div>
         </div>
     );

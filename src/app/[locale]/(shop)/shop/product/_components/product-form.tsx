@@ -13,7 +13,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { MAX_QTY_PER_ITEM } from "@/lib/constants";
-import { useProductForm, ProductData, Variant } from "../_hooks/use-product-form";
+import { ProductData, useProductForm, Variant } from "@/hooks/useProductForm";
 
 type ProductFormProps = {
     product: ProductData;
@@ -44,13 +44,17 @@ export default function ProductForm({ product, variants }: ProductFormProps) {
                     )}
                 </div>
             </div>
-            
             <div className="flex flex-col gap-3">
                 <span className="text-sm font-semibold uppercase tracking-wider">{t("size")}</span>
                 <div className="flex flex-wrap gap-2">
                     {variants.map((v) => {
-                        const variantInCart = state.cartItems.find(i => i.variantId === v.id)?.quantity || 0;
-                        const isVariantMaxedOut = variantInCart >= Math.min(v.stock, MAX_QTY_PER_ITEM);
+                        const totalPhysicalVariantInCart = state.cartItems
+                            .filter(i => i.variantId === v.id)
+                            .reduce((sum, i) => sum + i.quantity, 0);
+                        const exactItemQuantityInCart = state.cartItems.find(i => i.cartItemId === v.id)?.quantity || 0;
+                        const isVariantMaxedOut =
+                            totalPhysicalVariantInCart >= v.stock ||
+                            exactItemQuantityInCart >= MAX_QTY_PER_ITEM;
 
                         return (
                             <button
@@ -76,9 +80,9 @@ export default function ProductForm({ product, variants }: ProductFormProps) {
             </div>
             <div className="flex items-center justify-between py-4 border-y border-border">
                 <span className="text-sm font-semibold uppercase tracking-wider">{t("quantity")}</span>
-                <Select 
-                    value={state.isLimitReached ? "" : state.quantity} 
-                    onValueChange={actions.setQuantity} 
+                <Select
+                    value={state.isLimitReached ? "" : state.quantity}
+                    onValueChange={actions.setQuantity}
                     disabled={!state.selectedSize || state.isGlobalOutOfStock || state.isLimitReached}
                 >
                     <SelectTrigger className="w-24 h-10 font-medium focus:ring-emerald-600">
@@ -91,7 +95,6 @@ export default function ProductForm({ product, variants }: ProductFormProps) {
                     </SelectContent>
                 </Select>
             </div>
-            
             <div className="flex items-center justify-between gap-4 mt-2">
                 <span className="text-2xl font-extrabold text-foreground shrink-0">
                     {formatPrice(state.totalPrice)}
