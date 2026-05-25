@@ -336,7 +336,8 @@
   "Shop": {
     "Navigation": {
       "all": "Storefront",
-      "sale": "Sale"
+      "sale": "Sale",
+      "playerJerseys": "Player Jerseys"
     },
     "ProductCard": {
       "sale": "Sale",
@@ -458,10 +459,47 @@
       "removedToast": "Item removed from cart",
       "limitError": "Maximum order limit is {max} pcs.",
       "stockError": "Only {stock} pcs. left in stock.",
+      "allAvailableAdded": "All available items of this size are already in your cart",
       "Metadata": {
         "title": "Shopping Cart",
         "description": "Your shopping list in the official online store. Check quantities, manage sizes, and proceed to secure checkout."
       }
+    },
+    "PlayersCatalog": {
+      "heading": "Choose Your Player",
+      "subheading": "Support your favorite footballer. Official match jerseys with original printing.",
+      "empty": "No player jerseys available at the moment.",
+      "Metadata": {
+        "title": "Player Jerseys",
+        "description": "Choose the jersey of your favorite player"
+      }
+    },
+    "PlayerJerseyPage": {
+      "selectType": "Kit Type",
+      "jersey": "Jersey",
+      "size": "Size",
+      "quantity": "Quantity",
+      "added": "Added",
+      "addToCart": "Add to Cart",
+      "chooseSizeFirst": "Select size first",
+      "outOfStock": "Out of Stock",
+      "inStock": "In Stock",
+      "adding": "Adding...",
+      "limitReached": "Maximum {max}",
+      "allAvailableAdded": "No more available",
+      "soldOutBtn": "Sold Out",
+      "limitError": "Product limit reached",
+      "addError": "Error adding to cart",
+      "noPhoto": "No photo",
+      "Metadata": {
+        "title": "Jersey: {name} #{number}",
+        "description": "Buy the official FC Polissya match jersey with the original printing of {name}."
+      }
+    },
+    "NotFound": {
+      "title": "Page Not Found",
+      "description": "Sorry, the product, category, or page you are looking for does not exist, has been removed, or hasn't been added yet. Please check the URL.",
+      "backButton": "Back to Shop"
     },
     "Layout": {
       "Metadata": {

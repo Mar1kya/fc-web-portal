@@ -13,7 +13,10 @@ export interface CartItem {
   size: string | null;
   quantity: number;
   stock: number;
+  customName?: string;
+  customNumber?: string;
 }
+
 interface CartState {
   items: CartItem[];
   isOpen: boolean;
@@ -27,6 +30,15 @@ interface CartState {
   toggleCart: (isOpen?: boolean) => void;
 }
 
+const generateCartItemId = (item: Omit<CartItem, "cartItemId" | "quantity">) => {
+  const baseId = item.variantId || item.productId;
+  let customPart = "";
+  if (item.customName) customPart += `-${item.customName}`;
+  if (item.customNumber) customPart += `-${item.customNumber}`;
+  
+  return `${baseId}${customPart}`;
+};
+
 export const useCartStore = create<CartState>()(
   persist(
     (set) => ({
@@ -35,35 +47,37 @@ export const useCartStore = create<CartState>()(
 
       addItem: (item, quantity = 1) => {
         set((state) => {
-          const cartItemId = item.variantId || item.productId;
-          const existingItem = state.items.find(
-            (i) => i.cartItemId === cartItemId,
-          );
+          const cartItemId = generateCartItemId(item);
+          const existingItem = state.items.find((i) => i.cartItemId === cartItemId);
+
+          const stockTakenByOthers = state.items
+            .filter((i) => i.variantId === item.variantId && i.cartItemId !== cartItemId)
+            .reduce((sum, i) => sum + i.quantity, 0);
+
+          const availablePhysicalStock = Math.max(0, item.stock - stockTakenByOthers);
 
           if (existingItem) {
             const newQuantity = Math.min(
               existingItem.quantity + quantity,
-              item.stock,
-              MAX_QTY_PER_ITEM,
+              availablePhysicalStock,
+              MAX_QTY_PER_ITEM
             );
             return {
               items: state.items.map((i) =>
-                i.cartItemId === cartItemId
-                  ? { ...i, quantity: newQuantity }
-                  : i,
+                i.cartItemId === cartItemId ? { ...i, quantity: newQuantity } : i
               ),
               isOpen: true,
             };
           }
 
+          const quantityToAdd = Math.min(quantity, availablePhysicalStock, MAX_QTY_PER_ITEM);
+          
+          if (quantityToAdd <= 0) return { items: state.items, isOpen: true }; 
+
           return {
             items: [
               ...state.items,
-              {
-                ...item,
-                cartItemId,
-                quantity: Math.min(quantity, item.stock, MAX_QTY_PER_ITEM),
-              },
+              { ...item, cartItemId, quantity: quantityToAdd },
             ],
             isOpen: true,
           };
@@ -77,21 +91,31 @@ export const useCartStore = create<CartState>()(
       },
 
       updateQuantity: (cartItemId, quantity) => {
-        set((state) => ({
-          items: state.items.map((i) => {
-            if (i.cartItemId === cartItemId) {
-              const validQuantity = Math.max(
-                1,
-                Math.min(quantity, i.stock, MAX_QTY_PER_ITEM),
-              );
-              return { ...i, quantity: validQuantity };
-            }
-            return i;
-          }),
-        }));
+        set((state) => {
+          const itemToUpdate = state.items.find(i => i.cartItemId === cartItemId);
+          if (!itemToUpdate) return state;
+
+          const stockTakenByOthers = state.items
+            .filter(i => i.variantId === itemToUpdate.variantId && i.cartItemId !== cartItemId)
+            .reduce((sum, i) => sum + i.quantity, 0);
+
+          const availablePhysicalStock = Math.max(0, itemToUpdate.stock - stockTakenByOthers);
+
+          const validQuantity = Math.max(
+            1,
+            Math.min(quantity, availablePhysicalStock, MAX_QTY_PER_ITEM)
+          );
+
+          return {
+            items: state.items.map((i) =>
+              i.cartItemId === cartItemId ? { ...i, quantity: validQuantity } : i
+            ),
+          };
+        });
       },
 
       clearCart: () => set({ items: [] }),
+      
       toggleCart: (isOpen) =>
         set((state) => ({
           isOpen: isOpen !== undefined ? isOpen : !state.isOpen,
@@ -101,16 +125,16 @@ export const useCartStore = create<CartState>()(
       name: "emerald-gang-cart",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ items: state.items }),
-    },
-  ),
+    }
+  )
 );
 
 export const useCartTotalItems = () =>
   useCartStore((state) =>
-    state.items.reduce((total, item) => total + item.quantity, 0),
+    state.items.reduce((total, item) => total + item.quantity, 0)
   );
 
 export const useCartTotalPrice = () =>
   useCartStore((state) =>
-    state.items.reduce((total, item) => total + item.price * item.quantity, 0),
+    state.items.reduce((total, item) => total + item.price * item.quantity, 0)
   );

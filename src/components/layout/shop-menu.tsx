@@ -43,6 +43,15 @@ export default async function ShopMenu() {
                         );
                     })}
                     <NavLink
+                        href="/shop/player"
+                        exact={false}
+                        inactiveClassName=" border-transparent"
+                        activeClassName="text-emerald-600 border-emerald-600"
+                        className="text-sm md:text-base font-semibold uppercase tracking-wider transition-all border-b-2 hover:text-emerald-600 hover:border-emerald-600"
+                    >
+                        {t("playerJerseys")}
+                    </NavLink>
+                    <NavLink
                         href="/shop/sale"
                         exact={false}
                         inactiveClassName="text-red-500 border-transparent"

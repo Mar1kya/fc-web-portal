@@ -18,7 +18,12 @@ export type ProductData = {
     image: string | null;
 };
 
-export const useProductForm = (product: ProductData, variants: Variant[]) => {
+export const useProductForm = (
+    product: ProductData, 
+    variants: Variant[],
+    customName?: string,
+    customNumber?: string
+) => {
     const t = useTranslations("Shop.ProductPage");
     const locale = useLocale();
     const addItem = useCartStore((state) => state.addItem);
@@ -26,20 +31,33 @@ export const useProductForm = (product: ProductData, variants: Variant[]) => {
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [quantity, setQuantity] = useState<string>("1");
     const [isAdding, setIsAdding] = useState(false);
+
     const isGlobalOutOfStock = variants.reduce((sum, v) => sum + v.stock, 0) <= 0;
     const selectedVariant = variants.find(v => v.size === selectedSize);
-    const existingCartItem = cartItems.find(i => i.variantId === selectedVariant?.id);
-    const quantityInCart = existingCartItem ? existingCartItem.quantity : 0;
+
+    const totalPhysicalVariantInCart = cartItems
+        .filter(i => i.variantId === selectedVariant?.id)
+        .reduce((sum, i) => sum + i.quantity, 0);
+
+    const currentCartItemId = selectedVariant 
+        ? `${selectedVariant.id}${customName ? `-${customName}` : ''}${customNumber ? `-${customNumber}` : ''}`
+        : null;
+    const exactItemQuantityInCart = cartItems.find(i => i.cartItemId === currentCartItemId)?.quantity || 0;
+    
     const stockAvailable = selectedVariant ? selectedVariant.stock : 0;
-    const isPolicyLimitReached = !!selectedVariant && (quantityInCart >= MAX_QTY_PER_ITEM);
-    const isStockDepleted = !!selectedVariant && (quantityInCart >= stockAvailable) && !isPolicyLimitReached;
+    
+    const isPolicyLimitReached = !!selectedVariant && (exactItemQuantityInCart >= MAX_QTY_PER_ITEM);
+    const isStockDepleted = !!selectedVariant && (totalPhysicalVariantInCart >= stockAvailable); 
     const isLimitReached = isPolicyLimitReached || isStockDepleted;
 
+    const remainingPhysicalStock = Math.max(0, stockAvailable - totalPhysicalVariantInCart);
+    const remainingPolicyAllowance = Math.max(0, MAX_QTY_PER_ITEM - exactItemQuantityInCart);
+
     const maxAllowedToAdd = selectedVariant 
-        ? Math.max(0, Math.min(stockAvailable, MAX_QTY_PER_ITEM) - quantityInCart)
+        ? Math.min(remainingPhysicalStock, remainingPolicyAllowance)
         : 1;
 
-    const isButtonDisabled = isGlobalOutOfStock || isAdding || isLimitReached;
+    const isButtonDisabled = isGlobalOutOfStock || isAdding || isLimitReached || !selectedSize;
 
     const discountPercentage = product.isOnSale && product.salePrice && product.price > 0
         ? Math.round(((product.price - product.salePrice) / product.price) * 100)
@@ -77,12 +95,15 @@ export const useProductForm = (product: ProductData, variants: Variant[]) => {
                 image: product.image || "",
                 size: selectedVariant.size,
                 stock: selectedVariant.stock,
+                customName,
+                customNumber
             }, Number(quantity));
 
             const translatedData = getTranslation({ translations: product.translations }, locale);
             const productName = translatedData?.name || "";
 
             toast.success(t("addedSuccess", { name: productName }));
+            
             setQuantity("1");
         } catch (err) {
             toast.error(t("addError"));
@@ -90,6 +111,7 @@ export const useProductForm = (product: ProductData, variants: Variant[]) => {
             setIsAdding(false);
         }
     };
+
     return {
         state: {
             selectedSize,
@@ -104,7 +126,8 @@ export const useProductForm = (product: ProductData, variants: Variant[]) => {
             discountPercentage,
             currentPrice,
             totalPrice,
-            cartItems
+            cartItems,
+            totalPhysicalVariantInCart 
         },
         actions: {
             setQuantity,

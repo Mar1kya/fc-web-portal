@@ -110,6 +110,12 @@ export default function CartMenu() {
                                                     {item.size && <span>•</span>}
                                                     <span>{t("qty")}: {item.quantity}</span>
                                                 </div>
+                                                {(item.customName || item.customNumber) && (
+                                                    <div className="text-[10px] font-bold text-emerald-600 uppercase mt-1 bg-emerald-600/10 w-fit px-1.5 py-0.5 rounded-sm">
+                                                        {item.customName} {item.customNumber && `#${item.customNumber}`}
+                                                    </div>
+                                                )}
+
                                                 <span className="text-sm font-bold mt-1">{item.price * item.quantity} {currencySymbol}</span>
                                             </div>
                                         </Link>
