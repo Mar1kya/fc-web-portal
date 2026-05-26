@@ -105,7 +105,7 @@ export const useProductForm = (
             toast.success(t("addedSuccess", { name: productName }));
             
             setQuantity("1");
-        } catch (err) {
+        } catch {
             toast.error(t("addError"));
         } finally {
             setIsAdding(false);

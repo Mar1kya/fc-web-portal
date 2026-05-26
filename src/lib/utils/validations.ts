@@ -20,4 +20,9 @@ export const zPassword = (errorMessage?: string) =>
     );
 
 export const zPhone = (errorMessage?: string) =>
-  z.string().regex(/^\+?[1-9]\d{7,14}$/, { message: errorMessage });
+  z
+    .string()
+    .transform((val) => val.replace(/[\s\-\(\)]/g, ""))
+    .refine((val) => /^(?:\+380\d{9}|0\d{9})$/.test(val), {
+      message: errorMessage,
+    });

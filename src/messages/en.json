@@ -496,6 +496,47 @@
         "description": "Buy the official FC Polissya match jersey with the original printing of {name}."
       }
     },
+    "CheckoutPage": {
+      "title": "Checkout",
+      "step1": "Recipient Details",
+      "step2": "Delivery Method",
+      "step3": "Payment Method",
+      "Form": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email Address",
+        "phone": "Phone Number",
+        "deliveryType": "Select delivery method",
+        "deliveryBranch": "Branch",
+        "deliveryPostomat": "Postomat",
+        "deliveryCourier": "Courier",
+        "city": "City / Town",
+        "branchNumber": "Branch Number",
+        "postomatNumber": "Postomat Number",
+        "address": "Street, Building, Apt",
+        "paymentType": "Select payment method",
+        "payOnline": "Card Online",
+        "payOnDelivery": "Cash on Delivery",
+        "submitButton": "Place Order",
+        "processing": "Processing..."
+      },
+      "Summary": {
+        "title": "Your Order",
+        "subtotal": "Subtotal",
+        "shippingNotice": "Shipping calculated by carrier",
+        "total": "Total",
+        "size": "Size",
+        "qty": "Qty"
+      }
+    },
+    "CheckoutErrors": {
+      "tooShort": "Value is too short",
+      "invalidEmail": "Invalid email format",
+      "invalidPhone": "Invalid phone number (minimum 10 digits)",
+      "emptyCart": "Your cart is empty",
+      "invalidData": "Please check the entered data",
+      "serverError": "A server error occurred. Please try again."
+    },
     "NotFound": {
       "title": "Page Not Found",
       "description": "Sorry, the product, category, or page you are looking for does not exist, has been removed, or hasn't been added yet. Please check the URL.",
