@@ -537,6 +537,36 @@
       "invalidData": "Please check the entered data",
       "serverError": "A server error occurred. Please try again."
     },
+    "OrderPage": {
+      "title": "Order",
+      "placedAt": "Placed at",
+      "status": "Order Status",
+      "paymentStatus": "Payment Status",
+      "paymentMethod": "Payment Method",
+      "recipient": "Recipient",
+      "deliveryAddress": "Delivery Address",
+      "items": "Items in Order",
+      "paid": "Paid",
+      "notPaid": "Pending Payment",
+      "paymentCard": "Card Online / Apple Pay / Google Pay",
+      "paymentCOD": "Cash on Delivery",
+      "paymentSuccess": "Transaction successful",
+      "paymentWaiting": "Awaiting payment",
+      "register": "Sign up",
+      "login": "Log in",
+      "google-button": "Sign in with Google",
+      "paymentUponDelivery": "Pay on delivery",
+      "paymentPendingNotice": "We are awaiting payment confirmation from the payment gateway. The status will update automatically within a minute.",
+      "guestBannerTitle": "Want to save this order?",
+      "guestBannerDesc": "Sign up or log in with Google using the email {email}, and this order will automatically appear in your personal account history!",
+      "statuses": {
+        "PENDING": "Pending",
+        "PAID": "Paid",
+        "SHIPPED": "Shipped",
+        "DELIVERED": "Delivered",
+        "CANCELLED": "Cancelled"
+      }
+    },
     "NotFound": {
       "title": "Page Not Found",
       "description": "Sorry, the product, category, or page you are looking for does not exist, has been removed, or hasn't been added yet. Please check the URL.",
