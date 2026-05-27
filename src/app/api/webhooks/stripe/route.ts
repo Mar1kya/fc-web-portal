@@ -36,13 +36,49 @@ export async function POST(req: Request) {
             isPaid: true,
           },
         });
+      } catch {
+        return new NextResponse("Database Error", { status: 500 });
+      }
+    }
+  } else if (event.type === "checkout.session.expired") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const orderId = session.metadata?.orderId;
 
-        console.log(`✅ Замовлення ${orderId} успішно оплачено!`);
-      } catch (error) {
-        console.error("Помилка оновлення замовлення в БД:", error);
+    if (orderId) {
+      try {
+        await prisma.$transaction(async (tx) => {
+          const order = await tx.order.findUnique({
+            where: { id: orderId },
+            include: { orderItems: true },
+          });
+
+          if (!order || order.status === "CANCELLED" || order.isPaid) {
+            return;
+          }
+
+          await tx.order.update({
+            where: { id: orderId },
+            data: { status: "CANCELLED" },
+          });
+
+          for (const item of order.orderItems) {
+            if (item.variantId) {
+              await tx.productVariant.update({
+                where: { id: item.variantId },
+                data: {
+                  stock: {
+                    increment: item.quantity,
+                  },
+                },
+              });
+            }
+          }
+        });
+      } catch {
         return new NextResponse("Database Error", { status: 500 });
       }
     }
   }
+
   return new NextResponse(null, { status: 200 });
 }

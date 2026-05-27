@@ -501,6 +501,7 @@
       "step1": "Recipient Details",
       "step2": "Delivery Method",
       "step3": "Payment Method",
+      "partialStockError": "Attention! Only {count} pcs left in stock. The quantity in your cart has been automatically updated.",
       "Form": {
         "firstName": "First Name",
         "lastName": "Last Name",
@@ -535,7 +536,8 @@
       "invalidPhone": "Invalid phone number (minimum 10 digits)",
       "emptyCart": "Your cart is empty",
       "invalidData": "Please check the entered data",
-      "serverError": "A server error occurred. Please try again."
+      "serverError": "A server error occurred. Please try again.",
+      "outOfStock": "Unfortunately, the selected quantity of this item is no longer in stock. Someone bought it slightly faster"
     },
     "OrderPage": {
       "title": "Order",
@@ -565,7 +567,12 @@
         "SHIPPED": "Shipped",
         "DELIVERED": "Delivered",
         "CANCELLED": "Cancelled"
-      }
+      },
+      "retryPayment": "Pay now",
+      "processing": "Redirecting...",
+      "errorCancelled": "This order has already been cancelled.",
+      "errorAlreadyPaid": "This order is already paid!",
+      "errorGeneric": "An error occurred. Please try again."
     },
     "NotFound": {
       "title": "Page Not Found",

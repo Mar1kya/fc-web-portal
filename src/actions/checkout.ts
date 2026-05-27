@@ -62,6 +62,10 @@ export type CheckoutState = {
     address?: string[];
   };
   message?: string;
+  outOfStockItem?: {
+    variantId: string;
+    availableStock: number;
+  };
 };
 
 export async function processCheckout(
@@ -128,32 +132,59 @@ export async function processCheckout(
       0,
     );
 
-    const order = await prisma.order.create({
-      data: {
-        userId: session?.user?.id || null,
-        status: "PENDING",
-        isPaid: false,
-        paymentMethod: paymentMethod === "card" ? "CARD" : "COD",
-        totalPrice,
-        firstName,
-        lastName,
-        email,
-        phone,
-        city,
-        postalCode: postalCode || "",
-        address: finalAddress,
-        orderItems: {
-          create: cartItems.map((item) => ({
-            productId: item.productId,
-            variantId: item.variantId,
-            size: item.size,
-            quantity: item.quantity,
-            fixedPrice: item.price,
-            customName: item.customName || null,
-            customNumber: item.customNumber || null,
-          })),
+    const order = await prisma.$transaction(async (tx) => {
+      for (const item of cartItems) {
+        if (!item.variantId) {
+          throw new Error(`MissingVariantId:${item.productId}`);
+        }
+
+        const variant = await tx.productVariant.findUnique({
+          where: { id: item.variantId },
+        });
+
+        if (!variant) {
+          throw new Error(`VariantNotFound:${item.variantId}`);
+        }
+
+        if (variant.stock < item.quantity) {
+          throw new Error(`OutOfStock:${item.variantId}:${variant.stock}`);
+        }
+
+        await tx.productVariant.update({
+          where: { id: variant.id },
+          data: {
+            stock: variant.stock - item.quantity,
+          },
+        });
+      }
+
+      return await tx.order.create({
+        data: {
+          userId: session?.user?.id || null,
+          status: "PENDING",
+          isPaid: false,
+          paymentMethod: paymentMethod === "card" ? "CARD" : "COD",
+          totalPrice,
+          firstName,
+          lastName,
+          email,
+          phone,
+          city,
+          postalCode: postalCode || "",
+          address: finalAddress,
+          orderItems: {
+            create: cartItems.map((item) => ({
+              productId: item.productId,
+              variantId: item.variantId,
+              size: item.size,
+              quantity: item.quantity,
+              fixedPrice: item.price,
+              customName: item.customName || null,
+              customNumber: item.customNumber || null,
+            })),
+          },
         },
-      },
+      });
     });
 
     console.log("Order created successfully:", order.id);
@@ -168,11 +199,14 @@ export async function processCheckout(
           { translations: item.translations },
           locale,
         );
-        const itemName = translatedData?.name || "Товар Emerald Gang";
+        const itemName = translatedData?.name || "Emerald Gang Produc";
 
-        const description = item.size
-          ? `${tSummary("size")}: ${item.size}`
-          : undefined;
+        const descriptionParts = [];
+        if (item.size) descriptionParts.push(`${tSummary("size")}: ${item.size}`);
+        if (item.customName) descriptionParts.push(`Name: ${item.customName}`);
+        if (item.customNumber) descriptionParts.push(`Number: ${item.customNumber}`);
+        
+        const description = descriptionParts.length > 0 ? descriptionParts.join(" • ") : undefined;
 
         return {
           price_data: {
@@ -193,7 +227,7 @@ export async function processCheckout(
         billing_address_collection: "auto",
         line_items,
         success_url: `${appUrl}/${locale}/shop/order/${order.id}`,
-        cancel_url: `${appUrl}/${locale}/shop/checkout`,
+        cancel_url: `${appUrl}/${locale}/shop/order/${order.id}`,
         metadata: {
           orderId: order.id,
         },
@@ -215,6 +249,19 @@ export async function processCheckout(
       throw error;
     }
     
+    if (error instanceof Error && error.message.startsWith("OutOfStock")) {
+      const [, variantId, stockStr] = error.message.split(":");
+      const availableStock = parseInt(stockStr, 10);
+
+      return { 
+        message: tErrors("outOfStock"),
+        outOfStockItem: {
+            variantId,
+            availableStock
+        }
+      };
+    }
+
     console.error("Checkout error:", error);
     return { message: tErrors("serverError") };
   }

@@ -9,8 +9,9 @@ import { maskName, maskEmail, maskPhone, maskAddress } from "@/lib/utils/mask-da
 import ClearCartTrigger from "./_components/clear-cart-trigger";
 import OrderGuestBanner from "./_components/order-guest-banner";
 import OrderDetails from "./_components/order-details";
+import RetryPaymentButton from "./_components/retry-payment-button";
 
-export default async function OrderPage({ params }: {params: Promise<{ id: string; locale: string }>}) {
+export default async function OrderPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
     const { id, locale } = await params;
     const t = await getTranslations("Shop.OrderPage");
 
@@ -32,8 +33,26 @@ export default async function OrderPage({ params }: {params: Promise<{ id: strin
 
     if (order.userId && !isOwner) notFound();
 
-    const safeAddress = order.address || "";
+    const isCardPayment = order.paymentMethod === "CARD";
+    let currentStatus = order.status;
+    let showRetryButton = false;
+    let expiresAt = 0;
 
+   if (!order.isPaid && isCardPayment && currentStatus !== "CANCELLED") {
+        const timeLimitMs = 30 * 60 * 1000; 
+        
+        // eslint-disable-next-line react-hooks/purity
+        const timePassedMs = Date.now() - order.createdAt.getTime();
+
+        if (timePassedMs >= timeLimitMs) {
+            currentStatus = "CANCELLED"; 
+        } else {
+            showRetryButton = true;
+            expiresAt = order.createdAt.getTime() + timeLimitMs;
+        }
+    }
+
+    const safeAddress = order.address || "";
     const displayData = {
         firstName: isOwner ? order.firstName : maskName(order.firstName),
         lastName: isOwner ? order.lastName : maskName(order.lastName),
@@ -42,8 +61,7 @@ export default async function OrderPage({ params }: {params: Promise<{ id: strin
         address: isOwner ? safeAddress : maskAddress(safeAddress),
     };
 
-    const isCardPayment = order.paymentMethod === "CARD";
-    const showPendingNotice = isCardPayment && !order.isPaid;
+    const showPendingNotice = isCardPayment && !order.isPaid && currentStatus !== "CANCELLED";
 
     let paymentBadgeText = "";
     let paymentBadgeClass = "";
@@ -51,7 +69,10 @@ export default async function OrderPage({ params }: {params: Promise<{ id: strin
     if (order.isPaid) {
         paymentBadgeText = t("paid");
         paymentBadgeClass = "bg-emerald-600 hover:bg-emerald-600 text-white";
-    } else if (!order.isPaid && isCardPayment) {
+    } else if (currentStatus === "CANCELLED") {
+        paymentBadgeText = t(`statuses.CANCELLED`);
+        paymentBadgeClass = "bg-destructive/10 text-destructive";
+    } else if (isCardPayment) {
         paymentBadgeText = t("notPaid");
         paymentBadgeClass = "bg-amber-500/10 text-amber-500";
     } else {
@@ -60,9 +81,9 @@ export default async function OrderPage({ params }: {params: Promise<{ id: strin
     }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 py-4">
+        <div className="max-w-4xl mx-auto space-y-8">
             <ClearCartTrigger />
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-6 border-border">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 border-b pb-6 border-border">
                 <div>
                     <h1 className="text-3xl font-black uppercase tracking-tight flex items-center gap-2">
                         <ShoppingBag className="w-8 h-8 text-emerald-600" />
@@ -74,13 +95,41 @@ export default async function OrderPage({ params }: {params: Promise<{ id: strin
                         })}
                     </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                    <Badge variant={order.status === "CANCELLED" ? "destructive" : "secondary"} className="h-8 font-bold uppercase tracking-wider px-3 bg-emerald-600/10 text-emerald-600 border-none">
-                        {t(`statuses.${order.status}`)}
-                    </Badge>
-                    <Badge variant="outline" className={cn("h-8 font-bold uppercase tracking-wider px-3 border-none", paymentBadgeClass)}>
-                        {paymentBadgeText}
-                    </Badge>
+                <div className="flex flex-col md:items-end gap-4 w-full md:w-auto">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-muted/20 p-3 sm:px-4 rounded-xl border border-border/50 w-full md:w-auto">
+                        <div className="flex items-center justify-between sm:justify-start gap-3">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                                {t("status")}:
+                            </span>
+                            <Badge
+                                variant={currentStatus === "CANCELLED" ? "destructive" : "secondary"}
+                                className={cn(
+                                    "h-7 font-bold uppercase tracking-wider px-2.5 border-none rounded-md",
+                                    currentStatus !== "CANCELLED" && "bg-emerald-600/10 text-emerald-600"
+                                )}
+                            >
+                                {t(`statuses.${currentStatus}`)}
+                            </Badge>
+                        </div>
+                        <div className="hidden sm:block w-px h-5 bg-border"></div>
+                        <div className="flex items-center justify-between sm:justify-start gap-3">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                                {t("paymentStatus")}:
+                            </span>
+                            <Badge
+                                variant="outline"
+                                className={cn("h-7 font-bold uppercase tracking-wider px-2.5 border-none rounded-md", paymentBadgeClass)}
+                            >
+                                {paymentBadgeText}
+                            </Badge>
+                        </div>
+
+                    </div>
+                    {showRetryButton && (
+                        <div className="w-full md:w-auto">
+                            <RetryPaymentButton orderId={order.id} expiresAt={expiresAt} />
+                        </div>
+                    )}
                 </div>
             </div>
             {showPendingNotice && (

@@ -46,10 +46,28 @@ export default function CheckoutForm({ initialData, className, ...props }: Check
     const [state, actionFn, isPending] = useActionState(processCheckoutWithData, undefined);
 
     useEffect(() => {
-        if (state?.message) {
+        if (state?.outOfStockItem) {
+            const { variantId, availableStock } = state.outOfStockItem;
+
+            const currentStore = useCartStore.getState();
+            const cartItemToUpdate = currentStore.items.find((item) => item.variantId === variantId);
+
+            if (cartItemToUpdate) {
+                setTimeout(() => {
+                    if (availableStock === 0) {
+                        currentStore.removeItem(cartItemToUpdate.cartItemId);
+                        toast.error(state.message);
+                    } else {
+                        currentStore.updateQuantity(cartItemToUpdate.cartItemId, availableStock);
+                        toast.error(t("partialStockError", { count: availableStock }));
+                    }
+                }, 0);
+            }
+        }
+        else if (state?.message) {
             toast.error(state.message);
         }
-    }, [state?.message]);
+    }, [state, t]);
 
     return (
         <div className={cn("w-full", className)} {...props}>
@@ -93,27 +111,27 @@ export default function CheckoutForm({ initialData, className, ...props }: Check
                                 <div className="sm:col-span-2">
                                     <FieldLabel className="mb-3 block text-sm font-bold uppercase">{t("Form.deliveryType")}</FieldLabel>
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                        <Button 
-                                            type="button" 
-                                            variant={deliveryMethod === "branch" ? "default" : "outline"} 
+                                        <Button
+                                            type="button"
+                                            variant={deliveryMethod === "branch" ? "default" : "outline"}
                                             className={cn("h-12 border-border/50 transition-all", deliveryMethod === "branch" && "ring-1 ring-emerald-600 bg-emerald-600/10 text-emerald-600 hover:bg-emerald-600/20")}
                                             onClick={() => setDeliveryMethod("branch")}
                                         >
                                             <Store className="w-4 h-4 mr-2" />
                                             {t("Form.deliveryBranch")}
                                         </Button>
-                                        <Button 
-                                            type="button" 
-                                            variant={deliveryMethod === "postomat" ? "default" : "outline"} 
+                                        <Button
+                                            type="button"
+                                            variant={deliveryMethod === "postomat" ? "default" : "outline"}
                                             className={cn("h-12 border-border/50 transition-all", deliveryMethod === "postomat" && "ring-1 ring-emerald-600 bg-emerald-600/10 text-emerald-600 hover:bg-emerald-600/20")}
                                             onClick={() => setDeliveryMethod("postomat")}
                                         >
                                             <Box className="w-4 h-4 mr-2" />
                                             {t("Form.deliveryPostomat")}
                                         </Button>
-                                        <Button 
-                                            type="button" 
-                                            variant={deliveryMethod === "courier" ? "default" : "outline"} 
+                                        <Button
+                                            type="button"
+                                            variant={deliveryMethod === "courier" ? "default" : "outline"}
                                             className={cn("h-12 border-border/50 transition-all", deliveryMethod === "courier" && "ring-1 ring-emerald-600 bg-emerald-600/10 text-emerald-600 hover:bg-emerald-600/20")}
                                             onClick={() => setDeliveryMethod("courier")}
                                         >
@@ -153,18 +171,18 @@ export default function CheckoutForm({ initialData, className, ...props }: Check
                         <CardContent className="pt-6">
                             <FieldLabel className="mb-3 block text-sm font-bold uppercase">{t("Form.paymentType")}</FieldLabel>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <Button 
-                                    type="button" 
-                                    variant={paymentMethod === "card" ? "default" : "outline"} 
+                                <Button
+                                    type="button"
+                                    variant={paymentMethod === "card" ? "default" : "outline"}
                                     className={cn("h-14 border-border/50 transition-all justify-start px-4", paymentMethod === "card" && "ring-1 ring-emerald-600 bg-emerald-600/10 text-emerald-600 hover:bg-emerald-600/20")}
                                     onClick={() => setPaymentMethod("card")}
                                 >
                                     <CreditCard className="w-5 h-5 mr-3 shrink-0" />
                                     <span className="truncate">{t("Form.payOnline")}</span>
                                 </Button>
-                                <Button 
-                                    type="button" 
-                                    variant={paymentMethod === "cod" ? "default" : "outline"} 
+                                <Button
+                                    type="button"
+                                    variant={paymentMethod === "cod" ? "default" : "outline"}
                                     className={cn("h-14 border-border/50 transition-all justify-start px-4", paymentMethod === "cod" && "ring-1 ring-emerald-600 bg-emerald-600/10 text-emerald-600 hover:bg-emerald-600/20")}
                                     onClick={() => setPaymentMethod("cod")}
                                 >

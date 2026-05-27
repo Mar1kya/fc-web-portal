@@ -35,7 +35,7 @@ export default async function OrderDetails({ order, displayData, locale }: Order
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="border-border/50 shadow-sm bg-card/50">
+                <Card className="border-border/50 shadow-sm bg-card">
                     <CardHeader className="pb-3">
                         <CardTitle className="text-sm font-black uppercase text-muted-foreground tracking-wider flex items-center gap-2">
                             <User className="w-4 h-4 text-emerald-600" />
@@ -48,8 +48,7 @@ export default async function OrderDetails({ order, displayData, locale }: Order
                         <p className="text-muted-foreground">{displayData.phone}</p>
                     </CardContent>
                 </Card>
-
-                <Card className="border-border/50 shadow-sm bg-card/50">
+                <Card className="border-border/50 shadow-sm bg-card">
                     <CardHeader className="pb-3">
                         <CardTitle className="text-sm font-black uppercase text-muted-foreground tracking-wider flex items-center gap-2">
                             <Truck className="w-4 h-4 text-emerald-600" />
@@ -62,7 +61,7 @@ export default async function OrderDetails({ order, displayData, locale }: Order
                     </CardContent>
                 </Card>
 
-                <Card className="border-border/50 shadow-sm bg-card/50">
+                <Card className="border-border/50 shadow-sm bg-card">
                     <CardHeader className="pb-3">
                         <CardTitle className="text-sm font-black uppercase text-muted-foreground tracking-wider flex items-center gap-2">
                             {isCardPayment ? <CreditCard className="w-4 h-4 text-emerald-600" /> : <Banknote className="w-4 h-4 text-emerald-600" />}
