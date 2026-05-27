@@ -529,6 +529,10 @@ enum OrderStatusEnum {
   DELIVERED
   CANCELLED
 }
+enum PaymentMethodEnum {
+  CARD 
+  COD  
+}
 
 model Order {
   id         String          @id @default(cuid())
@@ -537,10 +541,16 @@ model Order {
   status     OrderStatusEnum @default(PENDING)
   isPaid     Boolean         @default(false)
   totalPrice Decimal         @db.Decimal(10, 2)
-  phone      String          @default("")
-  address    String          @default("")
+  firstName  String
+  lastName   String
+  email      String
+  phone      String
+  city       String
+  postalCode String? 
+  address    String? 
   orderItems OrderItem[]
   payment    Payment?
+  paymentMethod PaymentMethodEnum @default(CARD)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -548,7 +558,6 @@ model Order {
 
   @@index([deletedAt])
 }
-
 model OrderItem {
   id           String          @id @default(cuid())
   orderId      String

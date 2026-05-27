@@ -1,5 +1,5 @@
 import z from "zod";
-import { zEmail, zPassword } from "./utils/validations";
+import { zEmail, zPassword, zPhone } from "./utils/validations";
 import { MIN_NAME_LENGTH, MIN_PASSWORD_LENGTH } from "./constants";
 
 export const SignInSchema = z.object({
@@ -65,3 +65,16 @@ export const createProfileSchema = (
       },
     );
 };
+
+export const createCheckoutSchema = (
+    t: (key: string, values?: Record<string, string | number>) => string
+) =>
+    z.object({
+        firstName: z.string().min(2, t("tooShort")),
+        lastName: z.string().min(2, t("tooShort")),
+        email: zEmail(t("invalidEmail")),
+        phone: zPhone(t("invalidPhone")),
+        city: z.string().min(2, t("tooShort")),
+        postalCode: z.string().optional(),
+        address: z.string().optional(),
+    });

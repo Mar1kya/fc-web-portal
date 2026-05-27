@@ -32,7 +32,7 @@ export default function CartMenu() {
         setMounted(true);
     }, []);
 
-   if (!mounted || items === undefined) {
+    if (!mounted || items === undefined) {
         return (
             <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg">
                 <ShoppingBasket className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
@@ -85,23 +85,21 @@ export default function CartMenu() {
                                     <div key={item.cartItemId} className="flex gap-3 items-center group relative">
                                         <Link
                                             href={`/shop/product/${item.slug}`}
-                                            className="flex gap-3 items-center grow hover:opacity-80 transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 rounded-md"
-                                            onClick={() => setIsOpen(false)}
+                                            className="flex gap-3 items-start grow hover:opacity-80 transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 rounded-md" onClick={() => setIsOpen(false)}
                                         >
-                                            <div className="relative w-14 h-16 rounded-md overflow-hidden bg-muted/50 border border-border/50 shrink-0">
-                                                {item.image ? (
-                                                    <Image
-                                                        src={item.image}
-                                                        alt={itemName}
-                                                        fill
-                                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                                        sizes="56px"
-                                                    />
-                                                ) : (
-                                                    <div className="flex h-full w-full flex-col items-center justify-center text-muted-foreground/30 transition-transform duration-500 group-hover:scale-105 group-hover:text-emerald-600/40">
-                                                        <ImageOff className="w-6 h-6" strokeWidth={1.5} />
-                                                    </div>
-                                                )}
+                                            <div className="relative w-14 h-20 rounded-md overflow-hidden bg-muted/50 border border-border/50 shrink-0 mt-0.5">                                                {item.image ? (
+                                                <Image
+                                                    src={item.image}
+                                                    alt={itemName}
+                                                    fill
+                                                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                                    sizes="56px"
+                                                />
+                                            ) : (
+                                                <div className="flex h-full w-full flex-col items-center justify-center text-muted-foreground/30 transition-transform duration-500 group-hover:scale-105 group-hover:text-emerald-600/40">
+                                                    <ImageOff className="w-6 h-6" strokeWidth={1.5} />
+                                                </div>
+                                            )}
                                             </div>
                                             <div className="flex flex-col grow">
                                                 <h4 className="text-sm font-semibold line-clamp-1 hover:text-emerald-600">{itemName}</h4>
@@ -122,8 +120,7 @@ export default function CartMenu() {
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 transition-all shrink-0 z-10"
-                                            onClick={(e) => {
+                                            className="h-8 w-8 mt-1 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 transition-all shrink-0 z-10" onClick={(e) => {
                                                 e.stopPropagation();
                                                 removeItem(item.cartItemId);
                                             }}

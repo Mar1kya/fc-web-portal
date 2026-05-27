@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { CalendarDays, MapPin } from "lucide-react";
 import { MatchStatus, Prisma } from "../../../../../../../generated/prisma";
