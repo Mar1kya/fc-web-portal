@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { createProfileSchema } from "@/lib/schemas";
+import { createLinkOrderSchema, createProfileSchema } from "@/lib/schemas";
 
 export type ProfileState = {
   errors?: {
@@ -16,6 +16,14 @@ export type ProfileState = {
     image?: string[];
   };
   message?: string;
+  success?: boolean;
+};
+export type LinkOrderState = {
+  errors?: {
+    orderId?: string[];
+    phone?: string[];
+  };
+  message?: string | null;
   success?: boolean;
 };
 
@@ -100,5 +108,65 @@ export async function updateProfile(
     return {
       message: t("defaultError"),
     };
+  }
+}
+export async function linkGuestOrder(
+  _prevState: LinkOrderState | undefined,
+  formData: FormData,
+): Promise<LinkOrderState | undefined> {
+  const t = await getTranslations("ProfilePage.LinkOrder.Errors");
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { message: t("unauthorized") };
+  }
+
+  const LinkOrderSchema = createLinkOrderSchema(t);
+  const formValues = Object.fromEntries(formData.entries());
+  const validatedFields = LinkOrderSchema.safeParse(formValues);
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: t("invalidData"),
+    };
+  }
+
+  const { orderId, phone } = validatedFields.data;
+
+  const cleanOrderId = orderId.replace("#", "").trim().toLowerCase();
+
+  try {
+    const order = await prisma.order.findFirst({
+      where: {
+        id: { endsWith: cleanOrderId },
+        phone: phone,
+      },
+    });
+
+    if (!order) {
+      return { message: t("notFound") };
+    }
+
+    if (order.userId === session.user.id) {
+      return { message: t("alreadyLinked") };
+    }
+
+    if (order.userId !== null) {
+      return { message: t("notFound") };
+    }
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { userId: session.user.id },
+    });
+
+    const locale = await getLocale();
+    revalidatePath(`/${locale}/profile/history`);
+
+    return {
+      success: true,
+    };
+  } catch {
+    return { message: t("defaultError") };
   }
 }

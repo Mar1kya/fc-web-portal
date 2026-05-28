@@ -67,14 +67,22 @@ export const createProfileSchema = (
 };
 
 export const createCheckoutSchema = (
-    t: (key: string, values?: Record<string, string | number>) => string
+  t: (key: string, values?: Record<string, string | number>) => string,
 ) =>
-    z.object({
-        firstName: z.string().min(2, t("tooShort")),
-        lastName: z.string().min(2, t("tooShort")),
-        email: zEmail(t("invalidEmail")),
-        phone: zPhone(t("invalidPhone")),
-        city: z.string().min(2, t("tooShort")),
-        postalCode: z.string().optional(),
-        address: z.string().optional(),
-    });
+  z.object({
+    firstName: z.string().min(2, t("tooShort")),
+    lastName: z.string().min(2, t("tooShort")),
+    email: zEmail(t("invalidEmail")),
+    phone: zPhone(t("invalidPhone")),
+    city: z.string().min(2, t("tooShort")),
+    postalCode: z.string().optional(),
+    address: z.string().optional(),
+  });
+export const createLinkOrderSchema = (
+  t: (key: string, values?: Record<string, string | number>) => string,
+) => {
+  return z.object({
+    orderId: z.string().min(1, t("orderIdRequired")),
+    phone: zPhone(t("phoneRequired")),
+  });
+};

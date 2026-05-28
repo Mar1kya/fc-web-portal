@@ -3,6 +3,7 @@ export const MIN_NAME_LENGTH = 2;
 export const PAGINATION = {
     NEWS_PER_PAGE: 16,
     SHOP_PER_PAGE: 12,
+    ORDERS_PER_PAGE: 10,
 };
 export const TARGET_TEAM_ORIGINAL_NAME = "Polissya Zhytomyr";
 export const TEAM_ID = "258536";
