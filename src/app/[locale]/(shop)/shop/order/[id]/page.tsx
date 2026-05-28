@@ -11,6 +11,17 @@ import OrderGuestBanner from "./_components/order-guest-banner";
 import OrderDetails from "./_components/order-details";
 import RetryPaymentButton from "./_components/retry-payment-button";
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string; locale: string }> }) {
+    const { id, locale } = await params;
+    const t = await getTranslations({ locale, namespace: "Shop.OrderPage.Metadata" });
+    const shortId = id.slice(-6).toUpperCase();
+
+    return {
+        title: t("title", { id: shortId }),
+        description: t("description", { id: shortId }),
+    };
+}
+
 export default async function OrderPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
     const { id, locale } = await params;
     const t = await getTranslations("Shop.OrderPage");
@@ -38,14 +49,14 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     let showRetryButton = false;
     let expiresAt = 0;
 
-   if (!order.isPaid && isCardPayment && currentStatus !== "CANCELLED") {
-        const timeLimitMs = 30 * 60 * 1000; 
-        
+    if (!order.isPaid && isCardPayment && currentStatus !== "CANCELLED") {
+        const timeLimitMs = 30 * 60 * 1000;
+
         // eslint-disable-next-line react-hooks/purity
         const timePassedMs = Date.now() - order.createdAt.getTime();
 
         if (timePassedMs >= timeLimitMs) {
-            currentStatus = "CANCELLED"; 
+            currentStatus = "CANCELLED";
         } else {
             showRetryButton = true;
             expiresAt = order.createdAt.getTime() + timeLimitMs;
@@ -123,7 +134,6 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                                 {paymentBadgeText}
                             </Badge>
                         </div>
-
                     </div>
                     {showRetryButton && (
                         <div className="w-full md:w-auto">

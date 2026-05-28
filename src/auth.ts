@@ -60,4 +60,35 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
+  events: {
+    async createUser({ user }) {
+      if (user.email && user.id) {
+        try {
+          await prisma.order.updateMany({
+            where: {
+              email: user.email.toLowerCase(),
+              userId: null,
+            },
+            data: {
+              userId: user.id,
+            },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    },
+    async signIn({ user, account }) {
+      if (account?.provider === "google" && user.email && user.id) {
+        try {
+          await prisma.order.updateMany({
+            where: { email: user.email.toLowerCase(), userId: null },
+            data: { userId: user.id },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    },
+  },
 });

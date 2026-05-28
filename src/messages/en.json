@@ -149,6 +149,48 @@
         "defaultError": "An error occurred while updating the profile. Please try again."
       }
     },
+    "History": {
+      "title": "Order History",
+      "description": "View your past and active orders",
+      "empty": "You have no orders yet.",
+      "total": "Total:",
+      "itemsCount": "Items: {count}",
+      "detailsButton": "View Details",
+      "payNowButton": "Pay Now",
+      "Tabs": {
+        "ALL": "All",
+        "PENDING": "Pending",
+        "PAID": "Paid",
+        "SHIPPED": "Shipped",
+        "DELIVERED": "Delivered",
+        "CANCELLED": "Cancelled"
+      },
+      "Sort": {
+        "newest": "Newest first",
+        "oldest": "Oldest first"
+      }
+    },
+    "LinkOrder": {
+      "trigger": "Find guest order",
+      "title": "Link Order",
+      "description": "Placed an order before registering? Enter its number and your phone number to add it to your history.",
+      "orderIdLabel": "Order Number",
+      "orderIdPlaceholder": "e.g. KSX9Z7",
+      "phoneLabel": "Phone Number",
+      "phonePlaceholder": "+380...",
+      "submitButton": "Find and Link",
+      "searching": "Searching...",
+      "success": "Order successfully added to your history!",
+      "Errors": {
+        "orderIdRequired": "Enter the order number",
+        "phoneRequired": "Enter a valid Ukrainian phone number",
+        "notFound": "Order not found or details do not match",
+        "unauthorized": "You are not authorized",
+        "invalidData": "Please check the entered data",
+        "defaultError": "An error occurred. Please try again.",
+        "alreadyLinked": "This order is already linked to your account!"
+      }
+    },
     "Metadata": {
       "title": "User Profile",
       "description": "Manage your personal details, password, and account settings."
@@ -528,6 +570,10 @@
         "total": "Total",
         "size": "Size",
         "qty": "Qty"
+      },
+      "Metadata": {
+        "title": "Checkout",
+        "description": "Complete your order at the fan shop. Secure payment and fast delivery."
       }
     },
     "CheckoutErrors": {
@@ -572,7 +618,11 @@
       "processing": "Redirecting...",
       "errorCancelled": "This order has already been cancelled.",
       "errorAlreadyPaid": "This order is already paid!",
-      "errorGeneric": "An error occurred. Please try again."
+      "errorGeneric": "An error occurred. Please try again.",
+      "Metadata": {
+        "title": "Order #{id}",
+        "description": "Details of your order #{id}. Check the status, payment, and delivery information."
+      }
     },
     "NotFound": {
       "title": "Page Not Found",
