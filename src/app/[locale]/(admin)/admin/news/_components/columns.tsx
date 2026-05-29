@@ -3,11 +3,10 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Pencil, Eye, Trash2, ArrowUpDown, Newspaper } from "lucide-react"
-import { Link } from "@/i18n/navigation"
+import { ArrowUpDown, Newspaper } from "lucide-react"
 import Image from "next/image"
 import { Prisma, PostType, TeamContext } from "../../../../../../../generated/prisma"
+import { PostActions } from "./post-actions"
 import { getTranslation } from "@/lib/utils/get-translation"
 
 export type PostWithRelations = Prisma.PostGetPayload<{
@@ -36,11 +35,11 @@ export const columns: ColumnDef<PostWithRelations>[] = [
             return (
                 <div className="h-12 w-20 relative rounded-md overflow-hidden bg-muted/50 shrink-0 flex items-center justify-center group">
                     {mediaUrl ? (
-                        <Image 
-                            src={mediaUrl} 
-                            alt="Cover" 
-                            fill 
-                            className="object-cover transition-transform duration-500 group-hover:scale-105" 
+                        <Image
+                            src={mediaUrl}
+                            alt="Cover"
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
                             sizes="(max-width: 768px) 100vw, 80px"
                         />
                     ) : (
@@ -53,7 +52,7 @@ export const columns: ColumnDef<PostWithRelations>[] = [
         },
     },
     {
-        accessorFn: (row) => getTranslation(row, "uk")?.title || "",
+        accessorFn: (row) => getTranslation(row, "uk")?.title || "Без заголовку",
         id: "title",
         header: ({ column }) => {
             return (
@@ -136,38 +135,6 @@ export const columns: ColumnDef<PostWithRelations>[] = [
     },
     {
         id: "actions",
-        cell: ({ row }) => {
-            const post = row.original;
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Відкрити меню</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Дії</DropdownMenuLabel>
-                        <DropdownMenuItem asChild>
-                            <Link href={`/news/${post.slug}`} target="_blank" className="cursor-pointer">
-                                <Eye className="mr-2 h-4 w-4" />
-                                Оглянути
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                            <Link href={`/admin/news/${post.id}/edit`} className="cursor-pointer">
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Редагувати
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-500 focus:text-red-600 focus:bg-red-500/10 cursor-pointer">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Видалити
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )
-        },
+        cell: ({ row }) => <PostActions post={row.original} />,
     },
 ]

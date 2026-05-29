@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Plus, Trash2 } from "lucide-react"
 import { DataTable } from "./_components/data-table"
 import { columns } from "./_components/columns"
 
@@ -34,12 +34,20 @@ export default async function AdminNewsPage() {
                         Управління публікаціями, інтерв&apos;ю та заявами клубу.
                     </p>
                 </div>
-                <Button asChild>
-                    <Link href="/admin/news/create">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Додати новину
-                    </Link>
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" asChild>
+                        <Link href="/admin/news/trash">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Кошик
+                        </Link>
+                    </Button>
+                    <Button asChild>
+                        <Link href="/admin/news/create">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Додати новину
+                        </Link>
+                    </Button>
+                </div>
             </div>
             <div className="mt-4">
                 <DataTable columns={columns} data={posts} />

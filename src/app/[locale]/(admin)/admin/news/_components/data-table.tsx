@@ -49,6 +49,9 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
             pagination: { pageSize: 10 },
         },
     })
+    const teamContextColumn = table.getAllColumns().find(c => c.id === "teamContext");
+    const typeColumn = table.getAllColumns().find(c => c.id === "type");
+    const isPublishedColumn = table.getAllColumns().find(c => c.id === "isPublished");
 
     return (
         <div className="space-y-4">
@@ -60,48 +63,54 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                     className="w-full md:w-64 lg:max-w-sm"
                 />
                 <div className="flex flex-col sm:flex-row flex-wrap items-center gap-2 w-full md:w-auto">
-                    <Select
-                        value={(table.getColumn("teamContext")?.getFilterValue() as string) ?? "ALL"}
-                        onValueChange={(value) => table.getColumn("teamContext")?.setFilterValue(value)}
-                    >
-                        <SelectTrigger className="w-full sm:w-40">
-                            <SelectValue placeholder="Команда" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="ALL">Всі команди</SelectItem>
-                            {Object.entries(teamContextTranslations).map(([key, label]) => (
-                                <SelectItem key={key} value={key}>{label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <Select
-                        value={(table.getColumn("type")?.getFilterValue() as string) ?? "ALL"}
-                        onValueChange={(value) => table.getColumn("type")?.setFilterValue(value)}
-                    >
-                        <SelectTrigger className="w-full sm:w-35">
-                            <SelectValue placeholder="Категорія" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="ALL">Всі категорії</SelectItem>
-                            {Object.entries(postTypeTranslations).map(([key, label]) => (
-                                <SelectItem key={key} value={key}>{label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <Select
-                        value={(table.getColumn("isPublished")?.getFilterValue() as string) ?? "ALL"}
-                        onValueChange={(value) => table.getColumn("isPublished")?.setFilterValue(value)}
-                    >
-                        <SelectTrigger className="w-full sm:w-35">
-                            <SelectValue placeholder="Статус" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="ALL">Всі статуси</SelectItem>
-                            <SelectItem value="PUBLISHED">Опубліковано</SelectItem>
-                            <SelectItem value="SCHEDULED">Заплановано</SelectItem>
-                            <SelectItem value="DRAFT">Чернетка</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    {teamContextColumn && (
+                        <Select
+                            value={(teamContextColumn.getFilterValue() as string) ?? "ALL"}
+                            onValueChange={(value) => teamContextColumn.setFilterValue(value)}
+                        >
+                            <SelectTrigger className="w-full sm:w-40">
+                                <SelectValue placeholder="Команда" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Всі команди</SelectItem>
+                                {Object.entries(teamContextTranslations).map(([key, label]) => (
+                                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    )}
+                    {typeColumn && (
+                        <Select
+                            value={(typeColumn.getFilterValue() as string) ?? "ALL"}
+                            onValueChange={(value) => typeColumn.setFilterValue(value)}
+                        >
+                            <SelectTrigger className="w-full sm:w-35">
+                                <SelectValue placeholder="Категорія" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Всі категорії</SelectItem>
+                                {Object.entries(postTypeTranslations).map(([key, label]) => (
+                                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    )}
+                    {isPublishedColumn && (
+                        <Select
+                            value={(isPublishedColumn.getFilterValue() as string) ?? "ALL"}
+                            onValueChange={(value) => isPublishedColumn.setFilterValue(value)}
+                        >
+                            <SelectTrigger className="w-full sm:w-35">
+                                <SelectValue placeholder="Статус" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Всі статуси</SelectItem>
+                                <SelectItem value="PUBLISHED">Опубліковано</SelectItem>
+                                <SelectItem value="SCHEDULED">Заплановано</SelectItem>
+                                <SelectItem value="DRAFT">Чернетка</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )}
                 </div>
             </div>
             <div className="rounded-md border bg-card overflow-hidden">
