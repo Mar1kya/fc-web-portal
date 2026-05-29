@@ -66,6 +66,7 @@
     "UserMenu": {
       "adminPanel": "Admin panel",
       "profile": "Profile",
+      "orderHistory": "Order history",
       "logOut": "Log out"
     },
     "DesktopMenu": {
