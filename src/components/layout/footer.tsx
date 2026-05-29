@@ -19,7 +19,6 @@ export default async function Footer() {
     const t = await getTranslations("Footer");
     const tEnums = await getTranslations("Enums");
 
-    // 1. Отримуємо активні склади команд
     const activeTeamsDb = await prisma.player.groupBy({
         by: ['teamContext'],
     });
@@ -27,7 +26,6 @@ export default async function Footer() {
         ? activeTeamsDb.map(t => t.teamContext)
         : [TeamContext.MAIN_TEAM];
 
-    // 2. Отримуємо турніри та матчі
     const matchesContextsDb = await prisma.match.groupBy({
         by: ['teamContext'],
     });

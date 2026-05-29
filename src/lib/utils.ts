@@ -31,7 +31,7 @@ export const getCurrencySymbol = (currencyCode = STORE_CURRENCY) => {
 
 export const formatPrice = (price: number | string) => {
   const formattedNumber = new Intl.NumberFormat(STORE_LOCALE, {
-    style: "decimal", // 
+    style: "decimal", 
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(Number(price));
