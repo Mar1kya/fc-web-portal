@@ -1,6 +1,7 @@
 import z from "zod";
 import { zEmail, zPassword, zPhone } from "./utils/validations";
 import { MIN_NAME_LENGTH, MIN_PASSWORD_LENGTH } from "./constants";
+import { PostType, TeamContext } from "../../generated/prisma";
 
 export const SignInSchema = z.object({
   email: zEmail(),
@@ -86,3 +87,20 @@ export const createLinkOrderSchema = (
     phone: zPhone(t("phoneRequired")),
   });
 };
+
+export const createPostSchema = z.object({
+  title_uk: z.string().min(3, "Заголовок має містити мінімум 3 символи"),
+  description_uk: z.string().optional(),
+  content_uk: z.string().min(10, "Текст новини занадто короткий"),
+  title_en: z.string().optional(),
+  description_en: z.string().optional(),
+  content_en: z.string().optional(),
+  type: z.nativeEnum(PostType),
+  teamContext: z.nativeEnum(TeamContext),
+  isPublished: z.boolean().default(true),
+  publishedAt: z.date().optional(),
+  mentionedPlayers: z.array(z.string()).optional(),
+  mentionedCoaches: z.array(z.string()).optional(),
+  relatedMatches: z.array(z.string()).optional(),
+  mediaUrls: z.array(z.string()).optional(),
+});
