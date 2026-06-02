@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Eye } from "lucide-react"
 import { Link } from "@/i18n/navigation"
 import { cn } from "@/lib/utils"
-import { formatPrice } from "@/lib/utils" 
+import { formatPrice } from "@/lib/utils"
 import { OrderStatusEnum, PaymentMethodEnum, Prisma } from "../../../../../../generated/prisma"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 type OrderWithItems = Prisma.OrderGetPayload<{
     include: {
@@ -21,7 +22,7 @@ type VariantWithProduct = Prisma.ProductVariantGetPayload<{
 }>;
 
 type MatchWithOpponent = Prisma.MatchGetPayload<{
-    include: { opponent: { include: { translations: true } } } 
+    include: { opponent: { include: { translations: true } } }
 }>;
 
 type DashboardTablesProps = {
@@ -132,7 +133,7 @@ export function DashboardTables({ recentOrders, lowStock, unsyncedMatches }: Das
                                                         </Badge>
                                                     </div>
                                                 </div>
-                                            </TableCell> 
+                                            </TableCell>
                                             <TableCell className="text-right">
                                                 <Button variant="ghost" size="icon" asChild>
                                                     <Link href={`/admin/shop/orders/${order.id}`}>
@@ -157,27 +158,29 @@ export function DashboardTables({ recentOrders, lowStock, unsyncedMatches }: Das
                         </CardTitle>
                         <CardDescription>Товари, яких залишилося менше 5 шт.</CardDescription>
                     </CardHeader>
-                    <CardContent className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                        <div className="space-y-4">
-                            {lowStock.length === 0 ? (
-                                <p className="text-sm text-muted-foreground">З товарами все добре.</p>
-                            ) : (
-                                lowStock.map((variant) => {
-                                    const productName = variant.product.translations[0]?.name || "Невідомий товар";
-                                    return (
-                                        <div key={variant.id} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
-                                            <div className="space-y-1 overflow-hidden pr-4">
-                                                <p className="text-sm font-medium leading-none truncate" title={productName}>{productName}</p>
-                                                <p className="text-xs text-muted-foreground">Розмір: {variant.size}</p>
+                    <CardContent>
+                        <ScrollArea className="h-75 w-full pr-4">
+                            <div className="space-y-4">
+                                {lowStock.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground">З товарами все добре.</p>
+                                ) : (
+                                    lowStock.map((variant) => {
+                                        const productName = variant.product.translations[0]?.name || "Невідомий товар";
+                                        return (
+                                            <div key={variant.id} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
+                                                <div className="space-y-1 overflow-hidden pr-4">
+                                                    <p className="text-sm font-medium leading-none truncate" title={productName}>{productName}</p>
+                                                    <p className="text-xs text-muted-foreground">Розмір: {variant.size}</p>
+                                                </div>
+                                                <div className="font-bold text-red-500 shrink-0">
+                                                    {variant.stock} шт
+                                                </div>
                                             </div>
-                                            <div className="font-bold text-red-500 shrink-0">
-                                                {variant.stock} шт
-                                            </div>
-                                        </div>
-                                    )
-                                })
-                            )}
-                        </div>
+                                        )
+                                    })
+                                )}
+                            </div>
+                        </ScrollArea>
                     </CardContent>
                 </Card>
                 <Card>
@@ -192,9 +195,9 @@ export function DashboardTables({ recentOrders, lowStock, unsyncedMatches }: Das
                             ) : (
                                 unsyncedMatches.map((match) => {
                                     const opponentName = match.opponent.translations?.[0]?.name || match.opponent.slug;
-                                    
-                                    const matchTitle = match.isHomeGame 
-                                        ? `Emerald Gang - ${opponentName}` 
+
+                                    const matchTitle = match.isHomeGame
+                                        ? `Emerald Gang - ${opponentName}`
                                         : `${opponentName} - Emerald Gang`;
                                     return (
                                         <div key={match.id} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">

@@ -22,7 +22,7 @@ export default async function AdminDashboardPage() {
         prisma.order.count({ where: { status: "PENDING" } }),
         prisma.order.aggregate({ _sum: { totalPrice: true }, where: { isPaid: true } }),
         prisma.match.findFirst({ where: { status: "SCHEDULED" }, orderBy: { date: "asc" }, include: { opponent: { include: { translations: true } } } }),
-        prisma.post.count({ where: { isPublished: true } }),
+        prisma.post.count({ where: { isPublished: true, deletedAt: null } }),
         prisma.order.findMany({
             take: 10,
             orderBy: { createdAt: "desc" },

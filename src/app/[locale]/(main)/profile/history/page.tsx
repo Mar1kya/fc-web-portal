@@ -107,7 +107,7 @@ export default async function OrderHistoryPage({ searchParams, params }: Props) 
                     <AppPagination totalPages={totalPages} currentPage={currentPage} />
                 </>
             ) : (
-                <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-xl border border-border/50">
+                <div className="text-center py-12 text-muted-foreground bg-muted/10 rounded-xl border border-dashed">
                     {t("empty")}
                 </div>
             )}
