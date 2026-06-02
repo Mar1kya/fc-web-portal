@@ -41,7 +41,7 @@ export const ourFileRouter = {
       return { uploadedBy: metadata.userId, url: file.url };
     }),
 
-  teamMemberImage: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+  teamMemberImage: f({ image: { maxFileSize: "4MB", maxFileCount: 10 } })
     .middleware(handleAuthAdmin)
     .onUploadComplete(async ({ metadata, file }) => {
       return { uploadedBy: metadata.userId, url: file.url };

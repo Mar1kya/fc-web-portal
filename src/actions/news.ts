@@ -9,11 +9,6 @@ import { PostType, TeamContext } from "../../generated/prisma";
 import { createPostSchema } from "@/lib/schemas";
 import { LOCALES } from "@/lib/constants";
 
-export type DeleteState = {
-  success?: boolean;
-  message: string;
-};
-
 export type PostFormState = {
   errors?: {
     title_uk?: string[];
@@ -45,7 +40,7 @@ export type BoundPostData = {
   selectedMatches: string[];
 };
 
-export async function softDeletePost(id: string): Promise<DeleteState> {
+export async function softDeletePost(id: string) {
   const session = await auth();
 
   if (!session?.user?.email || session.user.role !== "ADMIN") {
@@ -101,7 +96,7 @@ export async function softDeletePost(id: string): Promise<DeleteState> {
   }
 }
 
-export async function restorePost(id: string): Promise<DeleteState> {
+export async function restorePost(id: string) {
   const session = await auth();
 
   if (!session?.user?.email || session.user.role !== "ADMIN") {
@@ -154,7 +149,7 @@ export async function restorePost(id: string): Promise<DeleteState> {
     return { message: "Сталася помилка при відновленні" };
   }
 }
-export async function hardDeletePost(id: string): Promise<DeleteState> {
+export async function hardDeletePost(id: string) {
   const session = await auth();
 
   if (!session?.user?.email || session.user.role !== "ADMIN") {

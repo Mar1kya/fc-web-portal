@@ -1,7 +1,7 @@
 import z from "zod";
 import { zEmail, zPassword, zPhone } from "./utils/validations";
 import { MIN_NAME_LENGTH, MIN_PASSWORD_LENGTH } from "./constants";
-import { PostType, TeamContext } from "../../generated/prisma";
+import { PlayerPosition, PostType, TeamContext } from "../../generated/prisma";
 
 export const SignInSchema = z.object({
   email: zEmail(),
@@ -103,4 +103,29 @@ export const createPostSchema = z.object({
   mentionedCoaches: z.array(z.string()).optional(),
   relatedMatches: z.array(z.string()).optional(),
   mediaUrls: z.array(z.string()).optional(),
+});
+
+export const createPlayerSchema = z.object({
+  name_uk: z.string().min(2, "Ім'я українською обов'язкове"),
+  bio_uk: z.string().optional(),
+  name_en: z.string().optional(),
+  bio_en: z.string().optional(),
+  number: z.coerce
+    .number()
+    .min(1, "Номер має бути більше 0")
+    .max(99, "Номер має бути до 99"),
+  position: z.nativeEnum(PlayerPosition),
+  teamContext: z.nativeEnum(TeamContext),
+  avatarUrl: z.string().optional(),
+  isManualAvatar: z.boolean().default(false),
+  mediaUrls: z.array(z.string()).default([]),
+  birthDate: z.coerce.date().optional(),
+  height: z.coerce.number().optional(),
+  weight: z.coerce.number().optional(),
+  nationality: z.string().max(10).optional(),
+  initialMatches: z.coerce.number().default(0),
+  initialGoals: z.coerce.number().default(0),
+  initialAssists: z.coerce.number().default(0),
+  initialCleanSheets: z.coerce.number().default(0),
+  initialGoalsConceded: z.coerce.number().default(0),
 });

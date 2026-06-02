@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PlayerPosition, TeamContext } from "../../../../../../../generated/prisma";
 import { Button } from "@/components/ui/button";
-import { Plus, RefreshCw } from "lucide-react";
+import { Archive, Plus, RefreshCw } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { DataTable, DataTableFilterOption } from "@/components/ui/data-table";
 import { columns } from "./_components/columns";
@@ -51,8 +51,8 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 w-full">
+                <div className="flex flex-wrap justify-center md:justify-start gap-2 w-full md:w-auto">
                     {availableTeams.length > 0 ? (
                         availableTeams.map((teamEnum) => {
                             const isActive = currentTeam === teamEnum;
@@ -76,10 +76,17 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
                         </Button>
                     )}
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 w-full md:w-auto">
+                    <Button variant="outline" asChild className="gap-2">
+                        <Link href="/admin/team/players/archive">
+                            <Archive className="w-4 h-4" />
+                            Архів
+                        </Link>
+                    </Button>
+
                     <Button variant="outline" className="gap-2">
                         <RefreshCw className="w-4 h-4" />
-                        Синхронізувати (SofaScore)
+                        Синхронізувати
                     </Button>
                     <Button asChild className="gap-2">
                         <Link href="/admin/team/players/create">
