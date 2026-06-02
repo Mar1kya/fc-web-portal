@@ -390,3 +390,104 @@ export async function updatePlayer(
     };
   }
 }
+
+export async function softDeleteCoach(id: string) {
+    const session = await auth();
+
+    if (!session?.user?.email || session.user.role !== "ADMIN") {
+        return { success: false, message: "Немає прав для виконання цієї дії" };
+    }
+
+    try {
+        const coach = await prisma.coach.update({
+            where: { id },
+            data: { deletedAt: new Date() },
+        });
+
+        LOCALES.forEach((locale) => {
+            revalidatePath(`/${locale}/admin/team`);
+            revalidatePath(`/${locale}/team`);
+            revalidatePath(`/${locale}/team/staff/${coach.slug}`);
+        });
+
+        return {
+            success: true,
+            message: "Профіль тренера переміщено в архів",
+        };
+    } catch (error) {
+        console.error("Error deleting coach:", error);
+        return {
+            success: false,
+            message: "Сталася помилка при видаленні профілю",
+        };
+    }
+}
+
+export async function restoreCoach(id: string) {
+    const session = await auth();
+
+    if (!session?.user?.email || session.user.role !== "ADMIN") {
+        return { success: false, message: "Немає прав для виконання цієї дії" };
+    }
+
+    try {
+        const coach = await prisma.coach.update({
+            where: { id },
+            data: { deletedAt: null },
+        });
+
+        LOCALES.forEach((locale) => {
+            revalidatePath(`/${locale}/admin/team`);
+            revalidatePath(`/${locale}/team`);
+            revalidatePath(`/${locale}/team/staff/${coach.slug}`);
+        });
+
+        return {
+            success: true,
+            message: "Профіль тренера успішно відновлено!",
+        };
+    } catch (error) {
+        console.error("Error during coach restoration:", error);
+        return {
+            success: false,
+            message: "Сталася помилка при відновленні профілю",
+        };
+    }
+}
+
+export async function hardDeleteCoach(id: string) {
+    const session = await auth();
+
+    if (!session?.user?.email || session.user.role !== "ADMIN") {
+        return { success: false, message: "Немає прав для виконання цієї дії" };
+    }
+
+    try {
+        const existingCoach = await prisma.coach.findUnique({
+            where: { id },
+        });
+
+        if (!existingCoach) {
+            return { success: false, message: "Співробітника не знайдено" };
+        }
+
+        await prisma.coach.delete({
+            where: { id },
+        });
+
+        LOCALES.forEach((locale) => {
+            revalidatePath(`/${locale}/admin/team`);
+        });
+
+        return {
+            success: true,
+            message: "Профіль тренера видалено назавжди",
+        };
+    } catch (error) {
+        console.error("Error during hard deletion of coach:", error);
+        return {
+            success: false,
+            message: "Сталася помилка при остаточному видаленні",
+        };
+    }
+}

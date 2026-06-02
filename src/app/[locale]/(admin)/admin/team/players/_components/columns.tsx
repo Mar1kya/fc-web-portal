@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import { PlayerPosition, Prisma } from "../../../../../../../../generated/prisma"
 import { PlayerActions } from "./player-actions"
+import { User } from "lucide-react"
 
 export type PlayerWithRelations = Prisma.PlayerGetPayload<{
     include: { translations: true }
@@ -38,7 +39,7 @@ export const columns: ColumnDef<PlayerWithRelations>[] = [
 
             return (
                 <div className="flex items-center gap-3">
-                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-muted border shrink-0">
+                    <div className="relative w-10 h-10 rounded-full border overflow-hidden bg-muted/50 shrink-0 flex items-center justify-center group">
                         {player.avatar ? (
                             <Image
                                 src={player.avatar}
@@ -51,7 +52,9 @@ export const columns: ColumnDef<PlayerWithRelations>[] = [
 
                             />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">?</div>
+                            <div className="flex flex-col items-center gap-2 text-muted-foreground/50 transition-transform duration-500 group-hover:scale-105 group-hover:text-emerald-600/50">
+                                <User className="w-6 h-6" strokeWidth={1.5} />
+                            </div>
                         )}
                     </div>
                     <div className="font-medium truncate">
