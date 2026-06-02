@@ -20,8 +20,8 @@ import { createPost, type BoundPostData } from "@/actions/news"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { UploadDropzone } from "@/lib/uploadthing"
 import { getTranslation } from "@/lib/utils/get-translation"
-import { postTypeTranslations, teamContextTranslations } from "../../_components/columns"
 import { PostType, Prisma, TeamContext } from "../../../../../../../../generated/prisma"
+import { postTypeTranslations, teamContextTranslations } from "@/lib/constants"
 
 type PlayerWithTranslations = Prisma.PlayerGetPayload<{ include: { translations: true } }>;
 type CoachWithTranslations = Prisma.CoachGetPayload<{ include: { translations: true } }>;

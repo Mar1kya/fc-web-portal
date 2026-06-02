@@ -89,7 +89,7 @@ export async function GET(request: Request) {
                 height,
                 birthDate,
                 nationality,
-                avatar,
+                ...(!existingPlayer.isManualAvatar ? { avatar } : {}),
               },
             });
             updatedCount++;

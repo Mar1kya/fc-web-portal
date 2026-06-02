@@ -16,20 +16,31 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { postTypeTranslations, teamContextTranslations } from "./columns"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+
+export type DataTableFilterOption = {
+    columnId: string;
+    placeholder: string;
+    options: { label: string; value: string }[];
+};
 
 type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    searchPlaceholder?: string
+    filters?: DataTableFilterOption[]
 }
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({
+    columns,
+    data,
+    searchPlaceholder = "Пошук...",
+    filters = []
+}: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [globalFilter, setGlobalFilter] = useState<string>("")
 
-    // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
         data,
         columns,
@@ -49,73 +60,46 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
             pagination: { pageSize: 10 },
         },
     })
-    const teamContextColumn = table.getAllColumns().find(c => c.id === "teamContext");
-    const typeColumn = table.getAllColumns().find(c => c.id === "type");
-    const isPublishedColumn = table.getAllColumns().find(c => c.id === "isPublished");
 
     return (
         <div className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
                 <Input
-                    placeholder="Пошук новин..."
+                    placeholder={searchPlaceholder}
                     value={globalFilter ?? ""}
                     onChange={(event) => setGlobalFilter(event.target.value)}
                     className="w-full md:w-64 lg:max-w-sm"
                 />
                 <div className="flex flex-col sm:flex-row flex-wrap items-center gap-2 w-full md:w-auto">
-                    {teamContextColumn && (
-                        <Select
-                            value={(teamContextColumn.getFilterValue() as string) ?? "ALL"}
-                            onValueChange={(value) => teamContextColumn.setFilterValue(value)}
-                        >
-                            <SelectTrigger className="w-full sm:w-40">
-                                <SelectValue placeholder="Команда" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">Всі команди</SelectItem>
-                                {Object.entries(teamContextTranslations).map(([key, label]) => (
-                                    <SelectItem key={key} value={key}>{label}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    )}
-                    {typeColumn && (
-                        <Select
-                            value={(typeColumn.getFilterValue() as string) ?? "ALL"}
-                            onValueChange={(value) => typeColumn.setFilterValue(value)}
-                        >
-                            <SelectTrigger className="w-full sm:w-35">
-                                <SelectValue placeholder="Категорія" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">Всі категорії</SelectItem>
-                                {Object.entries(postTypeTranslations).map(([key, label]) => (
-                                    <SelectItem key={key} value={key}>{label}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    )}
-                    {isPublishedColumn && (
-                        <Select
-                            value={(isPublishedColumn.getFilterValue() as string) ?? "ALL"}
-                            onValueChange={(value) => isPublishedColumn.setFilterValue(value)}
-                        >
-                            <SelectTrigger className="w-full sm:w-35">
-                                <SelectValue placeholder="Статус" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">Всі статуси</SelectItem>
-                                <SelectItem value="PUBLISHED">Опубліковано</SelectItem>
-                                <SelectItem value="SCHEDULED">Заплановано</SelectItem>
-                                <SelectItem value="DRAFT">Чернетка</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    )}
+                    {filters.map((filter) => {
+                        const column = table.getColumn(filter.columnId);
+                        if (!column) return null;
+
+                        return (
+                           <Select
+                                key={filter.columnId}
+                                value={(column.getFilterValue() as string) ?? "ALL"}
+                                onValueChange={(value) => column.setFilterValue(value)}
+                            >
+                                <SelectTrigger className="w-full sm:w-auto min-w-36">
+                                    <SelectValue placeholder={filter.placeholder} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="ALL">{filter.placeholder}</SelectItem>
+                                    {filter.options.map((opt) => (
+                                        <SelectItem key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        );
+                    })}
                 </div>
             </div>
             <div className="rounded-md border bg-card overflow-hidden">
                 <div className="overflow-x-auto custom-scrollbar">
-                    <Table className="min-w-225">
+                    <Table className="min-w-150">
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id}>
@@ -141,7 +125,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={columns.length} className="h-24 text-center">
-                                        Не знайдено жодної публікації за цими критеріями.
+                                        Не знайдено жодного запису за цими критеріями.
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -161,7 +145,6 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                         onClick={() => table.previousPage()}
                         disabled={!table.getCanPreviousPage()}
                     >
-                        <span className="sr-only">Попередня сторінка</span>
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <Button
@@ -171,7 +154,6 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                         onClick={() => table.nextPage()}
                         disabled={!table.getCanNextPage()}
                     >
-                        <span className="sr-only">Наступна сторінка</span>
                         <ChevronRight className="h-4 w-4" />
                     </Button>
                 </div>

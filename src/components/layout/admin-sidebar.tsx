@@ -9,6 +9,7 @@ import {
     User as UserIcon,
     ChevronsUpDown,
     Trophy,
+    Users,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import {
@@ -33,6 +34,7 @@ import { NavLink } from "../ui/nav-link"
 const adminLinks = [
     { title: "Дашборд", url: "/admin", icon: LayoutDashboard },
     { title: "Новини", url: "/admin/news", icon: Newspaper },
+    { title: "Команда", url: "/admin/team", icon: Users },
     { title: "Турніри та Матчі", url: "/admin/tournaments", icon: Trophy },
     { title: "Фаншоп", url: "/admin/shop", icon: Shirt },
 ]
