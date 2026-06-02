@@ -62,7 +62,7 @@ export function PlayerActions({ player }: PlayerActionsProps) {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                        <Link href={`/admin/team/players/${player.id}/edit`} className="cursor-pointer">
+                        <Link href={`/admin/team/players/${player.slug}/edit`} className="cursor-pointer">
                             <Pencil className="mr-2 h-4 w-4" />
                             Редагувати
                         </Link>

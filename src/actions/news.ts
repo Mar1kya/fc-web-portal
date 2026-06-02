@@ -187,8 +187,8 @@ export async function hardDeletePost(id: string) {
 
 export async function createPost(
   boundData: BoundPostData,
-  prevState: PostFormState | undefined,
-  formData: FormData,
+  _prevState: PostFormState | undefined,
+  _formData: FormData,
 ): Promise<PostFormState | undefined> {
   const session = await auth();
 
@@ -336,8 +336,8 @@ export async function createPost(
 export async function updatePost(
   postId: string,
   boundData: BoundPostData,
-  prevState: PostFormState | undefined,
-  formData: FormData,
+  _prevState: PostFormState | undefined,
+  _formData: FormData,
 ): Promise<PostFormState | undefined> {
   const session = await auth();
 

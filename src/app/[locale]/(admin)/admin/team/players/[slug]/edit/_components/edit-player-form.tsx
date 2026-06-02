@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useActionState, useEffect } from "react"
-import { Link, useRouter } from "@/i18n/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { toast } from "sonner"
 import Flag from "react-world-flags"
 import { Loader2, X } from "lucide-react"
 import Image from "next/image"
+import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,13 +14,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Switch } from "@/components/ui/switch"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import { BoundPlayerData, createPlayer } from "@/actions/team"
-import { PlayerPosition, TeamContext } from "../../../../../../../../../generated/prisma"
+import { BoundPlayerData, updatePlayer } from "@/actions/team"
+import { PlayerPosition, TeamContext, Prisma } from "../../../../../../../../../../generated/prisma"
 import { COUNTRIES, teamContextTranslations } from "@/lib/constants"
 import { UploadDropzone } from "@/lib/uploadthing"
-import { Switch } from "@/components/ui/switch"
+import { getTranslation } from "@/lib/utils/get-translation"
 
+type PlayerWithRelations = Prisma.PlayerGetPayload<{
+    include: { translations: true; media: true }
+}>
 
 const positionTranslations: Record<PlayerPosition, string> = {
     GOALKEEPER: "Воротар",
@@ -28,27 +33,32 @@ const positionTranslations: Record<PlayerPosition, string> = {
     FORWARD: "Нападник",
 };
 
-export function CreatePlayerForm() {
+export function EditPlayerForm({ player }: { player: PlayerWithRelations }) {
     const router = useRouter();
-    const [nameUk, setNameUk] = useState("");
-    const [bioUk, setBioUk] = useState("");
-    const [nameEn, setNameEn] = useState("");
-    const [bioEn, setBioEn] = useState("");
-    const [number, setNumber] = useState<number | "">("");
-    const [position, setPosition] = useState<PlayerPosition>(PlayerPosition.MIDFIELDER);
-    const [teamContext, setTeamContext] = useState<TeamContext>(TeamContext.MAIN_TEAM);
-    const [nationality, setNationality] = useState<string>("UKR");
-    const [height, setHeight] = useState<number | "">("");
-    const [weight, setWeight] = useState<number | "">("");
-    const [birthDate, setBirthDate] = useState<string>("");
-    const [avatarUrl, setAvatarUrl] = useState("");
-    const [isManualAvatar, setIsManualAvatar] = useState(false);
-    const [mediaUrls, setMediaUrls] = useState<string[]>([]);
-    const [initialMatches, setInitialMatches] = useState<number>(0);
-    const [initialGoals, setInitialGoals] = useState<number>(0);
-    const [initialAssists, setInitialAssists] = useState<number>(0);
-    const [initialCleanSheets, setInitialCleanSheets] = useState<number>(0);
-    const [initialGoalsConceded, setInitialGoalsConceded] = useState<number>(0);
+    const txUk = getTranslation(player, "uk");
+    const txEn = player.translations.find(t => t.language === "en");
+    const formattedBirthDate = player.birthDate
+        ? new Date(player.birthDate).toISOString().split("T")[0]
+        : "";
+    const [nameUk, setNameUk] = useState(txUk?.name || "");
+    const [bioUk, setBioUk] = useState(txUk?.bio || "");
+    const [nameEn, setNameEn] = useState(txEn?.name || "");
+    const [bioEn, setBioEn] = useState(txEn?.bio || "");
+    const [number, setNumber] = useState<number | "">(player.number);
+    const [position, setPosition] = useState<PlayerPosition>(player.position);
+    const [teamContext, setTeamContext] = useState<TeamContext>(player.teamContext);
+    const [nationality, setNationality] = useState<string>(player.nationality || "UKR");
+    const [height, setHeight] = useState<number | "">(player.height || "");
+    const [weight, setWeight] = useState<number | "">(player.weight || "");
+    const [birthDate, setBirthDate] = useState<string>(formattedBirthDate);
+    const [avatarUrl, setAvatarUrl] = useState(player.avatar || "");
+    const [isManualAvatar, setIsManualAvatar] = useState(player.isManualAvatar);
+    const [mediaUrls, setMediaUrls] = useState<string[]>(player.media.map(m => m.url));
+    const [initialMatches, setInitialMatches] = useState<number>(player.initialMatches);
+    const [initialGoals, setInitialGoals] = useState<number>(player.initialGoals);
+    const [initialAssists, setInitialAssists] = useState<number>(player.initialAssists);
+    const [initialCleanSheets, setInitialCleanSheets] = useState<number>(player.initialCleanSheets);
+    const [initialGoalsConceded, setInitialGoalsConceded] = useState<number>(player.initialGoalsConceded);
     const isGoalkeeper = position === PlayerPosition.GOALKEEPER;
 
     const boundData: BoundPlayerData = {
@@ -64,7 +74,7 @@ export function CreatePlayerForm() {
         weight: weight === "" ? undefined : Number(weight),
         birthDate: birthDate ? new Date(birthDate) : undefined,
         avatarUrl,
-        isManualAvatar, 
+        isManualAvatar,
         mediaUrls,
         initialMatches,
         initialGoals,
@@ -72,9 +82,8 @@ export function CreatePlayerForm() {
         initialCleanSheets,
         initialGoalsConceded,
     };
-
-    const createPlayerWithData = createPlayer.bind(null, boundData);
-    const [state, actionFn, isPending] = useActionState(createPlayerWithData, undefined);
+    const updatePlayerWithId = updatePlayer.bind(null, player.id, boundData);
+    const [state, actionFn, isPending] = useActionState(updatePlayerWithId, undefined);
 
     useEffect(() => {
         if (state?.success) {
@@ -92,12 +101,15 @@ export function CreatePlayerForm() {
 
     return (
         <form action={actionFn} className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+
+            {/* ЛІВА ЧАСТИНА */}
             <div className="xl:col-span-2 space-y-6 flex flex-col">
                 <Tabs defaultValue="uk" className="w-full border rounded-lg bg-card p-4 sm:p-6 shadow-sm">
                     <TabsList className="grid w-full grid-cols-2 max-w-100 mb-6">
                         <TabsTrigger value="uk">Українська версія</TabsTrigger>
                         <TabsTrigger value="en">Англійська (Опціонально)</TabsTrigger>
                     </TabsList>
+
                     <TabsContent value="uk" className="space-y-4 outline-none">
                         <div className="space-y-2">
                             <Label htmlFor="name_uk" className="text-base font-semibold">Ім&apos;я та Прізвище <span className="text-red-500">*</span></Label>
@@ -105,6 +117,7 @@ export function CreatePlayerForm() {
                                 id="name_uk"
                                 value={nameUk}
                                 onChange={(e) => setNameUk(e.target.value)}
+                                placeholder="Олександр Назаренко"
                                 className="text-lg"
                                 disabled={isPending}
                             />
@@ -115,6 +128,7 @@ export function CreatePlayerForm() {
                             <RichTextEditor value={bioUk} onChange={setBioUk} disabled={isPending} />
                         </div>
                     </TabsContent>
+
                     <TabsContent value="en" className="space-y-4 outline-none">
                         <div className="space-y-2">
                             <Label htmlFor="name_en" className="text-base font-semibold">Ім&apos;я та Прізвище (Англійська)</Label>
@@ -122,6 +136,7 @@ export function CreatePlayerForm() {
                                 id="name_en"
                                 value={nameEn}
                                 onChange={(e) => setNameEn(e.target.value)}
+                                placeholder="Oleksandr Nazarenko"
                                 className="text-lg"
                                 disabled={isPending}
                             />
@@ -134,10 +149,11 @@ export function CreatePlayerForm() {
                 </Tabs>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Аватар профілю */}
                     <Card className="h-full">
                         <CardHeader className="pb-4">
                             <CardTitle className="text-lg">Аватар профілю</CardTitle>
-                            <CardDescription>Вставте посилання на фото або залиште порожнім (підтягнеться з SofaScore).</CardDescription>
+                            <CardDescription>Вставте посилання на фото або залиште порожнім.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
@@ -150,15 +166,10 @@ export function CreatePlayerForm() {
                                     disabled={isPending}
                                 />
                             </div>
-
                             <div className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm mt-2">
                                 <div className="space-y-0.5">
-                                    <Label htmlFor="manual-avatar" className="text-sm font-medium">
-                                        Кастомне фото
-                                    </Label>
-                                    <p className="text-[12px] text-muted-foreground leading-tight">
-                                        Заборонити SofaScore оновлювати
-                                    </p>
+                                    <Label htmlFor="manual-avatar" className="text-sm font-medium">Кастомне фото</Label>
+                                    <p className="text-[12px] text-muted-foreground leading-tight">Заборонити SofaScore оновлювати</p>
                                 </div>
                                 <Switch
                                     id="manual-avatar"
@@ -169,7 +180,7 @@ export function CreatePlayerForm() {
                             </div>
                             {avatarUrl && (
                                 <div className="mt-4 relative group rounded-md overflow-hidden border aspect-3/4 bg-muted w-32 mx-auto">
-                                    <Image src={avatarUrl} alt="Avatar preview" fill className="object-cover" unoptimized referrerPolicy="no-referrer"/>
+                                    <Image src={avatarUrl} alt="Avatar preview" fill className="object-cover" unoptimized referrerPolicy="no-referrer" />
                                     <button
                                         type="button"
                                         onClick={() => setAvatarUrl("")}
@@ -209,7 +220,7 @@ export function CreatePlayerForm() {
                                     onClientUploadComplete={(res) => {
                                         if (res) {
                                             const newUrls = res.map(file => file.ufsUrl || file.url);
-                                            setMediaUrls(prev => [...prev, ...newUrls].slice(0, 3));
+                                            setMediaUrls(prev => [...prev, ...newUrls].slice(0, 10));
                                             toast.success("Зображення завантажено");
                                         }
                                     }}
@@ -219,8 +230,7 @@ export function CreatePlayerForm() {
                                     content={{
                                         label: "Перетягніть фотографії сюди",
                                         allowedContent: "Зображення до 4MB",
-                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                        button: (state: any) => {
+                                        button: (state: { isUploading: boolean; ready: boolean; files: unknown[] }) => {
                                             if (state.isUploading) return "Завантаження...";
                                             if (state.files && state.files.length > 0) return `Завантажити (${state.files.length})`;
                                             if (state.ready) return "Обрати файли";
@@ -248,7 +258,7 @@ export function CreatePlayerForm() {
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="number">Номер <span className="text-red-500">*</span></Label>
+                                <Label htmlFor="number">Номер *</Label>
                                 <Input
                                     id="number"
                                     type="number"
@@ -259,11 +269,9 @@ export function CreatePlayerForm() {
                                 {state?.errors?.number && <p className="text-red-500 text-sm">{state.errors.number[0]}</p>}
                             </div>
                             <div className="space-y-2">
-                                <Label>Позиція <span className="text-red-500">*</span></Label>
+                                <Label>Позиція *</Label>
                                 <Select value={position} onValueChange={(val) => setPosition(val as PlayerPosition)} disabled={isPending}>
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
                                         {Object.entries(positionTranslations).map(([key, label]) => (
                                             <SelectItem key={key} value={key}>{label}</SelectItem>
@@ -273,11 +281,9 @@ export function CreatePlayerForm() {
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label>Команда <span className="text-red-500">*</span></Label>
+                            <Label>Команда *</Label>
                             <Select value={teamContext} onValueChange={(val) => setTeamContext(val as TeamContext)} disabled={isPending}>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
                                     {Object.entries(teamContextTranslations).map(([key, label]) => (
                                         <SelectItem key={key} value={key}>{label}</SelectItem>
@@ -288,9 +294,7 @@ export function CreatePlayerForm() {
                         <div className="space-y-2">
                             <Label>Національність</Label>
                             <Select value={nationality} onValueChange={setNationality} disabled={isPending}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Оберіть країну" />
-                                </SelectTrigger>
+                                <SelectTrigger><SelectValue placeholder="Оберіть країну" /></SelectTrigger>
                                 <SelectContent>
                                     <ScrollArea className="h-60">
                                         {COUNTRIES.map((country) => (
@@ -305,7 +309,7 @@ export function CreatePlayerForm() {
                                 </SelectContent>
                             </Select>
                         </div>
-                       <div className="space-y-2">
+                        <div className="space-y-2">
                             <Label htmlFor="birthDate">Дата народження</Label>
                             <Input
                                 id="birthDate"
@@ -313,7 +317,7 @@ export function CreatePlayerForm() {
                                 value={birthDate}
                                 onChange={(e) => setBirthDate(e.target.value)}
                                 disabled={isPending}
-                                max={new Date().toISOString().split("T")[0]} 
+                                max={new Date().toISOString().split("T")[0]}
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -343,9 +347,7 @@ export function CreatePlayerForm() {
                 <Card className="flex-1">
                     <CardHeader className="pb-4">
                         <CardTitle className="text-lg">Початкова статистика</CardTitle>
-                        <CardDescription>
-                            {isGoalkeeper ? "Поля для воротаря" : "Поля для польового гравця"}
-                        </CardDescription>
+                        <CardDescription>{isGoalkeeper ? "Поля для воротаря" : "Поля для польового гравця"}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
@@ -359,7 +361,6 @@ export function CreatePlayerForm() {
                                 disabled={isPending}
                             />
                         </div>
-
                         {isGoalkeeper ? (
                             <>
                                 <div className="space-y-2">
@@ -374,9 +375,7 @@ export function CreatePlayerForm() {
                                         className={initialCleanSheets > initialMatches ? "border-red-500 focus-visible:ring-red-500" : ""}
                                     />
                                     {initialCleanSheets > initialMatches && (
-                                        <p className="text-sm text-red-500 font-medium">
-                                            Сухих матчів не може бути більше, ніж зіграних!
-                                        </p>
+                                        <p className="text-sm text-red-500 font-medium">Сухих матчів не може бути більше, ніж зіграних!</p>
                                     )}
                                 </div>
                                 <div className="space-y-2">
@@ -422,14 +421,12 @@ export function CreatePlayerForm() {
             </div>
             <div className="xl:col-span-3 flex flex-col sm:flex-row gap-4 justify-end border-t border-border pt-6 mt-4">
                 <Button type="button" variant="outline" asChild disabled={isPending} className="w-full sm:w-32">
-                    <Link href="/admin/team/players">
-                        Скасувати
-                    </Link>
+                    <Link href="/admin/team/players">Скасувати</Link>
                 </Button>
-                <Button type="submit" className="w-full sm:w-auto min-w-48" disabled={isPending}>
+                <Button type="submit" className="w-full sm:w-auto min-w-48" disabled={isPending || (isGoalkeeper && initialCleanSheets > initialMatches)}>
                     {isPending ? (
                         <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Збереження...</>
-                    ) : "Додати гравця"}
+                    ) : "Оновити гравця"}
                 </Button>
             </div>
         </form>

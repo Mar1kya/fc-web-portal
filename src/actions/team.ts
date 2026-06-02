@@ -19,6 +19,7 @@ export type PlayerFormState = {
   };
   message?: string | null;
   success?: boolean;
+  newSlug?: string;
 };
 
 export type BoundPlayerData = {
@@ -151,8 +152,8 @@ export async function hardDeletePlayer(id: string) {
 }
 export async function createPlayer(
   boundData: BoundPlayerData,
-  prevState: PlayerFormState | undefined,
-  formData: FormData,
+  _prevState: PlayerFormState | undefined,
+  _formData: FormData,
 ): Promise<PlayerFormState | undefined> {
   const session = await auth();
 
@@ -254,6 +255,138 @@ export async function createPlayer(
     console.error("Error creating player:", error);
     return {
       message: "Сталася помилка при створенні гравця",
+    };
+  }
+}
+export async function updatePlayer(
+  playerId: string,
+  boundData: BoundPlayerData,
+  _prevState: PlayerFormState | undefined,
+  _formData: FormData,
+): Promise<PlayerFormState | undefined> {
+  const session = await auth();
+
+  if (!session?.user?.email || session.user.role !== "ADMIN") {
+    return { message: "Немає прав для виконання цієї дії" };
+  }
+
+  try {
+    const validatedFields = createPlayerSchema.safeParse(boundData);
+
+    if (!validatedFields.success) {
+      const flattened = validatedFields.error.flatten();
+      return {
+        errors: flattened.fieldErrors,
+        message: "Перевірте правильність заповнення полів",
+      };
+    }
+
+    const data = validatedFields.data;
+
+    const existingPlayer = await prisma.player.findUnique({
+      where: { id: playerId },
+      select: { slug: true },
+    });
+
+    if (!existingPlayer) {
+      return { message: "Гравця не знайдено" };
+    }
+    const oldSlug = existingPlayer.slug;
+    const nameForSlug =
+      data.name_en && data.name_en.trim() !== "" ? data.name_en : data.name_uk;
+    const newSlug = generatePlayerSlug(nameForSlug, data.number);
+
+    if (oldSlug !== newSlug) {
+      const slugConflict = await prisma.player.findUnique({
+        where: { slug: newSlug },
+      });
+      if (slugConflict) {
+        return {
+          message: `Гравець з таким ім'ям та номером (${newSlug}) вже існує. Змініть дані.`,
+        };
+      }
+    }
+
+    const translations = [
+      {
+        language: "uk",
+        name: data.name_uk,
+        bio: data.bio_uk || null,
+      },
+    ];
+
+    if (data.name_en && data.name_en.trim() !== "") {
+      translations.push({
+        language: "en",
+        name: data.name_en,
+        bio: data.bio_en || null,
+      });
+    }
+
+    const isGoalkeeper = data.position === PlayerPosition.GOALKEEPER;
+    const cleanSheets = isGoalkeeper ? data.initialCleanSheets : 0;
+    const goalsConceded = isGoalkeeper ? data.initialGoalsConceded : 0;
+    const goals = isGoalkeeper ? 0 : data.initialGoals;
+
+    await prisma.player.update({
+      where: { id: playerId },
+      data: {
+        slug: newSlug,
+        number: data.number,
+        position: data.position,
+        teamContext: data.teamContext,
+        avatar: data.avatarUrl || null,
+        isManualAvatar: data.isManualAvatar,
+        birthDate: data.birthDate || null,
+        height: data.height || null,
+        weight: data.weight || null,
+        nationality: data.nationality || null,
+        initialMatches: data.initialMatches,
+        initialGoals: goals,
+        initialAssists: data.initialAssists,
+        initialCleanSheets: cleanSheets,
+        initialGoalsConceded: goalsConceded,
+
+        translations: {
+          deleteMany: {},
+          create: translations,
+        },
+        media: {
+          deleteMany: {},
+          create:
+            data.mediaUrls && data.mediaUrls.length > 0
+              ? data.mediaUrls.map((url: string) => ({
+                  url,
+                  type: "IMAGE",
+                }))
+              : [],
+        },
+      },
+    });
+    LOCALES.forEach((locale) => {
+      revalidatePath(`/${locale}/admin/team`);
+      revalidatePath(`/${locale}/admin/team/players`);
+      revalidatePath(`/${locale}/team`);
+      revalidatePath(`/${locale}/team/${oldSlug}`);
+      if (oldSlug !== newSlug) {
+        revalidatePath(`/${locale}/team/${newSlug}`);
+      }
+      revalidatePath(`/${locale}/shop/player`);
+      revalidatePath(`/${locale}/shop/player/${oldSlug}`);
+      if (oldSlug !== newSlug) {
+        revalidatePath(`/${locale}/shop/player/${newSlug}`);
+      }
+    });
+
+    return {
+      success: true,
+      message: "Профіль гравця успішно оновлено!",
+      newSlug,
+    };
+  } catch (error) {
+    console.error("Error updating player:", error);
+    return {
+      message: "Сталася помилка при оновленні гравця",
     };
   }
 }

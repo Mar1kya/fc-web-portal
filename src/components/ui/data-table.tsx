@@ -40,7 +40,8 @@ export function DataTable<TData, TValue>({
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [globalFilter, setGlobalFilter] = useState<string>("")
-
+    
+    // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
         data,
         columns,
@@ -76,7 +77,7 @@ export function DataTable<TData, TValue>({
                         if (!column) return null;
 
                         return (
-                           <Select
+                            <Select
                                 key={filter.columnId}
                                 value={(column.getFilterValue() as string) ?? "ALL"}
                                 onValueChange={(value) => column.setFilterValue(value)}
