@@ -199,6 +199,7 @@ model Player {
   position             PlayerPosition
   teamContext          TeamContext         @default(MAIN_TEAM)
   avatar               String?
+  isManualAvatar       Boolean             @default(false)
   media                Media[]
   birthDate            DateTime?
   height               Int?
@@ -529,27 +530,28 @@ enum OrderStatusEnum {
   DELIVERED
   CANCELLED
 }
+
 enum PaymentMethodEnum {
-  CARD 
-  COD  
+  CARD
+  COD
 }
 
 model Order {
-  id         String          @id @default(cuid())
-  userId     String?
-  user       User?           @relation(fields: [userId], references: [id])
-  status     OrderStatusEnum @default(PENDING)
-  isPaid     Boolean         @default(false)
-  totalPrice Decimal         @db.Decimal(10, 2)
-  firstName  String
-  lastName   String
-  email      String
-  phone      String
-  city       String
-  postalCode String? 
-  address    String? 
-  orderItems OrderItem[]
-  payment    Payment?
+  id            String            @id @default(cuid())
+  userId        String?
+  user          User?             @relation(fields: [userId], references: [id])
+  status        OrderStatusEnum   @default(PENDING)
+  isPaid        Boolean           @default(false)
+  totalPrice    Decimal           @db.Decimal(10, 2)
+  firstName     String
+  lastName      String
+  email         String
+  phone         String
+  city          String
+  postalCode    String?
+  address       String?
+  orderItems    OrderItem[]
+  payment       Payment?
   paymentMethod PaymentMethodEnum @default(CARD)
 
   createdAt DateTime  @default(now())
@@ -558,6 +560,7 @@ model Order {
 
   @@index([deletedAt])
 }
+
 model OrderItem {
   id           String          @id @default(cuid())
   orderId      String

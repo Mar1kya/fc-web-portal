@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button"
 import { ArrowUpDown, Newspaper } from "lucide-react"
 import Image from "next/image"
 import { getTranslation } from "@/lib/utils/get-translation"
-import { type PostWithRelations, postTypeTranslations, teamContextTranslations } from "../../_components/columns"
+import { type PostWithRelations } from "../../_components/columns"
 import { TrashActions } from "./trash-actions"
+import { postTypeTranslations, teamContextTranslations } from "@/lib/constants"
 
 export const trashColumns: ColumnDef<PostWithRelations>[] = [
     {
@@ -39,13 +40,19 @@ export const trashColumns: ColumnDef<PostWithRelations>[] = [
         accessorKey: "type",
         header: "Категорія",
         cell: ({ row }) => <Badge variant="outline" className="text-xs px-2.5 py-0.5">{postTypeTranslations[row.original.type]}</Badge>,
-        filterFn: (row, id, value) => value === "ALL" || row.getValue(id) === value,
+        filterFn: (row, id, value) => {
+            if (!value || value === "ALL") return true;
+            return row.getValue(id) === value;
+        },
     },
     {
         accessorKey: "teamContext",
         header: "Команда",
         cell: ({ row }) => <Badge variant="secondary" className="text-xs px-2.5 py-0.5">{teamContextTranslations[row.original.teamContext]}</Badge>,
-        filterFn: (row, id, value) => value === "ALL" || row.getValue(id) === value,
+        filterFn: (row, id, value) => {
+            if (!value || value === "ALL") return true;
+            return row.getValue(id) === value;
+        },
     },
     {
         accessorKey: "deletedAt",

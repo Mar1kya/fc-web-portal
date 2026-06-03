@@ -3,13 +3,33 @@ import { prisma } from "@/lib/prisma"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
-import { DataTable } from "../_components/data-table"
 import { trashColumns } from "./_components/trash-columns"
+import { DataTable, DataTableFilterOption } from "@/components/ui/data-table"
+import { postTypeTranslations, teamContextTranslations } from "@/lib/constants"
 
 export const metadata: Metadata = {
     title: "Кошик новин",
     description: "Управління видаленими публікаціями."
 }
+
+const trashFilters: DataTableFilterOption[] = [
+    {
+        columnId: "teamContext", 
+        placeholder: "Всі команди",
+        options: Object.entries(teamContextTranslations).map(([value, label]) => ({
+            value,
+            label,
+        })),
+    },
+    {
+        columnId: "type",
+        placeholder: "Всі категорії",
+        options: Object.entries(postTypeTranslations).map(([value, label]) => ({
+            value,
+            label,
+        })),
+    },
+];
 
 export default async function TrashPage() {
     const trashedPosts = await prisma.post.findMany({
@@ -43,7 +63,12 @@ export default async function TrashPage() {
             </div>
 
             <div className="mt-4">
-                <DataTable columns={trashColumns} data={trashedPosts} />
+                <DataTable 
+                    columns={trashColumns} 
+                    data={trashedPosts} 
+                    searchPlaceholder="Пошук за заголовком..."
+                    filters={trashFilters}
+                />
             </div>
         </div>
     )

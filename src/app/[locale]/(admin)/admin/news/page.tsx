@@ -3,13 +3,38 @@ import { prisma } from "@/lib/prisma"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { Plus, Trash2 } from "lucide-react"
-import { DataTable } from "./_components/data-table"
 import { columns } from "./_components/columns"
+import { DataTable, DataTableFilterOption } from "@/components/ui/data-table"
+import { postStatusOptions, postTypeTranslations, teamContextTranslations } from "@/lib/constants"
 
 export const metadata: Metadata = {
     title: "Новини",
     description: "Управління публікаціями, інтерв'ю та заявами клубу."
 }
+
+const newsFilters: DataTableFilterOption[] = [
+    {
+        columnId: "teamContext", 
+        placeholder: "Всі команди",
+        options: Object.entries(teamContextTranslations).map(([value, label]) => ({
+            value,
+            label,
+        })),
+    },
+    {
+        columnId: "type",
+        placeholder: "Всі категорії",
+        options: Object.entries(postTypeTranslations).map(([value, label]) => ({
+            value,
+            label,
+        })),
+    },
+    {
+        columnId: "isPublished",
+        placeholder: "Всі статуси",
+       options: postStatusOptions,
+    },
+];
 
 export default async function AdminNewsPage() {
     const posts = await prisma.post.findMany({
@@ -50,7 +75,12 @@ export default async function AdminNewsPage() {
                 </div>
             </div>
             <div className="mt-4">
-                <DataTable columns={columns} data={posts} />
+                <DataTable 
+                    columns={columns} 
+                    data={posts} 
+                    searchPlaceholder="Пошук за заголовком..."
+                    filters={newsFilters}
+                />
             </div>
         </div>
     )

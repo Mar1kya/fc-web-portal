@@ -5,26 +5,15 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ArrowUpDown, Newspaper } from "lucide-react"
 import Image from "next/image"
-import { Prisma, PostType, TeamContext } from "../../../../../../../generated/prisma"
+import { Prisma } from "../../../../../../../generated/prisma"
 import { PostActions } from "./post-actions"
 import { getTranslation } from "@/lib/utils/get-translation"
+import { postTypeTranslations, teamContextTranslations } from "@/lib/constants"
 
 export type PostWithRelations = Prisma.PostGetPayload<{
     include: { translations: true; media: true }
 }>
 
-export const postTypeTranslations: Record<PostType, string> = {
-    NEWS: "Новина",
-    INTERVIEW: "Інтерв'ю",
-    STATEMENT: "Офіційно"
-};
-
-export const teamContextTranslations: Record<TeamContext, string> = {
-    MAIN_TEAM: "Основна команда",
-    U19: "U-19",
-    ACADEMY: "Академія",
-    GENERAL: "Клуб"
-};
 
 export const columns: ColumnDef<PostWithRelations>[] = [
     {
@@ -79,7 +68,10 @@ export const columns: ColumnDef<PostWithRelations>[] = [
                 {postTypeTranslations[row.original.type]}
             </Badge>
         ),
-        filterFn: (row, id, value) => value === "ALL" || row.getValue(id) === value,
+        filterFn: (row, id, value) => {
+            if (!value || value === "ALL") return true;
+            return row.getValue(id) === value;
+        },
     },
     {
         accessorKey: "teamContext",
@@ -89,7 +81,10 @@ export const columns: ColumnDef<PostWithRelations>[] = [
                 {teamContextTranslations[row.original.teamContext]}
             </Badge>
         ),
-        filterFn: (row, id, value) => value === "ALL" || row.getValue(id) === value,
+        filterFn: (row, id, value) => {
+            if (!value || value === "ALL") return true;
+            return row.getValue(id) === value;
+        },
     },
     {
         accessorKey: "isPublished",
