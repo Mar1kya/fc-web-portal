@@ -2,11 +2,10 @@
 
 import { useState, useTransition } from "react"
 import { Season } from "../../../../../../../../generated/prisma"
-import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
-import { 
-    DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
-    DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger 
+import {
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+    DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import {
     AlertDialog, AlertDialogContent, AlertDialogDescription,
@@ -16,10 +15,12 @@ import {
 import { MoreHorizontal, Edit, Archive } from "lucide-react"
 import { toast } from "sonner"
 import { softDeleteSeason } from "@/actions/season"
+import { SeasonModal } from "./season-modal"
 
 export function SeasonActions({ season }: { season: Season }) {
     const [isPending, startTransition] = useTransition();
     const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const handleArchive = () => {
         startTransition(async () => {
@@ -45,12 +46,20 @@ export function SeasonActions({ season }: { season: Season }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Дії</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                        <Link href={`/admin/tournaments/seasons/${season.id}/edit`} className="cursor-pointer">
-                            <Edit className="mr-2 h-4 w-4" />
-                            Редагувати
-                        </Link>
-                    </DropdownMenuItem>
+                    <SeasonModal
+                        season={season}
+                        open={isEditModalOpen}
+                        onOpenChange={setIsEditModalOpen}
+                        trigger={
+                            <DropdownMenuItem onSelect={(e) => {
+                                e.preventDefault();
+                                setIsEditModalOpen(true);
+                            }} className="cursor-pointer">
+                                <Edit className="mr-2 h-4 w-4" />
+                                Редагувати
+                            </DropdownMenuItem>
+                        }
+                    />
                     <DropdownMenuSeparator />
                     <AlertDialogTrigger asChild>
                         <DropdownMenuItem
@@ -67,13 +76,13 @@ export function SeasonActions({ season }: { season: Season }) {
                 <AlertDialogHeader>
                     <AlertDialogTitle>Переміщення в архів</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Ви збираєтеся перемістити сезон <strong>&quot;{season.name}&quot;</strong> в архів. 
+                        Ви збираєтеся перемістити сезон <strong>&quot;{season.name}&quot;</strong> в архів.
                         Ви зможете відновити його пізніше з кошика.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel disabled={isPending}>Скасувати</AlertDialogCancel>
-                    <Button 
+                    <Button
                         variant="destructive"
                         onClick={handleArchive}
                         disabled={isPending}

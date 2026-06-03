@@ -146,17 +146,21 @@ export const createCoachSchema = z.object({
 
 export const seasonSchema = z
   .object({
-    name: z.string().min(4, "Назва обов'язкова (наприклад: 2024/2025)"),
-    sofascoreId: z
-      .string()
-      .optional()
-      .nullable()
-      .transform((v) => (v === "" ? null : Number(v))),
-    startDate: z.coerce.date({ required_error: "Оберіть дату початку" }),
-    endDate: z.coerce.date({ required_error: "Оберіть дату завершення" }),
+    name: z.string().min(4, "Назва обов'язкова (наприклад: 2025/2026)"),
+    sofascoreId: z.coerce.number().nullable().optional(),
+    startDate: z
+      .string({ required_error: "Оберіть дату початку" })
+      .min(1, "Оберіть дату початку")
+      .transform((str) => new Date(str)),
+    endDate: z
+      .string({ required_error: "Оберіть дату завершення" })
+      .min(1, "Оберіть дату завершення")
+      .transform((str) => new Date(str)),
+      
     isActive: z.boolean().default(false),
   })
   .refine((data) => data.startDate <= data.endDate, {
     message: "Дата завершення не може бути раніше дати початку",
     path: ["endDate"],
   });
+

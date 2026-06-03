@@ -44,7 +44,7 @@ export const columns: ColumnDef<Season>[] = [
         header: "SofaScore ID",
         cell: ({ row }) => {
             const id = row.original.sofascoreId;
-            return id ? <Badge variant="outline">{id}</Badge> : <span className="text-muted-foreground">—</span>;
+            return id ? <Badge variant="outline">{id}</Badge> : <span className="text-muted-foreground">-</span>;
         },
     },
     {

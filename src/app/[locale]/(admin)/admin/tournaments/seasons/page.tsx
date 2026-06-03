@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Archive, Plus } from "lucide-react"
 import { columns } from "./_components/columns"
 import { DataTable } from "@/components/ui/data-table"
+import { SeasonModal } from "./_components/season-modal"
 
 export const metadata = {
     title: "Сезони",
@@ -36,12 +37,14 @@ export default async function SeasonsPage() {
                             Архів
                         </Link>
                     </Button>
-                    <Button asChild className="gap-2 flex-1 sm:flex-none">
-                        <Link href="/admin/tournaments/seasons/create">
-                            <Plus className="w-4 h-4" /> 
-                            Створити сезон
-                        </Link>
-                    </Button>
+                    <SeasonModal 
+                        trigger={
+                            <Button className="gap-2 flex-1 sm:flex-none">
+                                <Plus className="w-4 h-4" /> 
+                                Створити сезон
+                            </Button>
+                        }
+                    />
                 </div>
             </div>
             <div className="mt-4">

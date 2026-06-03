@@ -8,7 +8,7 @@ import { LOCALES } from "@/lib/constants";
 import { seasonSchema } from "@/lib/schemas";
 import slugify from "slugify";
 
-export type BoundSeasonData = z.infer<typeof seasonSchema>;
+export type BoundSeasonData = z.input<typeof seasonSchema>;
 
 export type SeasonFormState = {
   errors?: {
@@ -51,12 +51,29 @@ export async function createSeason(
 
     const data = validatedFields.data;
     const slug = slugify(data.name.replace(/\//g, "-")).toLowerCase();
+    const orConditions: Array<{
+      slug?: string;
+      name?: string;
+      sofascoreId?: number;
+    }> = [{ slug }, { name: data.name }];
+
+    if (data.sofascoreId != null) {
+      orConditions.push({ sofascoreId: data.sofascoreId });
+    }
 
     const existing = await prisma.season.findFirst({
-      where: { OR: [{ slug }, { name: data.name }] },
+      where: { OR: orConditions },
     });
 
     if (existing) {
+      if (
+        data.sofascoreId != null &&
+        existing.sofascoreId === data.sofascoreId
+      ) {
+        return {
+          message: `Сезон з SofaScore ID ${data.sofascoreId} вже існує (можливо, в архіві).`,
+        };
+      }
       return {
         message: `Сезон з такою назвою або слагом (${slug}) вже існує.`,
       };
@@ -125,6 +142,17 @@ export async function updateSeason(
       if (conflict) return { message: "Сезон з такою назвою вже існує." };
     }
 
+    if (data.sofascoreId != null && data.sofascoreId !== existing.sofascoreId) {
+      const conflictId = await prisma.season.findUnique({
+        where: { sofascoreId: data.sofascoreId },
+      });
+      if (conflictId) {
+        return {
+          message: `SofaScore ID ${data.sofascoreId} вже використовується іншим сезоном (перевірте архів).`,
+        };
+      }
+    }
+
     await prisma.$transaction(async (tx) => {
       if (data.isActive && !existing.isActive) {
         await tx.season.updateMany({
@@ -174,7 +202,7 @@ export async function toggleActiveSeason(id: string) {
 
     revalidateSeasonPaths();
     return { success: true, message: "Активний сезон змінено!" };
-  } catch (error) {
+  } catch {
     return { success: false, message: "Помилка при зміні статусу" };
   }
 }
@@ -201,7 +229,7 @@ export async function softDeleteSeason(id: string) {
 
     revalidateSeasonPaths();
     return { success: true, message: "Сезон переміщено в архів" };
-  } catch (error) {
+  } catch {
     return { success: false, message: "Помилка архівації" };
   }
 }
@@ -220,7 +248,7 @@ export async function restoreSeason(id: string) {
 
     revalidateSeasonPaths();
     return { success: true, message: "Сезон відновлено!" };
-  } catch (error) {
+  } catch {
     return { success: false, message: "Помилка відновлення" };
   }
 }

@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Season } from "../../../../../../../../../generated/prisma"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, CalendarRange } from "lucide-react"
+import { ArrowUpDown } from "lucide-react"
 import { ArchiveActions } from "./archive-actions"
 
 export const archiveColumns: ColumnDef<Season>[] = [
@@ -25,8 +25,7 @@ export const archiveColumns: ColumnDef<Season>[] = [
             const end = new Date(row.original.endDate).toLocaleDateString("uk-UA");
             return (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground/70">
-                    <CalendarRange className="w-4 h-4" />
-                    <span>{start} — {end}</span>
+                    <span>{start} - {end}</span>
                 </div>
             )
         },
@@ -39,7 +38,7 @@ export const archiveColumns: ColumnDef<Season>[] = [
             return id ? (
                 <Badge variant="outline" className="opacity-60">{id}</Badge>
             ) : (
-                <span className="text-muted-foreground/70">—</span>
+                <span className="text-muted-foreground/70">-</span>
             );
         },
     },
