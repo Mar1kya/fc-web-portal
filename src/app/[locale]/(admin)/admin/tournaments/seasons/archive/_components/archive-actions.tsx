@@ -1,33 +1,28 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { Season } from "../../../../../../../../../generated/prisma"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import {
-    AlertDialog,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogCancel,
-    AlertDialogTrigger,
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+    DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
+import {
+    AlertDialog, AlertDialogContent, AlertDialogDescription,
+    AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+    AlertDialogCancel, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { MoreHorizontal, RefreshCcw, Trash } from "lucide-react"
 import { toast } from "sonner"
-import { getTranslation } from "@/lib/utils/get-translation"
-import { restorePlayer, hardDeletePlayer } from "@/actions/team"
-import { type PlayerWithRelations } from "../../_components/columns"
+import { restoreSeason, hardDeleteSeason } from "@/actions/season"
 
-export function ArchiveActions({ player }: { player: PlayerWithRelations }) {
+export function ArchiveActions({ season }: { season: Season }) {
     const [isPending, startTransition] = useTransition();
     const [isAlertOpen, setIsAlertOpen] = useState(false);
-    
-    const name = getTranslation(player, "uk")?.name || "Без імені";
 
     const handleRestore = () => {
         startTransition(async () => {
-            const result = await restorePlayer(player.id);
+            const result = await restoreSeason(season.id);
             if (result.success) {
                 toast.success(result.message);
             } else {
@@ -38,7 +33,7 @@ export function ArchiveActions({ player }: { player: PlayerWithRelations }) {
 
     const handleHardDelete = () => {
         startTransition(async () => {
-            const result = await hardDeletePlayer(player.id);
+            const result = await hardDeleteSeason(season.id);
             if (result.success) {
                 toast.success(result.message);
                 setIsAlertOpen(false);
@@ -60,13 +55,13 @@ export function ArchiveActions({ player }: { player: PlayerWithRelations }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Дії архіву</DropdownMenuLabel>
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                         onClick={handleRestore}
                         disabled={isPending}
                         className="text-emerald-600 focus:text-emerald-700 focus:bg-emerald-500/10 cursor-pointer"
                     >
                         <RefreshCcw className="mr-2 h-4 w-4" />
-                        Відновити гравця
+                        Відновити сезон
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <AlertDialogTrigger asChild>
@@ -84,13 +79,13 @@ export function ArchiveActions({ player }: { player: PlayerWithRelations }) {
                 <AlertDialogHeader>
                     <AlertDialogTitle>Остаточне видалення</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Ви збираєтеся назавжди видалити профіль гравця <strong>&quot;{name}&quot;</strong>. 
-                        Цю дію неможливо скасувати. Усі переклади будуть втрачені.
+                        Ви збираєтеся назавжди видалити сезон <strong>&quot;{season.name}&quot;</strong>.
+                        Цю дію неможливо скасувати. Всі матчі та турнірні таблиці, прив&apos;язані до цього сезону, також будуть видалені!
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel disabled={isPending}>Скасувати</AlertDialogCancel>
-                    <Button 
+                    <Button
                         variant="destructive"
                         onClick={handleHardDelete}
                         disabled={isPending}

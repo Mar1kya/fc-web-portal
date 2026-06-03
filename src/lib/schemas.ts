@@ -131,15 +131,32 @@ export const createPlayerSchema = z.object({
 });
 
 export const createCoachSchema = z.object({
-    name_uk: z.string().min(2, "Ім'я обов'язкове"),
-    role_uk: z.string().min(2, "Посада обов'язкова"), 
-    bio_uk: z.string().optional(),
-    name_en: z.string().optional(),
-    role_en: z.string().optional(),
-    bio_en: z.string().optional(),
-    teamContext: z.nativeEnum(TeamContext),
-    avatarUrl: z.string().optional(),
-    mediaUrls: z.array(z.string()).default([]),
-    birthDate: z.coerce.date().optional(),
-    nationality: z.string().max(10).optional(),
+  name_uk: z.string().min(2, "Ім'я обов'язкове"),
+  role_uk: z.string().min(2, "Посада обов'язкова"),
+  bio_uk: z.string().optional(),
+  name_en: z.string().optional(),
+  role_en: z.string().optional(),
+  bio_en: z.string().optional(),
+  teamContext: z.nativeEnum(TeamContext),
+  avatarUrl: z.string().optional(),
+  mediaUrls: z.array(z.string()).default([]),
+  birthDate: z.coerce.date().optional(),
+  nationality: z.string().max(10).optional(),
 });
+
+export const seasonSchema = z
+  .object({
+    name: z.string().min(4, "Назва обов'язкова (наприклад: 2024/2025)"),
+    sofascoreId: z
+      .string()
+      .optional()
+      .nullable()
+      .transform((v) => (v === "" ? null : Number(v))),
+    startDate: z.coerce.date({ required_error: "Оберіть дату початку" }),
+    endDate: z.coerce.date({ required_error: "Оберіть дату завершення" }),
+    isActive: z.boolean().default(false),
+  })
+  .refine((data) => data.startDate <= data.endDate, {
+    message: "Дата завершення не може бути раніше дати початку",
+    path: ["endDate"],
+  });

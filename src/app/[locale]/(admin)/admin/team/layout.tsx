@@ -1,9 +1,4 @@
-import { Metadata } from "next";
 import { TeamNav } from "./_components/team-nav";
-
-export const metadata: Metadata = {
-    title: "Керування командою",
-};
 
 export default function TeamLayout({ children }: { children: React.ReactNode }) {
     return (

@@ -1,4 +1,3 @@
-import { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
@@ -7,14 +6,14 @@ import { columns } from "./_components/columns"
 import { DataTable, DataTableFilterOption } from "@/components/ui/data-table"
 import { postStatusOptions, postTypeTranslations, teamContextTranslations } from "@/lib/constants"
 
-export const metadata: Metadata = {
+export const metadata = {
     title: "Новини",
     description: "Управління публікаціями, інтерв'ю та заявами клубу."
 }
 
 const newsFilters: DataTableFilterOption[] = [
     {
-        columnId: "teamContext", 
+        columnId: "teamContext",
         placeholder: "Всі команди",
         options: Object.entries(teamContextTranslations).map(([value, label]) => ({
             value,
@@ -32,7 +31,7 @@ const newsFilters: DataTableFilterOption[] = [
     {
         columnId: "isPublished",
         placeholder: "Всі статуси",
-       options: postStatusOptions,
+        options: postStatusOptions,
     },
 ];
 
@@ -75,9 +74,9 @@ export default async function AdminNewsPage() {
                 </div>
             </div>
             <div className="mt-4">
-                <DataTable 
-                    columns={columns} 
-                    data={posts} 
+                <DataTable
+                    columns={columns}
+                    data={posts}
                     searchPlaceholder="Пошук за заголовком..."
                     filters={newsFilters}
                 />

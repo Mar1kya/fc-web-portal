@@ -3,10 +3,8 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { getTranslation } from "@/lib/utils/get-translation"
 import { Badge } from "@/components/ui/badge"
-import Image from "next/image"
 import { PlayerPosition, Prisma } from "../../../../../../../../generated/prisma"
 import { PlayerActions } from "./player-actions"
-import { User } from "lucide-react"
 import { TableAvatar } from "./table-avatar"
 
 export type PlayerWithRelations = Prisma.PlayerGetPayload<{
