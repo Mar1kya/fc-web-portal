@@ -5,6 +5,7 @@ import { Archive, Plus, RefreshCw } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { DataTable, DataTableFilterOption } from "@/components/ui/data-table";
 import { columns } from "./_components/columns";
+import { SyncRosterButton } from "./_components/sync-roster-button";
 
 const teamTranslations: Record<TeamContext, string> = {
     MAIN_TEAM: "Основна команда",
@@ -83,11 +84,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
                             Архів
                         </Link>
                     </Button>
-
-                    <Button variant="outline" className="gap-2">
-                        <RefreshCw className="w-4 h-4" />
-                        Синхронізувати
-                    </Button>
+                    <SyncRosterButton />
                     <Button asChild className="gap-2">
                         <Link href="/admin/team/players/create">
                             <Plus className="w-4 h-4" /> Додати гравця

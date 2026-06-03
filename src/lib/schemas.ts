@@ -106,7 +106,7 @@ export const createPostSchema = z.object({
 });
 
 export const createPlayerSchema = z.object({
-  name_uk: z.string().min(2, "Ім'я українською обов'язкове"),
+  name_uk: z.string().min(2, "Ім'я обов'язкове"),
   bio_uk: z.string().optional(),
   name_en: z.string().optional(),
   bio_en: z.string().optional(),
@@ -128,4 +128,18 @@ export const createPlayerSchema = z.object({
   initialAssists: z.coerce.number().default(0),
   initialCleanSheets: z.coerce.number().default(0),
   initialGoalsConceded: z.coerce.number().default(0),
+});
+
+export const createCoachSchema = z.object({
+    name_uk: z.string().min(2, "Ім'я обов'язкове"),
+    role_uk: z.string().min(2, "Посада обов'язкова"), 
+    bio_uk: z.string().optional(),
+    name_en: z.string().optional(),
+    role_en: z.string().optional(),
+    bio_en: z.string().optional(),
+    teamContext: z.nativeEnum(TeamContext),
+    avatarUrl: z.string().optional(),
+    mediaUrls: z.array(z.string()).default([]),
+    birthDate: z.coerce.date().optional(),
+    nationality: z.string().max(10).optional(),
 });

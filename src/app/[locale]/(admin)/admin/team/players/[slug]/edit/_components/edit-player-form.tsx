@@ -101,15 +101,12 @@ export function EditPlayerForm({ player }: { player: PlayerWithRelations }) {
 
     return (
         <form action={actionFn} className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
-
-            {/* ЛІВА ЧАСТИНА */}
             <div className="xl:col-span-2 space-y-6 flex flex-col">
                 <Tabs defaultValue="uk" className="w-full border rounded-lg bg-card p-4 sm:p-6 shadow-sm">
                     <TabsList className="grid w-full grid-cols-2 max-w-100 mb-6">
                         <TabsTrigger value="uk">Українська версія</TabsTrigger>
                         <TabsTrigger value="en">Англійська (Опціонально)</TabsTrigger>
                     </TabsList>
-
                     <TabsContent value="uk" className="space-y-4 outline-none">
                         <div className="space-y-2">
                             <Label htmlFor="name_uk" className="text-base font-semibold">Ім&apos;я та Прізвище <span className="text-red-500">*</span></Label>
@@ -128,7 +125,6 @@ export function EditPlayerForm({ player }: { player: PlayerWithRelations }) {
                             <RichTextEditor value={bioUk} onChange={setBioUk} disabled={isPending} />
                         </div>
                     </TabsContent>
-
                     <TabsContent value="en" className="space-y-4 outline-none">
                         <div className="space-y-2">
                             <Label htmlFor="name_en" className="text-base font-semibold">Ім&apos;я та Прізвище (Англійська)</Label>
@@ -147,26 +143,63 @@ export function EditPlayerForm({ player }: { player: PlayerWithRelations }) {
                         </div>
                     </TabsContent>
                 </Tabs>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Аватар профілю */}
-                    <Card className="h-full">
+                    <Card className="h-full flex flex-col">
                         <CardHeader className="pb-4">
                             <CardTitle className="text-lg">Аватар профілю</CardTitle>
-                            <CardDescription>Вставте посилання на фото або залиште порожнім.</CardDescription>
+                            <CardDescription>Завантажте кастомне фото гравця.</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="avatarUrl">URL фотографії</Label>
-                                <Input
-                                    id="avatarUrl"
-                                    value={avatarUrl}
-                                    onChange={(e) => setAvatarUrl(e.target.value)}
-                                    placeholder="https://..."
-                                    disabled={isPending}
+                        <CardContent className="space-y-4 flex-1 flex flex-col justify-center">
+                            {avatarUrl ? (
+                                <div className="mt-4 relative group rounded-md overflow-hidden border aspect-3/4 bg-muted w-32 mx-auto">
+                                    <Image
+                                        src={avatarUrl}
+                                        alt="Avatar preview"
+                                        fill
+                                        className="object-cover"
+                                        unoptimized
+                                        referrerPolicy="no-referrer"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setAvatarUrl("")}
+                                        className="absolute top-1 right-1 bg-black/50 hover:bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <UploadDropzone
+                                    endpoint="teamMemberImage"
+                                    onClientUploadComplete={(res) => {
+                                        if (res && res.length > 0) {
+                                            setAvatarUrl(res[0].ufsUrl || res[0].url);
+                                            toast.success("Аватар успішно завантажено");
+                                        }
+                                    }}
+                                    onUploadError={(error: Error) => {
+                                        toast.error(`Помилка: ${error.message}`);
+                                    }}
+                                    content={{
+                                        label: "Перетягніть фото сюди",
+                                        allowedContent: "Зображення до 4MB (1 шт.)",
+                                        button: (state: { isUploading: boolean; ready: boolean; files: unknown[] }) => {
+                                            if (state.isUploading) return "Завантаження...";
+                                            if (state.files && state.files.length > 0) return "Завантажити";
+                                            if (state.ready) return "Обрати файл";
+                                            return "Підготовка...";
+                                        },
+                                    }}
+                                    appearance={{
+                                        container: "border-2 border-dashed border-emerald-500/40 hover:border-emerald-600 transition-all bg-muted/10 py-6 focus-within:ring-0 focus-within:ring-offset-0",
+                                        label: "text-emerald-600 hover:text-emerald-700 font-semibold text-sm mt-2",
+                                        allowedContent: "text-muted-foreground text-xs mt-1",
+                                        button: "bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 mt-3 ut-uploading:cursor-not-allowed",
+                                        uploadIcon: "w-8 h-8 text-emerald-600",
+                                    }}
                                 />
-                            </div>
-                            <div className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm mt-2">
+                            )}
+                            <div className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm mt-4">
                                 <div className="space-y-0.5">
                                     <Label htmlFor="manual-avatar" className="text-sm font-medium">Кастомне фото</Label>
                                     <p className="text-[12px] text-muted-foreground leading-tight">Заборонити SofaScore оновлювати</p>
@@ -178,18 +211,6 @@ export function EditPlayerForm({ player }: { player: PlayerWithRelations }) {
                                     disabled={isPending}
                                 />
                             </div>
-                            {avatarUrl && (
-                                <div className="mt-4 relative group rounded-md overflow-hidden border aspect-3/4 bg-muted w-32 mx-auto">
-                                    <Image src={avatarUrl} alt="Avatar preview" fill className="object-cover" unoptimized referrerPolicy="no-referrer" />
-                                    <button
-                                        type="button"
-                                        onClick={() => setAvatarUrl("")}
-                                        className="absolute top-1 right-1 bg-black/50 hover:bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            )}
                         </CardContent>
                     </Card>
                     <Card className="h-full flex flex-col">
