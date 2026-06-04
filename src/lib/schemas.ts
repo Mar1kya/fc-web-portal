@@ -164,3 +164,9 @@ export const seasonSchema = z
     path: ["endDate"],
   });
 
+export const tournamentSchema = z.object({
+  name_uk: z.string().min(2, "Назва українською обов'язкова"),
+  name_en: z.string().min(2, "Назва англійською обов'язкова"),
+  sofascoreId: z.coerce.number().nullable().optional(),
+  hasStandings: z.boolean().default(false),
+});
