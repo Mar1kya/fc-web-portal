@@ -205,7 +205,7 @@ export async function softDeleteTournament(id: string) {
 
     revalidateTournamentPaths();
     return { success: true, message: "Турнір переміщено в архів" };
-  } catch (error) {
+  } catch {
     return { success: false, message: "Помилка архівації" };
   }
 }
@@ -224,7 +224,7 @@ export async function restoreTournament(id: string) {
 
     revalidateTournamentPaths();
     return { success: true, message: "Турнір успішно відновлено!" };
-  } catch (error) {
+  } catch {
     return { success: false, message: "Помилка відновлення" };
   }
 }
@@ -263,7 +263,7 @@ export async function toggleTournamentStandings(
     await prisma.tournament.update({ where: { id }, data: { hasStandings } });
     revalidateTournamentPaths();
     return { success: true, message: "Статус турнірної таблиці оновлено" };
-  } catch (error) {
+  } catch {
     return { success: false, message: "Помилка оновлення" };
   }
 }

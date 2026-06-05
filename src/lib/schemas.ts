@@ -170,3 +170,8 @@ export const tournamentSchema = z.object({
   sofascoreId: z.coerce.number().nullable().optional(),
   hasStandings: z.boolean().default(false),
 });
+
+export const dictionarySchema = z.object({
+    name_uk: z.string().min(1, "Назва українською обов'язкова"),
+    name_en: z.string().min(1, "Назва англійською обов'язкова"),
+});

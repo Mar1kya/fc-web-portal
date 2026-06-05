@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useTransition, useEffect } from "react"
+import { useState, useTransition } from "react"
 import { Season } from "../../../../../../../../generated/prisma"
 import { useRouter } from "@/i18n/navigation"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"

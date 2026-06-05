@@ -51,7 +51,16 @@ export function TournamentsNav() {
                 >
                     Суперники
                 </NavLink>
+                <NavLink
+                    href="/admin/tournaments/dictionary"
+                    exact={false}
+                    className="whitespace-nowrap cursor-pointer relative rounded-none border-b-2 px-4 py-3 font-medium shadow-none transition-none"
+                    activeClassName="border-emerald-600 text-foreground"
+                    inactiveClassName="border-transparent text-muted-foreground hover:text-foreground"
+                >
+                    Переклад команд
+                </NavLink>
             </nav>
-        </div >
+        </div>
     )
 }

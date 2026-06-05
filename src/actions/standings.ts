@@ -1,36 +1,136 @@
 "use server";
 
-import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { LOCALES } from "@/lib/constants";
 
-export async function forceSyncStandings() {
-    const session = await auth();
-    if (!session?.user?.email || session.user.role !== "ADMIN") {
-        return { success: false, message: "Немає прав" };
+export async function executeStandingsSync() {
+  try {
+    const activeSeason = await prisma.season.findFirst({
+      where: { isActive: true },
+    });
+
+    if (!activeSeason || !activeSeason.sofascoreId) {
+      throw new Error("Не знайдено активного сезону або його SofaScore ID.");
     }
 
-    try {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-        const secret = process.env.CRON_SECRET;
-        
-        // Викликаємо твій API-роут
-        const response = await fetch(`${baseUrl}/api/cron/sync-standings?key=${secret}`, {
-            method: "GET",
-            cache: "no-store"
+    const tournaments = await prisma.tournament.findMany({
+      where: { hasStandings: true },
+    });
+
+    if (tournaments.length === 0) {
+      return { success: true, message: "Немає турнірів для оновлення таблиць." };
+    }
+
+    let totalUpdated = 0;
+
+    await prisma.$transaction(
+      async (tx) => {
+        const existingDictionary = await tx.teamDictionary.findMany({
+          include: { translations: true },
+        });
+        const dictionaryMap = new Map<number, (typeof existingDictionary)[0]>();
+        existingDictionary.forEach((item) => {
+          dictionaryMap.set(item.sofascoreId, item);
         });
 
-        if (!response.ok) {
-            throw new Error("Помилка API");
+        for (const tournament of tournaments) {
+          if (!tournament.sofascoreId) continue;
+
+          const response = await fetch(
+            `https://sofascore.p.rapidapi.com/tournaments/get-standings?tournamentId=${tournament.sofascoreId}&seasonId=${activeSeason.sofascoreId}&type=total`,
+            {
+              headers: {
+                "x-rapidapi-host": "sofascore.p.rapidapi.com",
+                "x-rapidapi-key": process.env.RAPIDAPI_KEY!,
+              },
+              cache: "no-store",
+            }
+          );
+
+          if (!response.ok) {
+            console.error(`Помилка API для турніру ${tournament.slug}: ${response.statusText}`);
+            continue;
+          }
+
+          const data = await response.json();
+          const rows = data.standings?.[0]?.rows;
+
+          if (!rows) continue;
+
+          await tx.standing.deleteMany({
+            where: {
+              tournamentId: tournament.id,
+              seasonId: activeSeason.id,
+            },
+          });
+
+          const insertData = [];
+
+          for (const row of rows) {
+            const teamId = row.team.id;
+            const originalName = row.team.name;
+            let localizedName = originalName;
+            const dictEntry = dictionaryMap.get(teamId);
+
+            if (dictEntry) {
+              const ukTranslation = dictEntry.translations.find((t) => t.language === "uk");
+              if (ukTranslation) localizedName = ukTranslation.name;
+            } else {
+              const newDictEntry = await tx.teamDictionary.create({
+                data: {
+                  sofascoreId: teamId,
+                  originalName: originalName,
+                  translations: {
+                    create: [
+                      { language: "uk", name: originalName },
+                      { language: "en", name: originalName },
+                    ],
+                  },
+                },
+                include: { translations: true },
+              });
+              dictionaryMap.set(teamId, newDictEntry);
+            }
+
+            insertData.push({
+              rank: row.position,
+              teamName: localizedName,
+              teamLogo: `https://api.sofascore.app/api/v1/team/${row.team.id}/image`,
+              points: row.points,
+              played: row.matches,
+              win: row.wins,
+              draw: row.draws,
+              lose: row.losses,
+              goalsFor: row.scoresFor,
+              goalsAgainst: row.scoresAgainst,
+              goalsDiff: row.scoresFor - row.scoresAgainst,
+              tournamentId: tournament.id,
+              seasonId: activeSeason.id,
+            });
+          }
+
+          await tx.standing.createMany({ data: insertData });
+          totalUpdated += rows.length;
         }
+      },
+      { maxWait: 10000, timeout: 30000 }
+    );
 
-        const data = await response.json();
-
-        revalidatePath("/admin/tournaments/standings");
-        revalidatePath("/matches", "layout");
-        
-        return { success: true, message: `Таблиці успішно оновлено! Оброблено команд: ${data.updated || 0}` };
-    } catch (error) {
-        console.error("Force sync error:", error);
-        return { success: false, message: "Не вдалося оновити таблиці. Перевірте CRON_SECRET та API." };
+    if (totalUpdated > 0) {
+      LOCALES.forEach((locale) => {
+        revalidatePath(`/${locale}/standings`);
+        revalidatePath(`/${locale}/admin/tournaments/standings`);
+        revalidatePath(`/${locale}/`); 
+      });
     }
+
+    return { success: true, updated: totalUpdated, message: `Оновлено ${totalUpdated} команд у таблицях!` };
+  } catch (error) {
+    console.error("Sync Standings Error:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Невідома помилка при оновленні",
+    };
+  }
 }
