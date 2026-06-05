@@ -156,7 +156,7 @@ export const seasonSchema = z
       .string({ required_error: "Оберіть дату завершення" })
       .min(1, "Оберіть дату завершення")
       .transform((str) => new Date(str)),
-      
+
     isActive: z.boolean().default(false),
   })
   .refine((data) => data.startDate <= data.endDate, {
@@ -172,6 +172,13 @@ export const tournamentSchema = z.object({
 });
 
 export const dictionarySchema = z.object({
-    name_uk: z.string().min(1, "Назва українською обов'язкова"),
-    name_en: z.string().min(1, "Назва англійською обов'язкова"),
+  name_uk: z.string().min(1, "Назва українською обов'язкова"),
+  name_en: z.string().min(1, "Назва англійською обов'язкова"),
+});
+
+export const opponentSchema = z.object({
+  name_uk: z.string().min(1, "Назва українською обов'язкова"),
+  name_en: z.string().min(1, "Назва англійською обов'язкова"),
+  sofascoreId: z.number().nullable().optional(),
+  logoUrl: z.string().nullable().optional(),
 });
