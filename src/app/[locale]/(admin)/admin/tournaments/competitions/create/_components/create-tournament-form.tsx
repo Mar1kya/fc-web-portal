@@ -77,9 +77,6 @@ export function CreateTournamentForm() {
                                 className="text-lg"
                                 disabled={isPending}
                             />
-                            <p className="text-sm text-muted-foreground mt-1">
-                                З англійської назви буде згенеровано URL (slug) для турніру.
-                            </p>
                             {state?.errors?.name_en && <p className="text-red-500 text-sm">{state.errors.name_en[0]}</p>}
                         </div>
                     </TabsContent>

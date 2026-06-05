@@ -18,10 +18,10 @@ export const columns: ColumnDef<OpponentWithTranslations>[] = [
         cell: ({ row }) => {
             const teamName = getTranslation(row.original, "uk")?.name || "Team";
             return (
-                <StandingsTeamLogo 
-                    src={row.original.logoUrl} 
-                    alt={teamName} 
-                    fallbackText={teamName} 
+                <StandingsTeamLogo
+                    src={row.original.logoUrl}
+                    alt={teamName}
+                    fallbackText={teamName}
                 />
             );
         },
@@ -46,9 +46,9 @@ export const columns: ColumnDef<OpponentWithTranslations>[] = [
         accessorKey: "sofascoreId",
         header: "SofaScore ID",
         cell: ({ row }) => (
-            row.original.sofascoreId 
+            row.original.sofascoreId
                 ? <Badge variant="outline">{row.original.sofascoreId}</Badge>
-                : <span className="text-muted-foreground text-sm">—</span>
+                : <span className="text-muted-foreground text-sm">-</span>
         ),
     },
     {
