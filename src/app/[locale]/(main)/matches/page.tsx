@@ -11,7 +11,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     const { context, season: seasonSlug } = await searchParams;
     const tMeta = await getTranslations("MatchesPage.Metadata");
     const tEnums = await getTranslations("Enums");
-    
+
     const currentContext = context && Object.values(TeamContext).includes(context as TeamContext)
         ? (context as TeamContext)
         : TeamContext.MAIN_TEAM;
@@ -35,7 +35,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     });
 
     const isCurrentActive = currentSeason?.isActive;
-    const includeSeason = seasonSlug && !isCurrentActive; 
+    const includeSeason = seasonSlug && !isCurrentActive;
 
     let canonicalUrl = "/matches";
     const queryParams: string[] = [];
@@ -93,13 +93,21 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
     }
 
     const previousMatch = await prisma.match.findFirst({
-        where: { status: MatchStatus.FINISHED, teamContext: currentContext },
+        where: {
+            status: MatchStatus.FINISHED,
+            teamContext: currentContext,
+            deletedAt: null
+        },
         orderBy: { date: "desc" },
         include: { tournament: { include: { translations: true } }, opponent: { include: { translations: true } } }
     });
 
     const upcomingMatches = await prisma.match.findMany({
-        where: { status: { in: [MatchStatus.SCHEDULED, MatchStatus.LIVE, MatchStatus.POSTPONED] }, teamContext: currentContext },
+        where: {
+            status: { in: [MatchStatus.SCHEDULED, MatchStatus.LIVE, MatchStatus.POSTPONED] },
+            teamContext: currentContext,
+            deletedAt: null
+        },
         orderBy: { date: "asc" },
         take: 2,
         include: { tournament: { include: { translations: true } }, opponent: { include: { translations: true } } }
@@ -112,6 +120,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         where: {
             seasonId: currentSeason?.id,
             teamContext: currentContext,
+            deletedAt: null,
         },
         orderBy: { date: "asc" },
         include: {

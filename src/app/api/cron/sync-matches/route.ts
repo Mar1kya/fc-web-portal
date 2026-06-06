@@ -101,8 +101,13 @@ export async function GET(request: Request) {
           const isHomeGame = Number(event.homeTeam.id) === Number(TEAM_ID);
           const opponentData = isHomeGame ? event.awayTeam : event.homeTeam;
 
-          let tournament = await tx.tournament.findUnique({
-            where: { sofascoreId: event.tournament.uniqueTournament.id },
+          let tournament = await tx.tournament.findFirst({
+            where: {
+              OR: [
+                { sofascoreId: event.tournament.uniqueTournament.id },
+                { slug: event.tournament.slug },
+              ],
+            },
           });
 
           if (!tournament) {
@@ -124,10 +129,20 @@ export async function GET(request: Request) {
                 },
               },
             });
+          } else if (tournament.sofascoreId === null) {
+            tournament = await tx.tournament.update({
+              where: { id: tournament.id },
+              data: { sofascoreId: event.tournament.uniqueTournament.id },
+            });
           }
 
-          let opponent = await tx.opponent.findUnique({
-            where: { sofascoreId: opponentData.id },
+          let opponent = await tx.opponent.findFirst({
+            where: {
+              OR: [
+                { sofascoreId: opponentData.id },
+                { slug: opponentData.slug },
+              ],
+            },
           });
 
           if (!opponent) {
@@ -143,6 +158,11 @@ export async function GET(request: Request) {
                   ],
                 },
               },
+            });
+          } else if (opponent.sofascoreId === null) {
+            opponent = await tx.opponent.update({
+              where: { id: opponent.id },
+              data: { sofascoreId: opponentData.id },
             });
           }
 
