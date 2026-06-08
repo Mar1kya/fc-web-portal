@@ -182,3 +182,16 @@ export const opponentSchema = z.object({
   sofascoreId: z.number().nullable().optional(),
   logoUrl: z.string().nullable().optional(),
 });
+
+export const createManualMatchSchema = z.object({
+  seasonId: z.string().min(1, "Оберіть сезон"),
+  tournamentId: z.string().min(1, "Оберіть турнір"),
+  opponentId: z.string().min(1, "Оберіть суперника"),
+  date: z.date({ required_error: "Вкажіть дату матчу" }),
+  isHomeGame: z.boolean(),
+  teamContext: z.nativeEnum(TeamContext),
+  stadium: z.string().optional(),
+  homeCoachName: z.string().optional(),
+  awayCoachName: z.string().optional(),
+  round: z.coerce.number().optional(),
+});

@@ -12,7 +12,7 @@ import {
     AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
     AlertDialogTrigger, AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Edit, Archive, RefreshCw, Loader2 } from "lucide-react";
+import { MoreHorizontal, Edit, Archive, RefreshCw, Loader2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { forceSyncMatchDetails, softDeleteMatch } from "@/actions/match";
 import { Match, MatchStatus } from "../../../../../../../../generated/prisma";
@@ -60,11 +60,17 @@ export function MatchActions({ match }: { match: Match }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuLabel>Дії</DropdownMenuLabel>
+                    <DropdownMenuItem asChild>
+                        <Link href={`/matches/${match.slug}`} target="_blank" className="cursor-pointer">
+                            <Eye className="mr-2 h-4 w-4" />
+                            Оглянути
+                        </Link>
+                    </DropdownMenuItem>
                     {match.status === MatchStatus.FINISHED && (
                         <DropdownMenuItem
                             onClick={(e) => handleSync(e.nativeEvent)}
                             disabled={isPending || isSyncing}
-                            className="cursor-pointer text-emerald-600 focus:text-emerald-700"
+                            className="cursor-pointer"
                         >
                             <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
                             Синхронізувати деталі

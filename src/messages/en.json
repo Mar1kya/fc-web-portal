@@ -339,6 +339,8 @@
       "ourTeamName": "Emerald Gang",
       "round": "Round {round}",
       "coach": "Coach",
+      "ownGoal": "Own Goal",
+      "penalty": "Penalty",
       "unknownPlayer": "Unknown player",
       "live": "Live"
     },
