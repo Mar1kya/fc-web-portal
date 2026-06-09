@@ -134,7 +134,7 @@ export async function processMatchSync(matchDbId: string) {
         }
 
         let eventType: EventType | null = null;
-        let isOpponentEvent = incident.isHome !== match.isHomeGame;
+        const isOpponentEvent = incident.isHome !== match.isHomeGame;
         let playerName = incident.player?.name || "";
 
         if (incident.incidentType === "goal") {
