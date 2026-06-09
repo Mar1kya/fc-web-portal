@@ -5,17 +5,35 @@ import { revalidatePath } from "next/cache";
 import { LOCALES, TEAM_ID } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 import { processMatchSync } from "@/lib/services/match-details.service";
-import { MatchStatus, TeamContext } from "../../generated/prisma";
-import { createManualMatchSchema } from "@/lib/schemas";
+import { MatchStatus, Prisma, TeamContext } from "../../generated/prisma";
+import { createManualMatchSchema, updateMatchSchema } from "@/lib/schemas";
 import { z } from "zod";
 
-function revalidateMatchPaths() {
+export async function revalidateMatchPaths(
+  slug?: string,
+  oldSlug?: string,
+  playerSlugs?: string[],
+) {
   LOCALES.forEach((locale) => {
     revalidatePath(`/${locale}/admin/tournaments/matches`);
     revalidatePath(`/${locale}/matches`, "layout");
     revalidatePath(`/${locale}`);
+
+    if (slug) {
+      revalidatePath(`/${locale}/matches/${slug}`);
+    }
+    if (oldSlug && oldSlug !== slug) {
+      revalidatePath(`/${locale}/matches/${oldSlug}`);
+    }
+
+    if (playerSlugs && playerSlugs.length > 0) {
+      playerSlugs.forEach((playerSlug) => {
+        revalidatePath(`/${locale}/team/${playerSlug}`);
+      });
+    }
   });
 }
+
 const mapMatchStatus = (sofaStatus: string): MatchStatus => {
   switch (sofaStatus) {
     case "finished":
@@ -33,6 +51,7 @@ const mapMatchStatus = (sofaStatus: string): MatchStatus => {
   }
 };
 export type BoundMatchData = z.infer<typeof createManualMatchSchema>;
+export type BoundMatchUpdateData = z.infer<typeof updateMatchSchema>;
 
 export type MatchFormState = {
   success?: boolean;
@@ -388,6 +407,167 @@ export async function createManualMatch(
     console.error("Error creating manual match:", error);
     return {
       message: "Сталася помилка при створенні матчу",
+    };
+  }
+}
+
+export async function updateMatch(
+  matchId: string,
+  boundData: BoundMatchUpdateData,
+  _prevState: MatchFormState | undefined,
+  _formData: FormData,
+): Promise<MatchFormState | undefined> {
+  const session = await auth();
+
+  if (!session?.user?.email || session.user.role !== "ADMIN") {
+    return { message: "Немає прав для виконання цієї дії" };
+  }
+
+  try {
+    const existingMatch = await prisma.match.findUnique({
+      where: { id: matchId },
+      select: { slug: true, isDetailsSynced: true },
+    });
+
+    if (!existingMatch) {
+      return { message: "Матч не знайдено" };
+    }
+
+    const validatedFields = updateMatchSchema.safeParse(boundData);
+
+    if (!validatedFields.success) {
+      const flattened = validatedFields.error.flatten();
+      return {
+        errors: flattened.fieldErrors,
+        message: "Перевірте правильність заповнення полів",
+      };
+    }
+
+    const data = validatedFields.data;
+
+    const season = await prisma.season.findUnique({
+      where: { id: data.seasonId },
+      select: { name: true, startDate: true, endDate: true },
+    });
+
+    if (season && season.startDate && season.endDate) {
+      const minDate = new Date(season.startDate);
+      const maxDate = new Date(season.endDate);
+      maxDate.setUTCHours(23, 59, 59, 999);
+
+      if (data.date < minDate || data.date > maxDate) {
+        return {
+          errors: { date: [`Дата повинна бути в межах сезону ${season.name}`] },
+          message: "Перевірте дату матчу",
+        };
+      }
+    }
+
+    const opponent = await prisma.opponent.findUnique({
+      where: { id: data.opponentId },
+      select: { slug: true },
+    });
+
+    if (!opponent) {
+      return { message: "Обраного суперника не знайдено" };
+    }
+
+    const dateUnix = Math.floor(data.date.getTime() / 1000);
+    const newSlug = data.isHomeGame
+      ? `emeraldgang-vs-${opponent.slug}-${dateUnix}`
+      : `${opponent.slug}-vs-emeraldgang-${dateUnix}`;
+
+    await prisma.match.update({
+      where: { id: matchId },
+      data: {
+        slug: newSlug,
+        date: data.date,
+        startTimestamp: dateUnix,
+        status: data.status,
+        round: data.round || null,
+        isHomeGame: data.isHomeGame,
+        teamContext: data.teamContext,
+        homeScore: data.homeScore ?? null,
+        awayScore: data.awayScore ?? null,
+        stadium:
+          data.stadium && data.stadium.trim() !== "" ? data.stadium : null,
+        homeCoachName:
+          data.homeCoachName && data.homeCoachName.trim() !== ""
+            ? data.homeCoachName
+            : null,
+        awayCoachName:
+          data.awayCoachName && data.awayCoachName.trim() !== ""
+            ? data.awayCoachName
+            : null,
+        highlightsUrl:
+          data.highlightsUrl && data.highlightsUrl.trim() !== ""
+            ? data.highlightsUrl
+            : null,
+        postMatchUrl:
+          data.postMatchUrl && data.postMatchUrl.trim() !== ""
+            ? data.postMatchUrl
+            : null,
+
+        season: { connect: { id: data.seasonId } },
+        tournament: { connect: { id: data.tournamentId } },
+        opponent: { connect: { id: data.opponentId } },
+
+        lineup: data.emeraldGangLineup
+          ? {
+              deleteMany: {},
+              create: data.emeraldGangLineup.map((player) => ({
+                playerId: player.playerId,
+                isStarter: player.isStarter,
+                played: player.played,
+              })),
+            }
+          : undefined,
+
+        events: data.events
+          ? {
+              deleteMany: {},
+              create: data.events.map((event) => ({
+                type: event.type,
+                minute: event.minute,
+                playerId: event.playerId || null,
+                customPlayerName: event.customPlayerName || null,
+                isOpponent: event.isOpponent,
+              })),
+            }
+          : undefined,
+      },
+    });
+
+    const playerIds = new Set<string>();
+
+    if (data.emeraldGangLineup) {
+      data.emeraldGangLineup.forEach((p) => playerIds.add(p.playerId));
+    }
+    if (data.events) {
+      data.events.forEach((e) => {
+        if (e.playerId) playerIds.add(e.playerId);
+      });
+    }
+
+    let playerSlugs: string[] = [];
+    if (playerIds.size > 0) {
+      const players = await prisma.player.findMany({
+        where: { id: { in: Array.from(playerIds) } },
+        select: { slug: true },
+      });
+      playerSlugs = players.map((p) => p.slug);
+    }
+
+    revalidateMatchPaths(newSlug, existingMatch.slug, playerSlugs);
+
+    return {
+      success: true,
+      message: "Матч успішно оновлено!",
+    };
+  } catch (error) {
+    console.error("Error updating match:", error);
+    return {
+      message: "Сталася помилка при оновленні матчу",
     };
   }
 }

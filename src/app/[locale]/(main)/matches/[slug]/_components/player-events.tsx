@@ -46,7 +46,7 @@ export default function PlayerEvents({ events }: { events: MatchEvent[] }) {
                                 <SoccerBallIcon className={`w-3.5 h-3.5 drop-shadow-sm ${isOwnGoal ? 'text-red-500' : 'text-emerald-500'}`} />
                                 <span className="text-[10px] text-muted-foreground/90 font-medium">
                                     {e.minute}&apos;
-                                    {isOwnGoal && <span className="ml-0.5 text-red-500 font-bold">({tHero("ownGoal")}) впвпвп</span>}
+                                    {isOwnGoal && <span className="ml-0.5 text-red-500 font-bold">({tHero("ownGoal")})</span>}
                                 </span>
                             </div>
                         );

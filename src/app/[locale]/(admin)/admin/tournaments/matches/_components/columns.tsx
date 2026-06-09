@@ -11,6 +11,10 @@ import { StandingsTeamLogo } from "../../standings/_components/tandings-team-log
 
 type MatchWithRelations = Match & {
     opponent: Opponent & { translations: OpponentTranslation[] };
+    _count?: {
+        lineup: number;
+        events: number;
+    };
 };
 
 const statusMap: Record<MatchStatus, { label: string; variant: "default" | "secondary" | "outline"; className: string }> = {
@@ -85,8 +89,8 @@ export const columns: ColumnDef<MatchWithRelations>[] = [
         cell: ({ row }) => {
             const statusInfo = statusMap[row.original.status];
             return (
-                <Badge 
-                    variant={statusInfo.variant} 
+                <Badge
+                    variant={statusInfo.variant}
                     className={`text-xs px-2.5 py-0.5 font-medium whitespace-nowrap ${statusInfo.className}`}
                 >
                     {statusInfo.label}
@@ -102,26 +106,52 @@ export const columns: ColumnDef<MatchWithRelations>[] = [
         accessorKey: "isDetailsSynced",
         header: "Деталі (Склади/Події)",
         cell: ({ row }) => {
-            const isFinished = row.original.status === "FINISHED";
-            const isSynced = row.original.isDetailsSynced;
+            const match = row.original;
+            const isFinished = match.status === "FINISHED";
+            const isSynced = match.isDetailsSynced;
+            const hasSofaId = !!match.sofascoreId;
 
             if (!isFinished) return <span className="text-xs text-muted-foreground">—</span>;
 
-            return isSynced ? (
-                <Badge variant="outline" className="text-emerald-500 border-emerald-500/30 bg-emerald-500/10 text-xs px-2.5 py-0.5 whitespace-nowrap">
-                    Синхронізовано
+            if (hasSofaId) {
+                return isSynced ? (
+                    <Badge variant="outline" className="text-emerald-500 border-emerald-500/30 bg-emerald-500/10 text-xs px-2.5 py-0.5 whitespace-nowrap">
+                        Синхронізовано
+                    </Badge>
+                ) : (
+                    <Badge variant="outline" className="text-amber-500 border-amber-500/30 bg-amber-500/10 text-xs px-2.5 py-0.5 whitespace-nowrap">
+                        Очікує синхр.
+                    </Badge>
+                );
+            }
+            const hasManualData = match._count && (match._count.lineup > 0 || match._count.events > 0);
+
+            return hasManualData ? (
+                <Badge variant="outline" className="text-blue-500 border-blue-500/30 bg-blue-500/10 text-xs px-2.5 py-0.5 whitespace-nowrap">
+                    Ручне введення
                 </Badge>
             ) : (
-                <Badge variant="outline" className="text-amber-500 border-amber-500/30 bg-amber-500/10 text-xs px-2.5 py-0.5 whitespace-nowrap">
-                    Очікує синхр.
+                <Badge variant="outline" className="text-muted-foreground border-border bg-muted/50 text-xs px-2.5 py-0.5 whitespace-nowrap">
+                    Дані для ручного матчу
                 </Badge>
             );
         },
         filterFn: (row, id, value) => {
             if (value === "ALL") return true;
-            const isFinished = row.original.status === "FINISHED";
-            if (value === "SYNCED") return isFinished && row.original.isDetailsSynced;
-            if (value === "PENDING") return isFinished && !row.original.isDetailsSynced;
+
+            const match = row.original;
+            const isFinished = match.status === "FINISHED";
+            if (!isFinished) return false;
+
+            const hasSofaId = !!match.sofascoreId;
+            const isSynced = match.isDetailsSynced;
+            const hasManualData = !!(match._count && (match._count.lineup > 0 || match._count.events > 0));
+
+            const isCompleted = hasSofaId ? isSynced : hasManualData;
+
+            if (value === "SYNCED") return isCompleted;
+            if (value === "PENDING") return !isCompleted;
+
             return true;
         }
     },

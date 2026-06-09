@@ -134,14 +134,15 @@ export async function processMatchSync(matchDbId: string) {
         }
 
         let eventType: EventType | null = null;
-        const isOpponentEvent = incident.isHome !== match.isHomeGame;
+        let isOpponentEvent = incident.isHome !== match.isHomeGame;
         let playerName = incident.player?.name || "";
 
         if (incident.incidentType === "goal") {
           eventType = EventType.GOAL;
 
           if (incident.incidentClass === "ownGoal") {
-            playerName += " (OG)"; 
+            playerName += " (OG)";
+            isOpponentEvent = !isOpponentEvent;
           } else if (incident.incidentClass === "penalty") {
             playerName += " (Pen.)";
           }

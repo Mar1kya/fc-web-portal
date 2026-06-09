@@ -220,7 +220,7 @@ export function CreateManualMatchForm({ seasons, tournaments, opponents }: Creat
                     </div>
                 </CardContent>
             </Card>
-            <div className="flex flex-col sm:flex-row gap-4 justify-end pt-2">
+            <div className="flex flex-col sm:flex-row gap-4 border-t border-border justify-end pt-6 mt-4">
                 <Button type="button" variant="outline" asChild disabled={isPending} className="w-full sm:w-32">
                     <Link href="/admin/tournaments/matches">
                         Скасувати

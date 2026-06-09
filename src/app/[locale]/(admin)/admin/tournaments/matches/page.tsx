@@ -45,6 +45,9 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             },
             tournament: {
                 include: { translations: true }
+            },
+            _count: {
+                select: { lineup: true, events: true }
             }
         },
         orderBy: {
@@ -65,10 +68,10 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         },
         {
             columnId: "isDetailsSynced",
-            placeholder: "Статус синхронізації",
+            placeholder: "Деталі матчу",
             options: [
-                { label: "Синхронізовано", value: "SYNCED" },
-                { label: "Очікує синхр.", value: "PENDING" },
+                { label: "Готові (Синхр. / Ручні)", value: "SYNCED" },
+                { label: "Очікують (Пусті)", value: "PENDING" },
             ]
         }
     ];

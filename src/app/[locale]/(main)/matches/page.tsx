@@ -84,6 +84,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         : TeamContext.MAIN_TEAM;
 
     const allSeasons = await prisma.season.findMany({
+        where: { deletedAt: null },
         orderBy: { startDate: "desc" },
     });
 

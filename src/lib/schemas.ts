@@ -1,7 +1,13 @@
 import z from "zod";
 import { zEmail, zPassword, zPhone } from "./utils/validations";
 import { MIN_NAME_LENGTH, MIN_PASSWORD_LENGTH } from "./constants";
-import { PlayerPosition, PostType, TeamContext } from "../../generated/prisma";
+import {
+  EventType,
+  MatchStatus,
+  PlayerPosition,
+  PostType,
+  TeamContext,
+} from "../../generated/prisma";
 
 export const SignInSchema = z.object({
   email: zEmail(),
@@ -194,4 +200,51 @@ export const createManualMatchSchema = z.object({
   homeCoachName: z.string().optional(),
   awayCoachName: z.string().optional(),
   round: z.coerce.number().optional(),
+});
+
+const lineupSchema = z.object({
+  playerId: z.string(),
+  isStarter: z.boolean().default(false),
+  played: z.boolean().default(false),
+});
+
+const eventSchema = z.object({
+  type: z.nativeEnum(EventType),
+  minute: z.number().min(1).max(130),
+  playerId: z.string().optional().nullable(),
+  customPlayerName: z.string().optional().nullable(),
+  isOpponent: z.boolean().default(false),
+});
+
+export const updateMatchSchema = z.object({
+  seasonId: z.string().min(1, "Оберіть сезон"),
+  tournamentId: z.string().min(1, "Оберіть турнір"),
+  opponentId: z.string().min(1, "Оберіть суперника"),
+  date: z.coerce.date({
+    required_error: "Вкажіть дату матчу",
+    invalid_type_error: "Невірна дата",
+  }),
+  isHomeGame: z.boolean(),
+  teamContext: z.nativeEnum(TeamContext),
+  status: z.nativeEnum(MatchStatus),
+  round: z.coerce.number().optional().nullable(),
+  homeScore: z.coerce.number().optional().nullable(),
+  awayScore: z.coerce.number().optional().nullable(),
+  stadium: z.string().optional().nullable(),
+  homeCoachName: z.string().optional().nullable(),
+  awayCoachName: z.string().optional().nullable(),
+  highlightsUrl: z
+    .string()
+    .url("Невірний формат URL")
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+  postMatchUrl: z
+    .string()
+    .url("Невірний формат URL")
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+  emeraldGangLineup: z.array(lineupSchema).optional(),
+  events: z.array(eventSchema).optional(),
 });
