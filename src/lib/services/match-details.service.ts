@@ -94,7 +94,7 @@ export async function processMatchSync(matchDbId: string) {
                 matchId: matchDbId,
                 playerId: playerInDb.id,
                 isStarter: !item.substitute,
-                played: true,
+                played: !item.substitute,
               },
             });
           }
@@ -108,7 +108,20 @@ export async function processMatchSync(matchDbId: string) {
       for (const incident of incidents) {
         if (incident.incidentType === "substitution") {
           const isOpponentSub = incident.isHome !== match.isHomeGame;
+
           if (incident.playerIn) {
+            if (!isOpponentSub) {
+              const playerInDb = await tx.player.findUnique({
+                where: { sofascoreId: incident.playerIn.id },
+              });
+              if (playerInDb) {
+                await tx.matchLineup.updateMany({
+                  where: { matchId: matchDbId, playerId: playerInDb.id },
+                  data: { played: true },
+                });
+              }
+            }
+
             await processEvent(
               tx,
               matchDbId,
