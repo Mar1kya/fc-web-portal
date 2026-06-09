@@ -3,7 +3,7 @@
 import { useState, useActionState, useEffect } from "react"
 import { Link, useRouter } from "@/i18n/navigation"
 import { toast } from "sonner"
-import { Loader2, X } from "lucide-react"
+import { Loader2, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -108,21 +108,25 @@ export function CreateOpponentForm() {
                     </CardHeader>
                     <CardContent className="space-y-4 flex-1 flex flex-col justify-center">
                         {customLogoUrl ? (
-                            <div className="mt-4 relative group w-40 h-40 mx-auto flex items-center justify-center">
+                            <div className="mt-4 relative group rounded-md overflow-hidden border aspect-square bg-white dark:bg-muted w-40 mx-auto transition-all hover:border-emerald-500/50 flex items-center justify-center p-4">
                                 <Image
                                     src={customLogoUrl}
                                     alt="Logo preview"
                                     fill
-                                    className="object-contain"
+                                    className="object-contain p-4"
                                     unoptimized
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setCustomLogoUrl("")}
-                                    className="absolute top-0 right-0 bg-black/50 hover:bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm z-10"
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 rounded-md">
+                                    <Button
+                                        type="button"
+                                        size="icon"
+                                        variant="destructive"
+                                        onClick={() => setCustomLogoUrl("")}
+                                        className="h-8 w-8 opacity-90 hover:opacity-100 shadow-sm"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                </div>
                             </div>
                         ) : (
                             <UploadDropzone

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
-import { Plus, Trash2 } from "lucide-react"
+import { Archive, Plus } from "lucide-react"
 import { columns } from "./_components/columns"
 import { DataTable, DataTableFilterOption } from "@/components/ui/data-table"
 import { postStatusOptions, postTypeTranslations, teamContextTranslations } from "@/lib/constants"
@@ -60,9 +60,9 @@ export default async function AdminNewsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                     <Button variant="outline" asChild>
-                        <Link href="/admin/news/trash">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Кошик
+                        <Link href="/admin/news/archive">
+                            <Archive className="w-4 h-4" />
+                            Архів
                         </Link>
                     </Button>
                     <Button asChild>

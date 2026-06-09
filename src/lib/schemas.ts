@@ -248,3 +248,12 @@ export const updateMatchSchema = z.object({
   emeraldGangLineup: z.array(lineupSchema).optional(),
   events: z.array(eventSchema).optional(),
 });
+
+export const createGallerySchema = z.object({
+    title_uk: z.string().min(1, "Введіть назву галереї українською"),
+    title_en: z.string().optional(),
+    coverUrl: z.string().url("Некоректне посилання на обкладинку"),
+    mediaUrls: z.array(z.string().url("Некоректне посилання на медіа")).min(1, "Додайте хоча б одне фото/відео"),
+    matchId: z.string().optional().nullable(),
+    publishedAt: z.coerce.date().optional(),
+});

@@ -4,7 +4,7 @@ import { useState, useActionState, useEffect } from "react"
 import { useRouter } from "@/i18n/navigation"
 import { toast } from "sonner"
 import Flag from "react-world-flags"
-import { Loader2, X } from "lucide-react"
+import { Loader2, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { RichTextEditor } from "@/components/ui/rich-text-editor" 
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { BoundCoachData, updateCoach } from "@/actions/team"
 import { TeamContext, Prisma } from "../../../../../../../../../../generated/prisma"
 import { COUNTRIES, teamContextTranslations } from "@/lib/constants"
@@ -28,13 +28,13 @@ export function EditCoachForm({ coach }: { coach: CoachWithRelations }) {
     const router = useRouter();
     const txUk = coach.translations.find(t => t.language === "uk");
     const txEn = coach.translations.find(t => t.language === "en");
-    const formattedBirthDate = coach.birthDate 
-        ? new Date(coach.birthDate).toISOString().split("T")[0] 
+    const formattedBirthDate = coach.birthDate
+        ? new Date(coach.birthDate).toISOString().split("T")[0]
         : "";
     const [nameUk, setNameUk] = useState(txUk?.name || "");
     const [roleUk, setRoleUk] = useState(txUk?.role || "");
     const [bioUk, setBioUk] = useState(txUk?.bio || "");
-    
+
     const [nameEn, setNameEn] = useState(txEn?.name || "");
     const [roleEn, setRoleEn] = useState(txEn?.role || "");
     const [bioEn, setBioEn] = useState(txEn?.bio || "");
@@ -55,7 +55,7 @@ export function EditCoachForm({ coach }: { coach: CoachWithRelations }) {
         nationality,
         birthDate: birthDate ? new Date(birthDate) : undefined,
         avatarUrl,
-        mediaUrls, 
+        mediaUrls,
     };
 
     const updateCoachWithId = updateCoach.bind(null, coach.id, boundData);
@@ -142,7 +142,6 @@ export function EditCoachForm({ coach }: { coach: CoachWithRelations }) {
                         </div>
                     </TabsContent>
                 </Tabs>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Card className="h-full flex flex-col">
                         <CardHeader className="pb-4">
@@ -151,15 +150,26 @@ export function EditCoachForm({ coach }: { coach: CoachWithRelations }) {
                         </CardHeader>
                         <CardContent className="space-y-4 flex-1 flex flex-col justify-center">
                             {avatarUrl ? (
-                                <div className="relative group rounded-md overflow-hidden border aspect-3/4 bg-muted w-32 mx-auto">
-                                    <Image src={avatarUrl} alt="Avatar preview" fill className="object-cover" />
-                                    <button
-                                        type="button"
-                                        onClick={() => setAvatarUrl("")}
-                                        className="absolute top-1 right-1 bg-black/50 hover:bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
+                                <div className="mt-4 relative group rounded-md overflow-hidden border aspect-3/4 bg-muted w-32 mx-auto transition-all hover:border-emerald-500/50">
+                                    <Image
+                                        src={avatarUrl}
+                                        alt="Avatar preview"
+                                        fill
+                                        className="object-cover"
+                                        unoptimized
+                                        referrerPolicy="no-referrer"
+                                    />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                        <Button
+                                            type="button"
+                                            size="icon"
+                                            variant="destructive"
+                                            onClick={() => setAvatarUrl("")}
+                                            className="h-8 w-8 opacity-90 hover:opacity-100 shadow-sm"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
                                 </div>
                             ) : (
                                 <UploadDropzone
@@ -203,15 +213,19 @@ export function EditCoachForm({ coach }: { coach: CoachWithRelations }) {
                             {mediaUrls.length > 0 && (
                                 <div className="grid grid-cols-2 gap-3">
                                     {mediaUrls.map((url, idx) => (
-                                        <div key={idx} className="relative group rounded-md overflow-hidden border aspect-video bg-muted">
-                                            <Image src={url} alt={`Media ${idx}`} fill className="object-cover" />
-                                            <button
-                                                type="button"
-                                                onClick={() => removeImage(url)}
-                                                className="absolute top-1 right-1 bg-black/50 hover:bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </button>
+                                        <div key={idx} className="relative group rounded-md overflow-hidden aspect-video border-2 border-border/50 hover:border-border transition-all">
+                                            <Image src={url} alt={`Media ${idx}`} fill className="object-cover" unoptimized />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                                <Button
+                                                    type="button"
+                                                    size="icon"
+                                                    variant="destructive"
+                                                    onClick={() => removeImage(url)}
+                                                    className="h-7 w-7 opacity-90 hover:opacity-100 shadow-sm"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -240,11 +254,11 @@ export function EditCoachForm({ coach }: { coach: CoachWithRelations }) {
                                         },
                                     }}
                                     appearance={{
-                                        container: "border-2 border-dashed border-emerald-500/40 hover:border-emerald-600 transition-all bg-muted/10 py-6 focus-within:ring-0 focus-within:ring-offset-0",
-                                        label: "text-emerald-600 hover:text-emerald-700 font-semibold text-sm mt-2",
+                                        container: "border-2 border-dashed border-emerald-500/40 hover:border-emerald-600 transition-all bg-muted/10 py-8 focus-within:ring-0 focus-within:ring-offset-0",
+                                        label: "text-emerald-600 hover:text-emerald-700 font-semibold text-base mt-4",
                                         allowedContent: "text-muted-foreground text-xs mt-1",
-                                        button: "bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 mt-3 ut-uploading:cursor-not-allowed",
-                                        uploadIcon: "w-8 h-8 text-emerald-600",
+                                        button: "bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 mt-4 ut-uploading:cursor-not-allowed",
+                                        uploadIcon: "w-10 h-10 text-emerald-600",
                                     }}
                                 />
                             )}

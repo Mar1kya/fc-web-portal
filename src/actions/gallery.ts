@@ -4,6 +4,10 @@ import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { LOCALES } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
+import { createGallerySchema } from "@/lib/schemas";
+import { z } from "zod";
+import { generateGallerySlug } from "@/lib/utils/slugify";
+
 
 function revalidateGalleryPaths(slug?: string, matchSlug?: string) {
     LOCALES.forEach((locale) => {
@@ -19,6 +23,20 @@ function revalidateGalleryPaths(slug?: string, matchSlug?: string) {
         }
     });
 }
+export type BoundGalleryData = z.input<typeof createGallerySchema>;
+
+export type GalleryFormState = {
+    errors?: {
+        title_uk?: string[];
+        title_en?: string[];
+        coverUrl?: string[];
+        mediaUrls?: string[];
+        matchId?: string[];
+        publishedAt?: string[];
+    };
+    message?: string | null;
+    success?: boolean;
+};
 
 async function getGalleryWithMatch(id: string) {
     return prisma.gallery.findUnique({
@@ -92,5 +110,84 @@ export async function hardDeleteGallery(id: string) {
     } catch (error) {
         console.error("Hard delete gallery error:", error);
         return { success: false, message: "Помилка при остаточному видаленні." };
+    }
+}
+export async function createGallery(
+    boundData: BoundGalleryData,
+    _prevState: GalleryFormState | undefined,
+    _formData: FormData
+): Promise<GalleryFormState | undefined> {
+    const session = await auth();
+
+    if (!session?.user?.email || session.user.role !== "ADMIN") {
+        return { message: "Немає прав для виконання цієї дії" };
+    }
+
+    try {
+        const validatedFields = createGallerySchema.safeParse(boundData);
+
+        if (!validatedFields.success) {
+            const flattened = validatedFields.error.flatten();
+            return {
+                errors: flattened.fieldErrors,
+                message: "Перевірте правильність заповнення полів",
+            };
+        }
+
+        const data = validatedFields.data;
+        const slug = generateGallerySlug(data.title_en, data.title_uk);
+
+        const translations = [
+            {
+                language: "uk",
+                title: data.title_uk,
+            },
+        ];
+
+        if (data.title_en && data.title_en.trim() !== "") {
+            translations.push({
+                language: "en",
+                title: data.title_en.trim(),
+            });
+        }
+
+        let matchSlug: string | undefined = undefined;
+        if (data.matchId) {
+            const match = await prisma.match.findUnique({
+                where: { id: data.matchId },
+                select: { slug: true }
+            });
+            if (match) matchSlug = match.slug;
+        }
+
+        await prisma.gallery.create({
+            data: {
+                slug,
+                coverUrl: data.coverUrl,
+                matchId: data.matchId || null,
+                publishedAt: data.publishedAt || new Date(),
+                translations: {
+                    create: translations,
+                },
+                media: {
+                    create: data.mediaUrls.map((url: string) => ({
+                        url,
+                        type: "IMAGE", 
+                    })),
+                },
+            },
+        });
+
+        revalidateGalleryPaths(slug, matchSlug);
+
+        return {
+            success: true,
+            message: "Галерею успішно створено!",
+        };
+    } catch (error) {
+        console.error("Error creating gallery:", error);
+        return {
+            message: "Сталася помилка при створенні галереї",
+        };
     }
 }

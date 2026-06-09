@@ -73,16 +73,16 @@ export function PostActions({ post }: PostActionsProps) {
                             onSelect={(e) => e.preventDefault()}
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Видалити
+                            В архів
                         </DropdownMenuItem>
                     </AlertDialogTrigger>
                 </DropdownMenuContent>
             </DropdownMenu>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Ви впевнені?</AlertDialogTitle>
+                    <AlertDialogTitle>Переміщення в архів</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Публікацію <strong>&quot;{title}&quot;</strong> буде переміщено в кошик. Вона більше не буде відображатися на сайті.
+                        Публікацію <strong>&quot;{title}&quot;</strong> буде переміщено в архів. Вона більше не буде відображатися на сайті.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -92,7 +92,7 @@ export function PostActions({ post }: PostActionsProps) {
                         onClick={handleDelete}
                         disabled={isPending}
                     >
-                        {isPending ? "Видалення..." : "Видалити"}
+                        {isPending ? "Архівація..." : "В архів"}
                     </Button>
                 </AlertDialogFooter>
             </AlertDialogContent>

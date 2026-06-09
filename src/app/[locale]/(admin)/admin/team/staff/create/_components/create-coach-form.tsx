@@ -4,7 +4,7 @@ import { useState, useActionState, useEffect } from "react"
 import { useRouter } from "@/i18n/navigation"
 import { toast } from "sonner"
 import Flag from "react-world-flags"
-import { Loader2, X } from "lucide-react"
+import { Loader2, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
@@ -140,15 +140,26 @@ export function CreateCoachForm() {
                         </CardHeader>
                         <CardContent className="space-y-4 flex-1 flex flex-col justify-center">
                             {avatarUrl ? (
-                                <div className="relative group rounded-md overflow-hidden border aspect-3/4 bg-muted w-32 mx-auto">
-                                    <Image src={avatarUrl} alt="Avatar preview" fill className="object-cover" />
-                                    <button
-                                        type="button"
-                                        onClick={() => setAvatarUrl("")}
-                                        className="absolute top-1 right-1 bg-black/50 hover:bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
+                                <div className="mt-4 relative group rounded-md overflow-hidden border aspect-3/4 bg-muted w-32 mx-auto transition-all hover:border-emerald-500/50">
+                                    <Image
+                                        src={avatarUrl}
+                                        alt="Avatar preview"
+                                        fill
+                                        className="object-cover"
+                                        unoptimized
+                                        referrerPolicy="no-referrer"
+                                    />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                        <Button
+                                            type="button"
+                                            size="icon"
+                                            variant="destructive"
+                                            onClick={() => setAvatarUrl("")}
+                                            className="h-8 w-8 opacity-90 hover:opacity-100 shadow-sm"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
                                 </div>
                             ) : (
                                 <UploadDropzone
@@ -164,7 +175,7 @@ export function CreateCoachForm() {
                                     }}
                                     content={{
                                         label: "Перетягніть фото сюди",
-                                        allowedContent: "Зображення до 4MB",
+                                        allowedContent: "Зображення до 4MB (1 шт.)",
                                         button: (state: { isUploading: boolean; ready: boolean; files: unknown[] }) => {
                                             if (state.isUploading) return "Завантаження...";
                                             if (state.files && state.files.length > 0) return "Завантажити";
@@ -183,6 +194,7 @@ export function CreateCoachForm() {
                             )}
                         </CardContent>
                     </Card>
+
                     <Card className="h-full flex flex-col">
                         <CardHeader className="pb-4">
                             <CardTitle className="text-lg">Медіафайли</CardTitle>
@@ -192,22 +204,26 @@ export function CreateCoachForm() {
                             {mediaUrls.length > 0 && (
                                 <div className="grid grid-cols-2 gap-3">
                                     {mediaUrls.map((url, idx) => (
-                                        <div key={idx} className="relative group rounded-md overflow-hidden border aspect-video bg-muted">
-                                            <Image src={url} alt={`Media ${idx}`} fill className="object-cover" />
-                                            <button
-                                                type="button"
-                                                onClick={() => removeImage(url)}
-                                                className="absolute top-1 right-1 bg-black/50 hover:bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </button>
+                                        <div key={idx} className="relative group rounded-md overflow-hidden aspect-video border-2 border-border/50 hover:border-border transition-all">
+                                            <Image src={url} alt={`Media ${idx}`} fill className="object-cover" unoptimized />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                                <Button
+                                                    type="button"
+                                                    size="icon"
+                                                    variant="destructive"
+                                                    onClick={() => removeImage(url)}
+                                                    className="h-7 w-7 opacity-90 hover:opacity-100 shadow-sm"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             )}
                             {mediaUrls.length < 3 && (
                                 <UploadDropzone
-                                    endpoint="teamMemberImage"
+                                    endpoint="galleryImages"
                                     onClientUploadComplete={(res) => {
                                         if (res) {
                                             const newUrls = res.map(file => file.ufsUrl || file.url);
@@ -220,7 +236,7 @@ export function CreateCoachForm() {
                                     }}
                                     content={{
                                         label: "Перетягніть фотографії сюди",
-                                        allowedContent: "Зображення до 4MB",
+                                        allowedContent: "Зображення до 8MB",
                                         button: (state: { isUploading: boolean; ready: boolean; files: unknown[] }) => {
                                             if (state.isUploading) return "Завантаження...";
                                             if (state.files && state.files.length > 0) return `Завантажити (${state.files.length})`;

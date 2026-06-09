@@ -20,7 +20,7 @@ import {
     AlertDialogTrigger,
     AlertDialogCancel,
 } from "@/components/ui/alert-dialog"
-import { MoreHorizontal, Pencil, Eye, Trash2 } from "lucide-react"
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 import { Link } from "@/i18n/navigation"
 import { toast } from "sonner"
 import { type GalleryWithRelations } from "./columns"

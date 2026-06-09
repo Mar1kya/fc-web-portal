@@ -71,7 +71,8 @@ export default async function SingleMatchPage({ params }: { params: Promise<{ sl
             galleries: {
                 include: {
                     media: { where: { deletedAt: null } }
-                }
+                },
+                where: { deletedAt: null } 
             },
             relatedPosts: {
                 where: {

@@ -18,7 +18,7 @@ import { Link } from "@/i18n/navigation"
 import { toast } from "sonner"
 import { getTranslation } from "@/lib/utils/get-translation"
 import { type PlayerWithRelations } from "./columns"
-import { softDeletePlayer } from "@/actions/team" 
+import { softDeletePlayer } from "@/actions/team"
 
 type PlayerActionsProps = {
     player: PlayerWithRelations;
@@ -73,14 +73,14 @@ export function PlayerActions({ player }: PlayerActionsProps) {
                             onSelect={(e) => e.preventDefault()}
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Видалити
+                            В архів
                         </DropdownMenuItem>
                     </AlertDialogTrigger>
                 </DropdownMenuContent>
             </DropdownMenu>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Ви впевнені?</AlertDialogTitle>
+                    <AlertDialogTitle>Переміщення в архів</AlertDialogTitle>
                     <AlertDialogDescription>
                         Профіль гравця <strong>&quot;{name}&quot;</strong> буде переміщено в архів. Він більше не буде відображатися в ростері команди.
                     </AlertDialogDescription>
@@ -92,7 +92,7 @@ export function PlayerActions({ player }: PlayerActionsProps) {
                         onClick={handleDelete}
                         disabled={isPending}
                     >
-                        {isPending ? "Видалення..." : "Видалити"}
+                        {isPending ? "Архівація..." : "В архів"}
                     </Button>
                 </AlertDialogFooter>
             </AlertDialogContent>

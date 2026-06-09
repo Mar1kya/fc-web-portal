@@ -75,14 +75,14 @@ export function CoachActions({ coach }: CoachActionsProps) {
                             onSelect={(e) => e.preventDefault()}
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Видалити
+                            В архів
                         </DropdownMenuItem>
                     </AlertDialogTrigger>
                 </DropdownMenuContent>
             </DropdownMenu>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Ви впевнені?</AlertDialogTitle>
+                    <AlertDialogTitle>Переміщення в архів</AlertDialogTitle>
                     <AlertDialogDescription>
                         Профіль {role} <strong>&quot;{name}&quot;</strong> буде переміщено в архів. Він більше не відображатиметься на сайті.
                     </AlertDialogDescription>
@@ -94,7 +94,7 @@ export function CoachActions({ coach }: CoachActionsProps) {
                         onClick={handleDelete}
                         disabled={isPending}
                     >
-                        {isPending ? "Видалення..." : "Видалити"}
+                        {isPending ? "Архівація..." : "В архів"}
                     </Button>
                 </AlertDialogFooter>
             </AlertDialogContent>

@@ -4,7 +4,7 @@ import { useState, useActionState, useEffect } from "react"
 import { useRouter } from "@/i18n/navigation"
 import { toast } from "sonner"
 import Flag from "react-world-flags"
-import { Loader2, X } from "lucide-react"
+import { Loader2, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
@@ -151,7 +151,7 @@ export function EditPlayerForm({ player }: { player: PlayerWithRelations }) {
                         </CardHeader>
                         <CardContent className="space-y-4 flex-1 flex flex-col justify-center">
                             {avatarUrl ? (
-                                <div className="mt-4 relative group rounded-md overflow-hidden border aspect-3/4 bg-muted w-32 mx-auto">
+                                <div className="mt-4 relative group rounded-md overflow-hidden border aspect-3/4 bg-muted w-32 mx-auto transition-all hover:border-emerald-500/50">
                                     <Image
                                         src={avatarUrl}
                                         alt="Avatar preview"
@@ -160,13 +160,17 @@ export function EditPlayerForm({ player }: { player: PlayerWithRelations }) {
                                         unoptimized
                                         referrerPolicy="no-referrer"
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => setAvatarUrl("")}
-                                        className="absolute top-1 right-1 bg-black/50 hover:bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                        <Button
+                                            type="button"
+                                            size="icon"
+                                            variant="destructive"
+                                            onClick={() => setAvatarUrl("")}
+                                            className="h-8 w-8 opacity-90 hover:opacity-100 shadow-sm"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
                                 </div>
                             ) : (
                                 <UploadDropzone
@@ -174,6 +178,7 @@ export function EditPlayerForm({ player }: { player: PlayerWithRelations }) {
                                     onClientUploadComplete={(res) => {
                                         if (res && res.length > 0) {
                                             setAvatarUrl(res[0].ufsUrl || res[0].url);
+                                            setIsManualAvatar(true);
                                             toast.success("Аватар успішно завантажено");
                                         }
                                     }}
@@ -201,8 +206,12 @@ export function EditPlayerForm({ player }: { player: PlayerWithRelations }) {
                             )}
                             <div className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm mt-4">
                                 <div className="space-y-0.5">
-                                    <Label htmlFor="manual-avatar" className="text-sm font-medium">Кастомне фото</Label>
-                                    <p className="text-[12px] text-muted-foreground leading-tight">Заборонити SofaScore оновлювати</p>
+                                    <Label htmlFor="manual-avatar" className="text-sm font-medium">
+                                        Кастомне фото
+                                    </Label>
+                                    <p className="text-[12px] text-muted-foreground leading-tight">
+                                        Заборонити SofaScore оновлювати
+                                    </p>
                                 </div>
                                 <Switch
                                     id="manual-avatar"
@@ -213,6 +222,7 @@ export function EditPlayerForm({ player }: { player: PlayerWithRelations }) {
                             </div>
                         </CardContent>
                     </Card>
+
                     <Card className="h-full flex flex-col">
                         <CardHeader className="pb-4">
                             <CardTitle className="text-lg">Медіафайли</CardTitle>
@@ -222,15 +232,19 @@ export function EditPlayerForm({ player }: { player: PlayerWithRelations }) {
                             {mediaUrls.length > 0 && (
                                 <div className="grid grid-cols-2 gap-3">
                                     {mediaUrls.map((url, idx) => (
-                                        <div key={idx} className="relative group rounded-md overflow-hidden border aspect-video bg-muted">
-                                            <Image src={url} alt={`Media ${idx}`} fill className="object-cover" />
-                                            <button
-                                                type="button"
-                                                onClick={() => removeImage(url)}
-                                                className="absolute top-1 right-1 bg-black/50 hover:bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </button>
+                                        <div key={idx} className="relative group rounded-md overflow-hidden aspect-video border-2 border-border/50 hover:border-border transition-all">
+                                            <Image src={url} alt={`Media ${idx}`} fill className="object-cover" unoptimized />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                                <Button
+                                                    type="button"
+                                                    size="icon"
+                                                    variant="destructive"
+                                                    onClick={() => removeImage(url)}
+                                                    className="h-7 w-7 opacity-90 hover:opacity-100 shadow-sm"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
