@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { LOCALES, TEAM_ID } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 import { processMatchSync } from "@/lib/services/match-details.service";
-import { MatchStatus, Prisma, TeamContext } from "../../generated/prisma";
+import { MatchStatus, TeamContext } from "../../generated/prisma";
 import { createManualMatchSchema, updateMatchSchema } from "@/lib/schemas";
 import { z } from "zod";
 

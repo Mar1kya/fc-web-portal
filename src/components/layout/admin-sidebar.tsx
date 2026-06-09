@@ -10,6 +10,7 @@ import {
     ChevronsUpDown,
     Trophy,
     Users,
+    Images,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import {
@@ -37,6 +38,7 @@ const adminLinks = [
     { title: "Команда", url: "/admin/team", icon: Users },
     { title: "Турніри та Матчі", url: "/admin/tournaments", icon: Trophy },
     { title: "Фаншоп", url: "/admin/shop", icon: Shirt },
+    { title: "Галерея", url: "/admin/gallery", icon: Images },
 ]
 
 type AdminSidebarProps = {
