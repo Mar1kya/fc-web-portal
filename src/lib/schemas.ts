@@ -250,10 +250,17 @@ export const updateMatchSchema = z.object({
 });
 
 export const createGallerySchema = z.object({
-    title_uk: z.string().min(1, "Введіть назву галереї українською"),
-    title_en: z.string().optional(),
-    coverUrl: z.string().url("Некоректне посилання на обкладинку"),
-    mediaUrls: z.array(z.string().url("Некоректне посилання на медіа")).min(1, "Додайте хоча б одне фото/відео"),
-    matchId: z.string().optional().nullable(),
-    publishedAt: z.coerce.date().optional(),
+  title_uk: z.string().min(1, "Введіть назву галереї українською"),
+  title_en: z.string().optional(),
+  coverUrl: z.string().url("Некоректне посилання на обкладинку"),
+  mediaUrls: z
+    .array(z.string().url("Некоректне посилання на медіа"))
+    .min(1, "Додайте хоча б одне фото/відео"),
+  matchId: z.string().optional().nullable(),
+  publishedAt: z.coerce.date().optional(),
+});
+
+export const categorySchema = z.object({
+  name_uk: z.string().min(2, "Українська назва має містити мінімум 2 символи"),
+  name_en: z.string().min(2, "Англійська назва має містити мінімум 2 символи"),
 });
