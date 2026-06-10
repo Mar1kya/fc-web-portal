@@ -94,7 +94,6 @@ export function EditGalleryForm({ gallery, matches }: EditGalleryFormProps) {
                         </Tabs>
                     </CardContent>
                 </Card>
-
                 <Card className="flex-1">
                     <CardHeader className="pb-4">
                         <CardTitle className="text-lg">Деталі</CardTitle>
@@ -124,7 +123,6 @@ export function EditGalleryForm({ gallery, matches }: EditGalleryFormProps) {
                     </CardContent>
                 </Card>
             </div>
-
             <div className="xl:col-span-2 space-y-6 flex flex-col h-full">
                 <Card className="flex-1 flex flex-col">
                     <CardHeader className="pb-4 flex flex-row items-center justify-between">
