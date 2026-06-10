@@ -80,7 +80,6 @@ export function ArchiveActions({ player }: { player: PlayerWithRelations }) {
                     </AlertDialogTrigger>
                 </DropdownMenuContent>
             </DropdownMenu>
-
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Остаточне видалення</AlertDialogTitle>

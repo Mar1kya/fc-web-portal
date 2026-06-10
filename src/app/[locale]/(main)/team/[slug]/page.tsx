@@ -73,6 +73,22 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
             },
             media: {
                 where: { deletedAt: null },
+            },
+            lineupEntries: {
+                where: {
+                    played: true,
+                    match: { deletedAt: null, status: "FINISHED" }
+                },
+                include: {
+                    match: {
+                        select: { homeScore: true, awayScore: true, isHomeGame: true }
+                    }
+                }
+            },
+            events: {
+                where: {
+                    match: { deletedAt: null, status: "FINISHED" }
+                }
             }
         },
     });

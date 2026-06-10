@@ -13,7 +13,7 @@ type SofaPlayerItem = {
 
 async function fetchSofaMatchDetails(
   sofascoreId: number,
-  endpointPath: string, 
+  endpointPath: string,
 ) {
   const response = await fetch(
     `https://sofascore.p.rapidapi.com/matches/${endpointPath}?matchId=${sofascoreId}`,
@@ -94,7 +94,7 @@ export async function processMatchSync(matchDbId: string) {
                 matchId: matchDbId,
                 playerId: playerInDb.id,
                 isStarter: !item.substitute,
-                played: true,
+                played: !item.substitute,
               },
             });
           }
@@ -106,17 +106,22 @@ export async function processMatchSync(matchDbId: string) {
       const incidents = incidentsData.incidents || [];
 
       for (const incident of incidents) {
-        let eventType: EventType | null = null;
-        let isOpponentEvent = false;
-
-        if (incident.incidentType === "goal") eventType = EventType.GOAL;
-        else if (incident.incidentClass === "yellow")
-          eventType = EventType.YELLOW_CARD;
-        else if (incident.incidentClass === "red")
-          eventType = EventType.RED_CARD;
-        else if (incident.incidentType === "substitution") {
+        if (incident.incidentType === "substitution") {
           const isOpponentSub = incident.isHome !== match.isHomeGame;
+
           if (incident.playerIn) {
+            if (!isOpponentSub) {
+              const playerInDb = await tx.player.findUnique({
+                where: { sofascoreId: incident.playerIn.id },
+              });
+              if (playerInDb) {
+                await tx.matchLineup.updateMany({
+                  where: { matchId: matchDbId, playerId: playerInDb.id },
+                  data: { played: true },
+                });
+              }
+            }
+
             await processEvent(
               tx,
               matchDbId,
@@ -141,15 +146,56 @@ export async function processMatchSync(matchDbId: string) {
           continue;
         }
 
-        if (eventType && incident.player) {
-          isOpponentEvent = incident.isHome !== match.isHomeGame;
+        let eventType: EventType | null = null;
+        let isOpponentEvent = incident.isHome !== match.isHomeGame;
+        let playerName = incident.player?.name || "";
+
+        if (incident.incidentType === "goal") {
+          eventType = EventType.GOAL;
+
+          if (incident.incidentClass === "ownGoal") {
+            playerName += " (OG)";
+            isOpponentEvent = !isOpponentEvent;
+          } else if (incident.incidentClass === "penalty") {
+            playerName += " (Pen.)";
+          }
+
           await processEvent(
             tx,
             matchDbId,
             eventType,
             incident.time,
-            incident.player.id,
-            incident.player.name,
+            incident.player?.id,
+            playerName,
+            isOpponentEvent,
+          );
+
+          if (incident.assist1 && incident.incidentClass !== "ownGoal") {
+            await processEvent(
+              tx,
+              matchDbId,
+              EventType.ASSIST,
+              incident.time,
+              incident.assist1.id,
+              incident.assist1.name,
+              isOpponentEvent,
+            );
+          }
+          continue;
+        } else if (incident.incidentClass === "yellow") {
+          eventType = EventType.YELLOW_CARD;
+        } else if (incident.incidentClass === "red") {
+          eventType = EventType.RED_CARD;
+        }
+
+        if (eventType) {
+          await processEvent(
+            tx,
+            matchDbId,
+            eventType,
+            incident.time,
+            incident.player?.id,
+            playerName,
             isOpponentEvent,
           );
         }
@@ -181,13 +227,13 @@ async function processEvent(
   matchId: string,
   type: EventType,
   minute: number,
-  playerSofaId: number,
+  playerSofaId: number | undefined,
   customName: string,
   isOpponent: boolean,
 ) {
   let playerIdDb: string | null = null;
 
-  if (!isOpponent) {
+  if (!isOpponent && playerSofaId) {
     const playerInDb = await tx.player.findUnique({
       where: { sofascoreId: playerSofaId },
     });
@@ -201,7 +247,8 @@ async function processEvent(
       minute,
       isOpponent,
       playerId: playerIdDb,
-      customPlayerName: isOpponent ? customName : null,
+      customPlayerName:
+        !playerIdDb || customName.includes("(") ? customName : null,
     },
   });
 }

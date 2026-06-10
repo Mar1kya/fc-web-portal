@@ -6,6 +6,12 @@ import { Link } from "@/i18n/navigation";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./_components/columns";
 
+export const metadata = {
+    title: "Керування тренерським штабом",
+    description: "Сторінка керування тренерським штабом"
+};
+
+
 const teamTranslations: Record<TeamContext, string> = {
     MAIN_TEAM: "Основна команда",
     U19: "U-19",
@@ -34,7 +40,7 @@ export default async function StaffPage({ searchParams }: { searchParams: Promis
             teamContext: currentTeam
         },
         include: { translations: true },
-        orderBy: { createdAt: "asc" } 
+        orderBy: { createdAt: "asc" }
     });
 
     return (

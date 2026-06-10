@@ -33,7 +33,7 @@ export function SyncRosterButton() {
                 } else {
                     toast.error(result.message || "Не вдалося синхронізувати дані");
                 }
-            } catch (error) {
+            } catch {
                 toast.error("Сталася непередбачувана помилка під час запиту");
             }
         });

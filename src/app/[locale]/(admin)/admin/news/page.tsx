@@ -1,20 +1,19 @@
-import { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
-import { Plus, Trash2 } from "lucide-react"
+import { Archive, Plus } from "lucide-react"
 import { columns } from "./_components/columns"
 import { DataTable, DataTableFilterOption } from "@/components/ui/data-table"
 import { postStatusOptions, postTypeTranslations, teamContextTranslations } from "@/lib/constants"
 
-export const metadata: Metadata = {
+export const metadata = {
     title: "Новини",
     description: "Управління публікаціями, інтерв'ю та заявами клубу."
 }
 
 const newsFilters: DataTableFilterOption[] = [
     {
-        columnId: "teamContext", 
+        columnId: "teamContext",
         placeholder: "Всі команди",
         options: Object.entries(teamContextTranslations).map(([value, label]) => ({
             value,
@@ -32,7 +31,7 @@ const newsFilters: DataTableFilterOption[] = [
     {
         columnId: "isPublished",
         placeholder: "Всі статуси",
-       options: postStatusOptions,
+        options: postStatusOptions,
     },
 ];
 
@@ -61,9 +60,9 @@ export default async function AdminNewsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                     <Button variant="outline" asChild>
-                        <Link href="/admin/news/trash">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Кошик
+                        <Link href="/admin/news/archive">
+                            <Archive className="w-4 h-4" />
+                            Архів
                         </Link>
                     </Button>
                     <Button asChild>
@@ -75,9 +74,9 @@ export default async function AdminNewsPage() {
                 </div>
             </div>
             <div className="mt-4">
-                <DataTable 
-                    columns={columns} 
-                    data={posts} 
+                <DataTable
+                    columns={columns}
+                    data={posts}
                     searchPlaceholder="Пошук за заголовком..."
                     filters={newsFilters}
                 />

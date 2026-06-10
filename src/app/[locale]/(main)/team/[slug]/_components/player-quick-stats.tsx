@@ -1,29 +1,25 @@
 import { useTranslations } from "next-intl";
 import { Activity, Goal, Shield, Target, AlertCircle } from "lucide-react";
-import { Player } from "../../../../../../../generated/prisma";
+import { calculateHybridStats, PlayerWithHybridStats } from "@/lib/utils/player-stats";
 
 type PlayerQuickStatsProps = {
-    player: Player; 
+    player: PlayerWithHybridStats;
 };
+
 export default function PlayerQuickStats({ player }: PlayerQuickStatsProps) {
     const t = useTranslations("PlayerStats");
     const isGoalkeeper = player.position === "GOALKEEPER";
-    const matches = player.initialMatches ?? 0;
-    const goals = player.initialGoals ?? 0;
-    const assists = player.initialAssists ?? 0;
-    const cleanSheets = player.initialCleanSheets ?? 0;
-    const conceded = player.initialGoalsConceded ?? 0;
-
+    const statsData = calculateHybridStats(player);
     const stats = isGoalkeeper
         ? [
-            { label: t("matches"), value: matches, icon: <Activity className="w-6 h-6 text-emerald-600" /> },
-            { label: t("cleanSheets"), value: cleanSheets, icon: <Shield className="w-6 h-6 text-emerald-600" /> },
-            { label: t("conceded"), value: conceded, icon: <AlertCircle className="w-6 h-6 text-emerald-600" /> },
+            { label: t("matches"), value: statsData.matches, icon: <Activity className="w-6 h-6 text-emerald-600" /> },
+            { label: t("cleanSheets"), value: statsData.cleanSheets, icon: <Shield className="w-6 h-6 text-emerald-600" /> },
+            { label: t("conceded"), value: statsData.conceded, icon: <AlertCircle className="w-6 h-6 text-emerald-600" /> },
         ]
         : [
-            { label: t("matches"), value: matches, icon: <Activity className="w-6 h-6 text-emerald-600" /> },
-            { label: t("goals"), value: goals, icon: <Goal className="w-6 h-6 text-emerald-600" /> },
-            { label: t("assists"), value: assists, icon: <Target className="w-6 h-6 text-emerald-600" /> },
+            { label: t("matches"), value: statsData.matches, icon: <Activity className="w-6 h-6 text-emerald-600" /> },
+            { label: t("goals"), value: statsData.goals, icon: <Goal className="w-6 h-6 text-emerald-600" /> },
+            { label: t("assists"), value: statsData.assists, icon: <Target className="w-6 h-6 text-emerald-600" /> },
         ];
 
     return (

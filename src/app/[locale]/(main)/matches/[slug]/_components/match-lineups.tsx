@@ -55,7 +55,15 @@ export default function MatchLineups({ match, locale }: { match: MatchWithDetail
         name: entry.name,
         number: entry.number,
         isStarter: entry.isStarter,
-        events: match.events.filter(e => e.isOpponent && e.customPlayerName === entry.name)
+        events: match.events.filter(e => {
+            if (!e.isOpponent || !e.customPlayerName) return false;
+            const cleanEventName = e.customPlayerName
+                .replace("(OG)", "")
+                .replace("(Pen.)", "")
+                .trim();
+
+            return cleanEventName === entry.name.trim();
+        })
     }));
 
     const homeLineup = match.isHomeGame ? ourLineup : opponentLineup;

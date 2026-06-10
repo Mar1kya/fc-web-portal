@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
-import { trashColumns } from "./_components/trash-columns"
+import { trashColumns } from "./_components/archive-columns"
 import { DataTable, DataTableFilterOption } from "@/components/ui/data-table"
 import { postTypeTranslations, teamContextTranslations } from "@/lib/constants"
 
@@ -31,7 +31,7 @@ const trashFilters: DataTableFilterOption[] = [
     },
 ];
 
-export default async function TrashPage() {
+export default async function ArchivePage() {
     const trashedPosts = await prisma.post.findMany({
         where: {
             deletedAt: { not: null }
@@ -49,7 +49,7 @@ export default async function TrashPage() {
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Кошик</h2>
+                    <h2 className="text-3xl font-bold tracking-tight">Архів</h2>
                     <p className="text-muted-foreground mt-1">
                         Тут зберігаються видалені публікації. Ви можете відновити їх або видалити назавжди.
                     </p>
@@ -61,7 +61,6 @@ export default async function TrashPage() {
                     </Link>
                 </Button>
             </div>
-
             <div className="mt-4">
                 <DataTable 
                     columns={trashColumns} 

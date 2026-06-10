@@ -339,6 +339,8 @@
       "ourTeamName": "Смарагдова Банда",
       "round": "Тур {round}",
       "coach": "Тренер",
+      "ownGoal": "Автогол",
+      "penalty": "Пен.",
       "unknownPlayer": "Невідомий гравець",
       "live": "Прямий ефір"
     },

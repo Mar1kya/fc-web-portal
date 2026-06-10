@@ -53,8 +53,19 @@ export default function MatchHero({ match, locale }: MatchHeroProps) {
     const isFinishedOrLive = match.status === MatchStatus.FINISHED || match.status === MatchStatus.LIVE;
     const allEvents = match.events || [];
     const goals = allEvents.filter(e => e.type === "GOAL");
-    const homeGoalsRaw = goals.filter(e => match.isHomeGame ? !e.isOpponent : e.isOpponent);
-    const awayGoalsRaw = goals.filter(e => match.isHomeGame ? e.isOpponent : !e.isOpponent);
+
+    const isOwnGoal = (customName: string | null) => (customName || "").includes("(OG)");
+    const homeGoalsRaw = goals.filter(e => {
+        const isHomeTeamPlayer = match.isHomeGame ? !e.isOpponent : e.isOpponent;
+        const og = isOwnGoal(e.customPlayerName);
+        return og ? !isHomeTeamPlayer : isHomeTeamPlayer;
+    });
+
+    const awayGoalsRaw = goals.filter(e => {
+        const isHomeTeamPlayer = match.isHomeGame ? !e.isOpponent : e.isOpponent;
+        const og = isOwnGoal(e.customPlayerName);
+        return og ? isHomeTeamPlayer : !isHomeTeamPlayer;
+    });
 
     const groupGoals = (goalEvents: typeof goals) => {
         const map = new Map<string, number[]>();
@@ -64,6 +75,10 @@ export default function MatchHero({ match, locale }: MatchHeroProps) {
             if (g.player) {
                 const translatedPlayer = getTranslation(g.player, locale);
                 name = translatedPlayer?.name || g.player.slug || name;
+                if (g.customPlayerName) {
+                    if (g.customPlayerName.includes("(OG)")) name += " (OG)";
+                    if (g.customPlayerName.includes("(Pen.)")) name += " (Pen.)";
+                }
             }
             else if (g.customPlayerName) {
                 name = g.customPlayerName;
@@ -121,17 +136,23 @@ export default function MatchHero({ match, locale }: MatchHeroProps) {
                     )}
                     {homeGoalScorers.length > 0 && (
                         <div className="mt-4 flex flex-col items-center gap-1.5 w-full">
-                            {homeGoalScorers.map((scorer, idx) => (
-                                <div key={idx} className="flex items-center justify-center gap-1.5 md:gap-2.5 bg-muted/20 px-2 py-1 md:px-3 md:py-1.5 rounded-md border border-border/50 w-fit max-w-full">
-                                    <span className="font-semibold text-foreground text-[10px] md:text-sm text-left wrap-break-word leading-tight">
-                                        {scorer.name}
-                                    </span>
-                                    <span className="text-muted-foreground text-[10px] md:text-sm whitespace-nowrap">
-                                        {scorer.minutes.join("', ")}&apos;
-                                    </span>
-                                    <SoccerBallIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-emerald-600 shrink-0" />
-                                </div>
-                            ))}
+                            {homeGoalScorers.map((scorer, idx) => {
+                                let displayName = scorer.name;
+                                if (displayName.includes("(OG)")) displayName = displayName.replace("(OG)", `(${t("ownGoal")})`);
+                                if (displayName.includes("(Pen.)")) displayName = displayName.replace("(Pen.)", `(${t("penalty")})`);
+
+                                return (
+                                    <div key={idx} className="flex items-center justify-center gap-1.5 md:gap-2.5 bg-muted/20 px-2 py-1 md:px-3 md:py-1.5 rounded-md border border-border/50 w-fit max-w-full">
+                                        <span className="font-semibold text-foreground text-[10px] md:text-sm text-left wrap-break-word leading-tight">
+                                            {displayName}
+                                        </span>
+                                        <span className="text-muted-foreground text-[10px] md:text-sm whitespace-nowrap">
+                                            {scorer.minutes.join("', ")}&apos;
+                                        </span>
+                                        <SoccerBallIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-emerald-600 shrink-0" />
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
                 </div>
@@ -168,17 +189,23 @@ export default function MatchHero({ match, locale }: MatchHeroProps) {
                     )}
                     {awayGoalScorers.length > 0 && (
                         <div className="mt-4 flex flex-col items-center gap-1.5 w-full">
-                            {awayGoalScorers.map((scorer, idx) => (
-                                <div key={idx} className="flex items-center justify-center gap-1.5 md:gap-2.5 bg-muted/20 px-2 py-1 md:px-3 md:py-1.5 rounded-md border border-border/50 w-fit max-w-full">
-                                    <span className="font-semibold text-foreground text-[10px] md:text-sm text-left wrap-break-word leading-tight">
-                                        {scorer.name}
-                                    </span>
-                                    <span className="text-muted-foreground text-[10px] md:text-sm whitespace-nowrap">
-                                        {scorer.minutes.join("', ")}&apos;
-                                    </span>
-                                    <SoccerBallIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-emerald-600 shrink-0" />
-                                </div>
-                            ))}
+                            {awayGoalScorers.map((scorer, idx) => {
+                                let displayName = scorer.name;
+                                if (displayName.includes("(OG)")) displayName = displayName.replace("(OG)", `(${t("ownGoal")})`);
+                                if (displayName.includes("(Pen.)")) displayName = displayName.replace("(Pen.)", `(${t("penalty")})`);
+
+                                return (
+                                    <div key={idx} className="flex items-center justify-center gap-1.5 md:gap-2.5 bg-muted/20 px-2 py-1 md:px-3 md:py-1.5 rounded-md border border-border/50 w-fit max-w-full">
+                                        <span className="font-semibold text-foreground text-[10px] md:text-sm text-left wrap-break-word leading-tight">
+                                            {displayName}
+                                        </span>
+                                        <span className="text-muted-foreground text-[10px] md:text-sm whitespace-nowrap">
+                                            {scorer.minutes.join("', ")}&apos;
+                                        </span>
+                                        <SoccerBallIcon className="w-3 h-3 md:w-3.5 md:h-3.5 text-emerald-600 shrink-0" />
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
                 </div>

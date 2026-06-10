@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
-import { Loader2, X } from "lucide-react"
+import { Loader2, Star, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import Image from "next/image"
 import { Link, useRouter } from "@/i18n/navigation"
@@ -22,6 +22,7 @@ import { UploadDropzone } from "@/lib/uploadthing"
 import { getTranslation } from "@/lib/utils/get-translation"
 import { PostType, Prisma, TeamContext } from "../../../../../../../../generated/prisma"
 import { postTypeTranslations, teamContextTranslations } from "@/lib/constants"
+import { Badge } from "@/components/ui/badge"
 
 type PlayerWithTranslations = Prisma.PlayerGetPayload<{ include: { translations: true } }>;
 type CoachWithTranslations = Prisma.CoachGetPayload<{ include: { translations: true } }>;
@@ -83,6 +84,12 @@ export function CreateNewsForm({ players, coaches, matches }: CreateNewsFormProp
         setMediaUrls(prev => prev.filter(url => url !== urlToRemove));
     };
 
+    const setAsCover = (urlToPromote: string) => {
+        setMediaUrls(prev => {
+            const filtered = prev.filter(url => url !== urlToPromote);
+            return [urlToPromote, ...filtered];
+        });
+    };
     return (
         <form action={actionFn} className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
             <div className="xl:col-span-2 space-y-6 flex flex-col">
@@ -161,19 +168,42 @@ export function CreateNewsForm({ players, coaches, matches }: CreateNewsFormProp
                         <CardContent className="space-y-4">
                             {mediaUrls.length > 0 && (
                                 <div className="grid grid-cols-2 gap-3">
-                                    {mediaUrls.map((url, idx) => (
-                                        <div key={idx} className="relative group rounded-md overflow-hidden border aspect-video bg-muted">
-                                            <Image src={url} alt={`Media ${idx}`} fill className="object-cover" />
-                                            <button
-                                                type="button"
-                                                onClick={() => removeImage(url)}
-                                                className="absolute top-1 right-1 bg-black/50 hover:bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </button>
-                                            {idx === 0 && <span className="absolute bottom-1 left-1 bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded">Головна</span>}
-                                        </div>
-                                    ))}
+                                    {mediaUrls.map((url, idx) => {
+                                        const isCover = idx === 0;
+
+                                        return (
+                                            <div key={idx} className={`relative group rounded-md overflow-hidden aspect-video border-2 transition-all ${isCover ? 'border-emerald-500 shadow-md scale-[1.02]' : 'border-border/50 hover:border-border'}`}>
+                                                <Image src={url} alt={`Media ${idx}`} fill className="object-cover" unoptimized />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                                    {!isCover && (
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            variant="secondary"
+                                                            onClick={() => setAsCover(url)}
+                                                            className="h-7 text-[10px] px-2 bg-black/70 hover:bg-emerald-500 hover:text-white text-white border-0 backdrop-blur-sm shadow-sm"
+                                                        >
+                                                            <Star className="w-3 h-3 mr-1" /> На обкладинку
+                                                        </Button>
+                                                    )}
+                                                    <Button
+                                                        type="button"
+                                                        size="icon"
+                                                        variant="destructive"
+                                                        onClick={() => removeImage(url)}
+                                                        className="h-7 w-7 opacity-90 hover:opacity-100 shadow-sm"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                                {isCover && (
+                                                    <Badge className="absolute top-1 left-1 pointer-events-none bg-emerald-500 hover:bg-emerald-500 text-[9px] px-1.5 py-0 h-4 border-none text-white shadow-sm">
+                                                        Обкладинка
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
                             {mediaUrls.length < 4 && (

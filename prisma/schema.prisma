@@ -278,6 +278,7 @@ model Opponent {
   logoUrl      String?
   translations OpponentTranslation[]
   matches      Match[]
+  deletedAt    DateTime?
 }
 
 model OpponentTranslation {

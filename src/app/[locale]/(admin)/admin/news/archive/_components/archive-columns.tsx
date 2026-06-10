@@ -7,7 +7,7 @@ import { ArrowUpDown, Newspaper } from "lucide-react"
 import Image from "next/image"
 import { getTranslation } from "@/lib/utils/get-translation"
 import { type PostWithRelations } from "../../_components/columns"
-import { TrashActions } from "./trash-actions"
+import { TrashActions } from "./archive-actions"
 import { postTypeTranslations, teamContextTranslations } from "@/lib/constants"
 
 export const trashColumns: ColumnDef<PostWithRelations>[] = [

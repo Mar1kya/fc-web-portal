@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PlayerPosition, TeamContext } from "../../../../../../../generated/prisma";
 import { Button } from "@/components/ui/button";
-import { Archive, Plus, RefreshCw } from "lucide-react";
+import { Archive, Plus } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { DataTable, DataTableFilterOption } from "@/components/ui/data-table";
 import { columns } from "./_components/columns";
@@ -25,6 +25,11 @@ const playerFilters: DataTableFilterOption[] = [
         ]
     }
 ];
+
+export const metadata = {
+    title: "Керування командою",
+    description: "Сторінка керування командою"
+};
 
 export default async function PlayersPage({ searchParams }: { searchParams: Promise<{ team?: string }> }) {
     const { team } = await searchParams;
