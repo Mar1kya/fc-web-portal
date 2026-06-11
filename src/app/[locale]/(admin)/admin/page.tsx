@@ -19,7 +19,7 @@ export default async function AdminDashboardPage() {
         lowStockVariants,
         unsyncedMatches
     ] = await Promise.all([
-        prisma.order.count({ where: { status: "PENDING" } }),
+        prisma.order.count({ where: { status: "PENDING", deletedAt: null } }),
         prisma.order.aggregate({ _sum: { totalPrice: true }, where: { isPaid: true } }),
         prisma.match.findFirst({ where: { status: "SCHEDULED" }, orderBy: { date: "asc" }, include: { opponent: { include: { translations: true } } } }),
         prisma.post.count({ where: { isPublished: true, deletedAt: null } }),
@@ -34,15 +34,24 @@ export default async function AdminDashboardPage() {
         }),
         prisma.productVariant.findMany({
             where: { stock: { lt: 5 } },
-            take: 20,
             orderBy: { stock: "asc" },
             include: { product: { include: { translations: true } } }
         }),
         prisma.match.findMany({
-            where: { status: "FINISHED", isDetailsSynced: false },
+            where: {
+                status: "FINISHED",
+                isDetailsSynced: false,
+                lineup: { none: {} },
+                events: { none: {} },
+            },
             take: 5,
             orderBy: { date: "desc" },
-            include: { opponent: { include: { translations: true } } }
+            include: {
+                opponent: { include: { translations: true } },
+                _count: {
+                    select: { lineup: true, events: true }
+                }
+            }
         })
     ]);
 

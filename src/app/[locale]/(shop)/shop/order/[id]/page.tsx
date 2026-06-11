@@ -10,6 +10,7 @@ import ClearCartTrigger from "./_components/clear-cart-trigger";
 import OrderGuestBanner from "./_components/order-guest-banner";
 import OrderDetails from "./_components/order-details";
 import RetryPaymentButton from "./_components/retry-payment-button";
+import { getPaymentBadgeConfig, statusColors } from "@/lib/constants";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string; locale: string }> }) {
     const { id, locale } = await params;
@@ -51,7 +52,6 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
     if (!order.isPaid && isCardPayment && currentStatus !== "CANCELLED") {
         const timeLimitMs = 30 * 60 * 1000;
-
         // eslint-disable-next-line react-hooks/purity
         const timePassedMs = Date.now() - order.createdAt.getTime();
 
@@ -74,21 +74,21 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
     const showPendingNotice = isCardPayment && !order.isPaid && currentStatus !== "CANCELLED";
 
-    let paymentBadgeText = "";
-    let paymentBadgeClass = "";
+    const payment = getPaymentBadgeConfig(
+        order.isPaid,
+        currentStatus,
+        order.paymentMethod as "CARD" | "COD"
+    );
 
+    let paymentBadgeText = "";
     if (order.isPaid) {
         paymentBadgeText = t("paid");
-        paymentBadgeClass = "bg-emerald-600 hover:bg-emerald-600 text-white";
     } else if (currentStatus === "CANCELLED") {
-        paymentBadgeText = t(`statuses.CANCELLED`);
-        paymentBadgeClass = "bg-destructive/10 text-destructive";
+        paymentBadgeText = t("statuses.CANCELLED");
     } else if (isCardPayment) {
         paymentBadgeText = t("notPaid");
-        paymentBadgeClass = "bg-amber-500/10 text-amber-500";
     } else {
         paymentBadgeText = t("paymentUponDelivery");
-        paymentBadgeClass = "bg-blue-500/10 text-blue-500";
     }
 
     return (
@@ -113,23 +113,26 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                                 {t("status")}:
                             </span>
                             <Badge
-                                variant={currentStatus === "CANCELLED" ? "destructive" : "secondary"}
+                                variant="secondary"
                                 className={cn(
-                                    "h-7 font-bold uppercase tracking-wider px-2.5 border-none rounded-md",
-                                    currentStatus !== "CANCELLED" && "bg-emerald-600/10 text-emerald-600"
+                                    "h-7 font-bold uppercase tracking-wider px-2.5 rounded-md",
+                                    statusColors[currentStatus]
                                 )}
                             >
                                 {t(`statuses.${currentStatus}`)}
                             </Badge>
                         </div>
-                        <div className="hidden sm:block w-px h-5 bg-border"></div>
+                        <div className="hidden sm:block w-px h-5 bg-border" />
                         <div className="flex items-center justify-between sm:justify-start gap-3">
                             <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                                 {t("paymentStatus")}:
                             </span>
                             <Badge
                                 variant="outline"
-                                className={cn("h-7 font-bold uppercase tracking-wider px-2.5 border-none rounded-md", paymentBadgeClass)}
+                                className={cn(
+                                    "h-7 font-bold uppercase tracking-wider px-2.5 rounded-md",
+                                    payment.className
+                                )}
                             >
                                 {paymentBadgeText}
                             </Badge>

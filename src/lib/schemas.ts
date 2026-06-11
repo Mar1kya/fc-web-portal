@@ -2,6 +2,7 @@ import z from "zod";
 import { zEmail, zPassword, zPhone } from "./utils/validations";
 import { MIN_NAME_LENGTH, MIN_PASSWORD_LENGTH } from "./constants";
 import {
+  Demographic,
   EventType,
   MatchStatus,
   PlayerPosition,
@@ -250,10 +251,51 @@ export const updateMatchSchema = z.object({
 });
 
 export const createGallerySchema = z.object({
-    title_uk: z.string().min(1, "Введіть назву галереї українською"),
-    title_en: z.string().optional(),
-    coverUrl: z.string().url("Некоректне посилання на обкладинку"),
-    mediaUrls: z.array(z.string().url("Некоректне посилання на медіа")).min(1, "Додайте хоча б одне фото/відео"),
-    matchId: z.string().optional().nullable(),
-    publishedAt: z.coerce.date().optional(),
+  title_uk: z.string().min(1, "Введіть назву галереї українською"),
+  title_en: z.string().optional(),
+  coverUrl: z.string().url("Некоректне посилання на обкладинку"),
+  mediaUrls: z
+    .array(z.string().url("Некоректне посилання на медіа"))
+    .min(1, "Додайте хоча б одне фото/відео"),
+  matchId: z.string().optional().nullable(),
+  publishedAt: z.coerce.date().optional(),
+});
+
+export const categorySchema = z.object({
+  name_uk: z.string().min(2, "Українська назва має містити мінімум 2 символи"),
+  name_en: z.string().min(2, "Англійська назва має містити мінімум 2 символи"),
+});
+
+export const productSchema = z.object({
+    name_uk: z.string().min(2, "Назва українською обов'язкова"),
+    name_en: z.string().min(2, "Назва англійською обов'язкова"),
+    description_uk: z.string().min(10, "Опис українською занадто короткий"),
+    description_en: z.string().min(10, "Опис англійською занадто короткий"),
+    categoryId: z.string().min(1, "Оберіть категорію"),
+    demographic: z.nativeEnum(Demographic).default(Demographic.UNISEX),
+    price: z.coerce.number().min(0.01, "Ціна має бути більшою за 0"),
+    salePrice: z.coerce.number().min(0).optional().nullable(),
+    isOnSale: z.boolean().default(false),
+    isFeatured: z.boolean().default(false),
+    isArchived: z.boolean().default(false),
+    color: z.string().optional().nullable(),
+    apparelType: z.string().optional().nullable(),
+    seasonYear: z.string().optional().nullable(),
+    matchType: z.string().optional().nullable(),
+    relatedPlayerIds: z.array(z.string()).optional(),
+    mediaUrls: z.array(z.string()).optional(),
+    variants: z.array(
+        z.object({
+            size: z.string().min(1, "Вкажіть розмір"),
+            stock: z.coerce.number().min(0, "Залишок не може бути від'ємним"),
+            sku: z.string().optional().nullable(),
+        })
+    )
+    .min(1, "Додайте хоча б один розмір")
+    .refine((variants) => {
+        const sizes = variants.map(v => v.size.toUpperCase().trim());
+        return sizes.length === new Set(sizes).size;
+    }, {
+        message: "У товарі є дублікати розмірів. Кожен розмір можна додати лише один раз.",
+    }),
 });

@@ -38,7 +38,6 @@ export default async function OrderHistoryPage({ searchParams, params }: Props) 
 
     const whereCondition: Prisma.OrderWhereInput = {
         userId: session.user.id,
-        deletedAt: null,
     };
 
     if (status && status !== "ALL") {

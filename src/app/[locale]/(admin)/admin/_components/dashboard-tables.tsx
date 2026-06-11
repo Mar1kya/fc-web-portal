@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { formatPrice } from "@/lib/utils"
 import { OrderStatusEnum, PaymentMethodEnum, Prisma } from "../../../../../../generated/prisma"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { statusColors } from "@/lib/constants"
 
 type OrderWithItems = Prisma.OrderGetPayload<{
     include: {
@@ -22,7 +23,10 @@ type VariantWithProduct = Prisma.ProductVariantGetPayload<{
 }>;
 
 type MatchWithOpponent = Prisma.MatchGetPayload<{
-    include: { opponent: { include: { translations: true } } }
+    include: {
+        opponent: { include: { translations: true } };
+        _count: { select: { lineup: true; events: true } };
+    }
 }>;
 
 type DashboardTablesProps = {
@@ -114,10 +118,10 @@ export function DashboardTables({ recentOrders, lowStock, unsyncedMatches }: Das
                                                     <div className="flex items-center gap-2">
                                                         <span className="text-[10px] uppercase text-muted-foreground w-12">Замовл:</span>
                                                         <Badge
-                                                            variant={order.status === OrderStatusEnum.CANCELLED ? "destructive" : "secondary"}
+                                                            variant="secondary"
                                                             className={cn(
-                                                                "h-6 text-[10px] font-bold uppercase tracking-wider px-2 border-none rounded-md",
-                                                                order.status !== OrderStatusEnum.CANCELLED && "bg-emerald-600/10 text-emerald-600"
+                                                                "h-6 text-[10px] font-bold uppercase tracking-wider px-2 rounded-md",
+                                                                statusColors[order.status]
                                                             )}
                                                         >
                                                             {statusTranslations[order.status]}
@@ -165,11 +169,20 @@ export function DashboardTables({ recentOrders, lowStock, unsyncedMatches }: Das
                                     <p className="text-sm text-muted-foreground">З товарами все добре.</p>
                                 ) : (
                                     lowStock.map((variant) => {
-                                        const productName = variant.product.translations[0]?.name || "Невідомий товар";
+                                        const productName = variant.product.translations?.find(t => t.language === "uk")?.name
+                                            || variant.product.translations?.[0]?.name
+                                            || "Невідомий товар";
+
                                         return (
                                             <div key={variant.id} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
-                                                <div className="space-y-1 overflow-hidden pr-4">
-                                                    <p className="text-sm font-medium leading-none truncate" title={productName}>{productName}</p>
+                                                <div className="space-y-1 overflow-hidden pr-4 flex-1">
+                                                    <Link
+                                                        href={`/admin/shop/products/${variant.product.id}/edit`}
+                                                        className="text-sm font-medium leading-none truncate block hover:text-primary hover:underline transition-colors cursor-pointer"
+                                                        title={`Редагувати: ${productName}`}
+                                                    >
+                                                        {productName}
+                                                    </Link>
                                                     <p className="text-xs text-muted-foreground">Розмір: {variant.size}</p>
                                                 </div>
                                                 <div className="font-bold text-red-500 shrink-0">
@@ -194,26 +207,52 @@ export function DashboardTables({ recentOrders, lowStock, unsyncedMatches }: Das
                                 <p className="text-sm text-muted-foreground">Вся статистика заповнена.</p>
                             ) : (
                                 unsyncedMatches.map((match) => {
-                                    const opponentName = match.opponent.translations?.[0]?.name || match.opponent.slug;
+                                    const opponentName =
+                                        match.opponent.translations?.find((t) => t.language === "uk")?.name
+                                        || match.opponent.translations?.[0]?.name
+                                        || match.opponent.slug;
 
                                     const matchTitle = match.isHomeGame
-                                        ? `Emerald Gang - ${opponentName}`
-                                        : `${opponentName} - Emerald Gang`;
+                                        ? `Смарагдова Банда — ${opponentName}`
+                                        : `${opponentName} — Смарагдова Банда`;
+
+                                    const hasManualData =
+                                        !match.sofascoreId &&
+                                        match._count &&
+                                        (match._count.lineup > 0 || match._count.events > 0);
+
                                     return (
-                                        <div key={match.id} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
+                                        <div
+                                            key={match.id}
+                                            className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
+                                        >
                                             <div className="space-y-1">
                                                 <p className="text-sm font-medium leading-none">{matchTitle}</p>
                                                 <p className="text-xs text-muted-foreground">
                                                     {new Date(match.date).toLocaleDateString("uk-UA")}
                                                 </p>
                                             </div>
-                                            <Button variant="outline" size="sm" asChild className="border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white shrink-0">
-                                                <Link href={`/admin/matches/${match.id}/edit`}>
-                                                    Оновити
-                                                </Link>
-                                            </Button>
+                                            {hasManualData ? (
+                                                <Badge
+                                                    variant="outline"
+                                                    className="text-blue-500 border-blue-500/30 bg-blue-500/10 text-xs px-2.5 py-0.5 whitespace-nowrap shrink-0"
+                                                >
+                                                    Ручне введення
+                                                </Badge>
+                                            ) : (
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    asChild
+                                                    className="border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white shrink-0"
+                                                >
+                                                    <Link href={`/admin/tournaments/matches/${match.id}/edit`}>
+                                                        Оновити
+                                                    </Link>
+                                                </Button>
+                                            )}
                                         </div>
-                                    )
+                                    );
                                 })
                             )}
                         </div>
