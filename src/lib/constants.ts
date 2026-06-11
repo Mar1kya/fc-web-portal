@@ -1,4 +1,4 @@
-import { PostType, TeamContext } from "../../generated/prisma";
+import { OrderStatusEnum, PostType, TeamContext } from "../../generated/prisma";
 
 export const MIN_PASSWORD_LENGTH = 8;
 export const MIN_NAME_LENGTH = 2;
@@ -104,3 +104,28 @@ export const STANDARD_SIZES = [
   "4XL",
   "ONE SIZE",
 ];
+export const statusColors: Record<OrderStatusEnum, string> = {
+    PENDING: "bg-amber-500/10 text-amber-500 border-none",
+    PAID: "bg-emerald-600/10 text-emerald-600 border-none",
+    SHIPPED: "bg-blue-500/10 text-blue-500 border-none",
+    DELIVERED: "bg-emerald-600/10 text-emerald-600 border-none",
+    CANCELLED: "bg-destructive/10 text-destructive border-none",
+};
+
+export function getPaymentBadgeConfig(
+  isPaid: boolean,
+  status: OrderStatusEnum,
+  paymentMethod: "CARD" | "COD"
+): { label: string; className: string } {
+  if (isPaid) {
+    return { label: "Оплачено", className: "bg-emerald-600 hover:bg-emerald-600 text-white border-none" };
+  }
+  if (status === OrderStatusEnum.CANCELLED) {
+    return { label: "Скасовано", className: "bg-destructive/10 text-destructive border-none" };
+  }
+  if (paymentMethod === "CARD") {
+    return { label: "Не оплачено", className: "bg-amber-500/10 text-amber-500 border-none" };
+  }
+  return { label: "Оплата при отриманні", className: "bg-blue-500/10 text-blue-500 border-none" };
+}
+ 

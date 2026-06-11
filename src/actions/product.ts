@@ -35,7 +35,6 @@ export async function softDeleteProduct(id: string) {
       where: { id },
       data: {
         deletedAt: new Date(),
-        isArchived: true,
       },
     });
 

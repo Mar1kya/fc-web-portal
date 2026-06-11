@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { buttonVariants } from "@/components/ui/button";
 import { Prisma } from "../../../../../../../generated/prisma";
+import { getPaymentBadgeConfig, statusColors } from "@/lib/constants";
 
 type OrderWithItems = Prisma.OrderGetPayload<{
     include: {
@@ -44,28 +45,28 @@ export default async function OrderHistoryCard({
     const allImageUrls = order.orderItems
         .map((item) => item.product.media[0]?.url)
         .filter(Boolean) as string[];
-        
+
     const uniqueImages = Array.from(new Set(allImageUrls));
-        
     const displayImages = uniqueImages.slice(0, 3);
     const remainingImages = uniqueImages.length - displayImages.length;
 
     const isCardPayment = order.paymentMethod === "CARD";
-    let paymentBadgeText = "";
-    let paymentBadgeClass = "";
 
+    const payment = getPaymentBadgeConfig(
+        order.isPaid,
+        order.status,
+        order.paymentMethod as "CARD" | "COD"
+    );
+
+    let paymentBadgeText = "";
     if (order.isPaid) {
         paymentBadgeText = tOrder("paid");
-        paymentBadgeClass = "bg-emerald-600/10 text-emerald-600";
     } else if (order.status === "CANCELLED") {
-        paymentBadgeText = tOrder(`statuses.CANCELLED`);
-        paymentBadgeClass = "bg-destructive/10 text-destructive";
+        paymentBadgeText = tOrder("statuses.CANCELLED");
     } else if (isCardPayment) {
         paymentBadgeText = tOrder("notPaid");
-        paymentBadgeClass = "bg-amber-500/10 text-amber-500";
     } else {
         paymentBadgeText = tOrder("paymentUponDelivery");
-        paymentBadgeClass = "bg-blue-500/10 text-blue-500";
     }
 
     const needsPayment = !order.isPaid && isCardPayment && order.status !== "CANCELLED";
@@ -88,24 +89,27 @@ export default async function OrderHistoryCard({
                         <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                             {tOrder("status")}:
                         </span>
-                        <Badge 
-                            variant={order.status === "CANCELLED" ? "destructive" : "secondary"} 
+                        <Badge
+                            variant="secondary"
                             className={cn(
-                                "h-6 text-[10px] font-bold uppercase tracking-wider px-2 border-none rounded-md",
-                                order.status !== "CANCELLED" && "bg-emerald-600/10 text-emerald-600"
+                                "h-6 text-[10px] font-bold uppercase tracking-wider px-2 rounded-md",
+                                statusColors[order.status]
                             )}
                         >
                             {tOrder(`statuses.${order.status}`)}
                         </Badge>
                     </div>
-                    <div className="hidden sm:block w-px h-4 bg-border"></div>
+                    <div className="hidden sm:block w-px h-4 bg-border" />
                     <div className="flex items-center justify-between sm:justify-start gap-3">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                             {tOrder("paymentStatus")}:
                         </span>
-                        <Badge 
-                            variant="outline" 
-                            className={cn("h-6 text-[10px] font-bold uppercase tracking-wider px-2 border-none rounded-md", paymentBadgeClass)}
+                        <Badge
+                            variant="outline"
+                            className={cn(
+                                "h-6 text-[10px] font-bold uppercase tracking-wider px-2 rounded-md",
+                                payment.className
+                            )}
                         >
                             {paymentBadgeText}
                         </Badge>
@@ -139,7 +143,7 @@ export default async function OrderHistoryCard({
                             {formatPrice(totalAmount)}
                         </span>
                     </div>
-                    <Link 
+                    <Link
                         href={`/${locale}/shop/order/${order.id}`}
                         className={cn(
                             buttonVariants({ variant: needsPayment ? "default" : "outline", size: "sm" }),

@@ -17,7 +17,7 @@ export type ProductPlain = {
     isOnSale: boolean;
     isFeatured: boolean;
     isArchived: boolean;
-    deletedAt: Date | null; 
+    deletedAt: Date | null;
     translations: ProductTranslation[];
     category: Category & { translations: CategoryTranslation[] };
     media: Media[];
@@ -129,9 +129,10 @@ export const columns: ColumnDef<ProductPlain>[] = [
         id: "status",
         header: "Статус",
         cell: ({ row }) => {
-            const { isFeatured, isOnSale } = row.original;
+            const { isFeatured, isOnSale, isArchived } = row.original;
             return (
                 <div className="flex gap-1 flex-wrap w-22.5">
+                    {isArchived && <Badge variant={"outline"}>Архівний</Badge>}
                     {isFeatured && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-emerald-500 hover:bg-emerald-600">Топ продажу</Badge>}
                     {isOnSale && <Badge className="bg-red-500 hover:bg-red-600 text-[10px] px-1.5 py-0 text-white">Акція</Badge>}
                     {!isFeatured && !isOnSale && <span className="text-muted-foreground text-xs">-</span>}

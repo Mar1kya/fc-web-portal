@@ -15,7 +15,6 @@ export default async function ProductsPage() {
     const rawProducts = await prisma.product.findMany({
         where: {
             deletedAt: null,
-            isArchived: false,
         },
         include: {
             translations: true,

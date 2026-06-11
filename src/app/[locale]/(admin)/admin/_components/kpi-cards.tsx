@@ -13,9 +13,16 @@ type KPICardsProps = {
     nextMatch: NextMatchWithOpponent | null; 
     newsCount: number;
 }
-export function KPICards({ pendingOrders, revenue, nextMatch, newsCount }: KPICardsProps) {
-    const nextMatchOpponent = nextMatch?.opponent?.translations?.[0]?.name || nextMatch?.opponent?.slug;
 
+export function KPICards({ pendingOrders, revenue, nextMatch, newsCount }: KPICardsProps) {
+    const nextMatchOpponent = nextMatch?.opponent?.translations?.find(t => t.language === 'uk')?.name 
+    || nextMatch?.opponent?.translations?.[0]?.name 
+    || nextMatch?.opponent?.slug;
+    
+    const matchTitle = nextMatch 
+        ? `Смарагдова Банда vs ${nextMatchOpponent}` 
+        : "Немає розкладу";
+    
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
@@ -44,8 +51,8 @@ export function KPICards({ pendingOrders, revenue, nextMatch, newsCount }: KPICa
                     <CalendarDays className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-xl font-bold truncate" title={nextMatch ? `vs ${nextMatchOpponent}` : ""}>
-                        {nextMatch ? `vs ${nextMatchOpponent}` : "Немає розкладу"}
+                    <div className="text-lg font-bold truncate" title={nextMatch ? matchTitle : ""}>
+                        {matchTitle}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
                         {nextMatch ? new Date(nextMatch.date).toLocaleDateString("uk-UA") : "-"}
