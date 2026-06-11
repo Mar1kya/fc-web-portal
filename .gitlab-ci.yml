@@ -17,21 +17,21 @@ cache:
 lint_job:
   stage: lint
   script:
-    - npm ci --cache .npm --prefer-offline
+    - npm ci --cache .npm --prefer-offline --ignore-scripts
     - npx prisma generate
     - npm run lint
 
 typecheck_job:
   stage: type-check
   script:
-    - npm ci --cache .npm --prefer-offline
+    - npm ci --cache .npm --prefer-offline --ignore-scripts
     - npx prisma generate
     - npm run type-check
 
 build_job:
   stage: build
   script:
-    - npm ci --cache .npm --prefer-offline
+    - npm ci --cache .npm --prefer-offline --ignore-scripts
     - npx prisma generate
     - npm run build
 
