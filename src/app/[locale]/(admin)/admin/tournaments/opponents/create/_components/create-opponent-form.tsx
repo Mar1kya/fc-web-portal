@@ -19,7 +19,7 @@ export function CreateOpponentForm() {
     const [nameEn, setNameEn] = useState("");
     const [sofascoreId, setSofascoreId] = useState<number | "">("");
     const [customLogoUrl, setCustomLogoUrl] = useState("");
-    const finalLogoUrl = customLogoUrl || (sofascoreId ? `https://api.sofascore.app/api/v1/team/${sofascoreId}/image` : null);
+    const finalLogoUrl = customLogoUrl || (sofascoreId ? `https://img.sofascore.com/api/v1/team/${sofascoreId}/image` : null);
 
     const boundData: BoundOpponentData = {
         name_uk: nameUk,

@@ -6,7 +6,35 @@
     }
   },
   "HomePage": {
-    "title": "Футбольний клуб"
+    "Hero": {
+      "noMatch": "Матчів поки немає",
+      "live": "LIVE",
+      "finished": "Завершено",
+      "upcoming": "Майбутній",
+      "round": "Тур",
+      "matchReport": "Звіт про матч",
+      "matchCenter": "Матч-центр",
+      "allMatches": "Розклад"
+    },
+    "Sections": {
+      "matches": "Матчі",
+      "allMatches": "Всі матчі",
+      "news": "Новини",
+      "allNews": "Всі новини",
+      "standings": "Таблиця",
+      "fullTable": "Повна таблиця",
+      "shop": "Фаншоп",
+      "allProducts": "До магазину"
+    },
+    "Metadata": {
+      "title": "Головна сторінка",
+      "description": "Emerald Gang — твій улюблений портал. Найсвіжіші новини, статистика гравців, розклад матчів та багато іншого."
+    }
+  },
+  "GlobalNotFound": {
+    "title": "Сторінку не знайдено",
+    "description": "На жаль, сторінка, яку ви шукаєте, не існує, була видалена або тимчасово недоступна.",
+    "backButton": "На головну"
   },
   "Validations": {
     "invalidEmail": "Невірний формат електронної пошти.",

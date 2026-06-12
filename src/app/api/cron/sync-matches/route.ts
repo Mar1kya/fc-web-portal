@@ -150,7 +150,7 @@ export async function GET(request: Request) {
               data: {
                 slug: opponentData.slug,
                 sofascoreId: opponentData.id,
-                logoUrl: `https://api.sofascore.app/api/v1/team/${opponentData.id}/image`,
+                logoUrl: `https://img.sofascore.com/api/v1/team/${opponentData.id}/image`,
                 translations: {
                   create: [
                     { language: "uk", name: opponentData.name },

@@ -96,7 +96,7 @@ export async function executeStandingsSync() {
             insertData.push({
               rank: row.position,
               teamName: localizedName,
-              teamLogo: `https://api.sofascore.app/api/v1/team/${row.team.id}/image`,
+              teamLogo: `https://img.sofascore.com/api/v1/team/${row.team.id}/image`,
               points: row.points,
               played: row.matches,
               win: row.wins,
