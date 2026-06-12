@@ -82,7 +82,6 @@ model Media {
   id           String             @id @default(cuid())
   url          String
   type         MediaType          @default(IMAGE)
-  translations MediaTranslation[]
   posts        Post[]
   players      Player[]
   coaches      Coach[]
@@ -93,16 +92,6 @@ model Media {
   deletedAt DateTime?
 
   @@index([deletedAt])
-}
-
-model MediaTranslation {
-  id       String @id @default(cuid())
-  mediaId  String
-  media    Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-  language String @db.VarChar(5)
-  altText  String
-
-  @@unique([mediaId, language])
 }
 
 enum PostType {
@@ -552,7 +541,6 @@ model Order {
   postalCode    String?
   address       String?
   orderItems    OrderItem[]
-  payment       Payment?
   paymentMethod PaymentMethodEnum @default(CARD)
 
   createdAt DateTime  @default(now())
@@ -575,18 +563,6 @@ model OrderItem {
   fixedPrice   Decimal         @db.Decimal(10, 2)
   customName   String?
   customNumber String?
-}
-
-model Payment {
-  id            String  @id @default(cuid())
-  orderId       String  @unique
-  order         Order   @relation(fields: [orderId], references: [id])
-  provider      String
-  status        String
-  transactionId String?
-  details       Json?
-
-  createdAt DateTime @default(now())
 }
 
 model Season {
