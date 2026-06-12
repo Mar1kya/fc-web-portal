@@ -783,7 +783,7 @@ export async function executeRosterSync() {
             ? new Date(playerData.dateOfBirthTimestamp * 1000)
             : null;
           const nationality = playerData.country?.alpha3 || null;
-          const avatar = `https://api.sofascore.app/api/v1/player/${sofascoreId}/image`;
+          const avatar = `https://img.sofascore.com/api/v1/player/${sofascoreId}/image`;
 
           const slug = generatePlayerSlug(name, number);
 

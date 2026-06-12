@@ -11,6 +11,7 @@ export const TARGET_TEAM_ORIGINAL_NAME = "Polissya Zhytomyr";
 export const TEAM_ID = "258536";
 export const MAX_QTY_PER_ITEM = 10;
 export const LOCALES = ["uk", "en"];
+export const OUR_LOGO_URL = "https://img.sofascore.com/api/v1/team/258536/image";
 
 export const postTypeTranslations: Record<PostType, string> = {
   NEWS: "Новина",

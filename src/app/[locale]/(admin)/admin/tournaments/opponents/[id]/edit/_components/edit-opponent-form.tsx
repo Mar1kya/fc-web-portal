@@ -25,9 +25,9 @@ export function EditOpponentForm({ opponent }: { opponent: OpponentWithTranslati
     const [nameUk, setNameUk] = useState(txUk?.name || "");
     const [nameEn, setNameEn] = useState(txEn?.name || "");
     const [sofascoreId, setSofascoreId] = useState<number | "">(opponent.sofascoreId ?? "");
-    const isSofaLogo = opponent.logoUrl?.includes("sofascore.app");
+    const isSofaLogo = opponent.logoUrl?.includes("sofascore.com");
     const [customLogoUrl, setCustomLogoUrl] = useState<string>(!isSofaLogo && opponent.logoUrl ? opponent.logoUrl : "");
-    const previewLogoUrl = customLogoUrl || (sofascoreId ? `https://api.sofascore.app/api/v1/team/${sofascoreId}/image` : "");
+    const previewLogoUrl = customLogoUrl || (sofascoreId ? `https://img.sofascore.com/api/v1/team/${sofascoreId}/image` : "");
     const finalLogoUrl = previewLogoUrl === "" ? null : previewLogoUrl;
 
     const boundData: BoundOpponentData = {

@@ -253,13 +253,12 @@ export async function syncMatchScheduleAction() {
               ],
             },
           });
-
           if (!opponent) {
             opponent = await tx.opponent.create({
               data: {
                 slug: opponentData.slug,
                 sofascoreId: opponentData.id,
-                logoUrl: `https://api.sofascore.app/api/v1/team/${opponentData.id}/image`,
+                logoUrl: `https://img.sofascore.com/api/v1/team/${opponentData.id}/image`,
                 translations: {
                   create: [
                     { language: "uk", name: opponentData.name },
@@ -268,10 +267,15 @@ export async function syncMatchScheduleAction() {
                 },
               },
             });
-          } else if (opponent.sofascoreId === null) {
+          } else {
             opponent = await tx.opponent.update({
               where: { id: opponent.id },
-              data: { sofascoreId: opponentData.id },
+              data: {
+                ...(opponent.sofascoreId === null && {
+                  sofascoreId: opponentData.id,
+                }),
+                logoUrl: `https://img.sofascore.com/api/v1/team/${opponentData.id}/image`,
+              },
             });
           }
 

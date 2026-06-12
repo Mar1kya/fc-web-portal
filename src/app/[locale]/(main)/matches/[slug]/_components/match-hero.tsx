@@ -34,7 +34,7 @@ export default function MatchHero({ match, locale }: MatchHeroProps) {
     const translatedTournament = getTranslation(match.tournament, locale)?.name || "";
     const translatedOpponent = getTranslation(match.opponent, locale)?.name || "";
     const ourTeamName = t("ourTeamName");
-    const ourLogoUrl = "https://api.sofascore.app/api/v1/team/258536/image";
+    const ourLogoUrl = "https://img.sofascore.com/api/v1/team/258536/image";
     const homeTeamName = match.isHomeGame ? ourTeamName : translatedOpponent;
     const awayTeamName = match.isHomeGame ? translatedOpponent : ourTeamName;
     const homeLogo = match.isHomeGame ? ourLogoUrl : (match.opponent?.logoUrl || "");

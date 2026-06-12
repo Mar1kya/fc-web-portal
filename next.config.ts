@@ -36,6 +36,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "img.sofascore.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "img.youtube.com",
         pathname: "/**",
       },

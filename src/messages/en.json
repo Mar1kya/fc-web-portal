@@ -6,7 +6,35 @@
     }
   },
   "HomePage": {
-    "title": "Football club"
+    "Hero": {
+      "noMatch": "No matches yet",
+      "live": "LIVE",
+      "finished": "Finished",
+      "upcoming": "Upcoming",
+      "round": "Round",
+      "matchReport": "Match report",
+      "matchCenter": "Match center",
+      "allMatches": "Schedule"
+    },
+    "Sections": {
+      "matches": "Matches",
+      "allMatches": "All matches",
+      "news": "News",
+      "allNews": "All news",
+      "standings": "Standings",
+      "fullTable": "Full table",
+      "shop": "Fan Shop",
+      "allProducts": "Visit shop"
+    },
+    "Metadata": {
+      "title": "Home",
+      "description": "Emerald Gang — your favorite portal. Latest news, player statistics, match schedules, and much more."
+    }
+  },
+  "GlobalNotFound": {
+    "title": "Page Not Found",
+    "description": "Sorry, the page you are looking for does not exist, has been removed, or is temporarily unavailable.",
+    "backButton": "Back to Home"
   },
   "Validations": {
     "invalidEmail": "Invalid email format.",
