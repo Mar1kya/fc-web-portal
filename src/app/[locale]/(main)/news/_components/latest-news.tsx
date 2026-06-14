@@ -4,7 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import NewsCard from "./news-card";
 import NewsFilters from "./news-filters";
 import { PostType, TeamContext } from "../../../../../../generated/prisma";
-import { startOfDay, endOfDay, parse, isValid } from "date-fns"; 
+import { startOfDay, endOfDay, parse, isValid } from "date-fns";
 import AppPagination from "@/components/layout/app-pagination";
 import { PAGINATION } from "@/lib/constants";
 
@@ -23,7 +23,7 @@ export default async function LatestNews({ searchParams }: { searchParams: { [ke
         if (Object.values(PostType).includes(typeParam as PostType)) {
             typeFilter = typeParam as PostType;
         } else {
-            isInvalidSearch = true; 
+            isInvalidSearch = true;
         }
     }
     let teamFilter: TeamContext | undefined = undefined;
@@ -31,7 +31,7 @@ export default async function LatestNews({ searchParams }: { searchParams: { [ke
         if (Object.values(TeamContext).includes(teamParam as TeamContext)) {
             teamFilter = teamParam as TeamContext;
         } else {
-            isInvalidSearch = true; 
+            isInvalidSearch = true;
         }
     }
     let dateFilter = undefined;
@@ -43,7 +43,7 @@ export default async function LatestNews({ searchParams }: { searchParams: { [ke
                 lte: endOfDay(parsedDate)
             };
         } else {
-            isInvalidSearch = true; 
+            isInvalidSearch = true;
         }
     }
     if (isInvalidSearch) {
@@ -60,6 +60,7 @@ export default async function LatestNews({ searchParams }: { searchParams: { [ke
 
     const whereClause = {
         isPublished: true,
+        deletedAt: null,
         ...(typeFilter && { type: typeFilter }),
         ...(teamFilter && { teamContext: teamFilter }),
         ...(dateFilter && { publishedAt: dateFilter }),
@@ -79,7 +80,7 @@ export default async function LatestNews({ searchParams }: { searchParams: { [ke
         prisma.post.count({ where: whereClause })
     ]);
     const totalPages = Math.ceil(totalItems / PAGINATION.NEWS_PER_PAGE);
-    
+
     return (
         <section className="container mx-auto">
             <div className="flex justify-between items-end mb-8 border-b pb-4 border-border">

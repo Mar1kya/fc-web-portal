@@ -24,7 +24,7 @@ export type OpponentFormState = {
 function revalidateOpponentPaths() {
   LOCALES.forEach((locale) => {
     revalidatePath(`/${locale}/admin/tournaments/opponents`);
-    revalidatePath(`/${locale}/admin/tournaments/opponents/trash`);
+    revalidatePath(`/${locale}/admin/tournaments/opponents/archive`);
     revalidatePath(`/${locale}/matches`, "layout");
   });
 }

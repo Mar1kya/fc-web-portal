@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
+import { Archive, Plus } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./_components/columns";
 import { TeamContext } from "../../../../../../../generated/prisma";
@@ -89,7 +89,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
                     <SyncScheduleButton />
                     <Button variant="outline" asChild>
                         <Link href="/admin/tournaments/matches/archive">
-                            <Trash2 className="mr-2 h-4 w-4" />
+                            <Archive className="mr-2 h-4 w-4" />
                             Архів
                         </Link>
                     </Button>
