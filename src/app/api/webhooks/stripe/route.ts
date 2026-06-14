@@ -3,6 +3,17 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
+import { LOCALES } from "@/lib/constants";
+import { revalidatePath } from "next/cache";
+
+function revalidateOrderPaths(orderId: string) {
+  LOCALES.forEach((locale) => {
+    revalidatePath(`/${locale}/shop/order/${orderId}`);
+    revalidatePath(`/${locale}/admin/shop/orders/${orderId}`);
+    revalidatePath(`/${locale}/admin/shop/orders`);
+    revalidatePath(`/${locale}/profile/history`);
+  });
+}
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -36,6 +47,7 @@ export async function POST(req: Request) {
             isPaid: true,
           },
         });
+        revalidateOrderPaths(orderId);
       } catch {
         return new NextResponse("Database Error", { status: 500 });
       }
@@ -77,6 +89,7 @@ export async function POST(req: Request) {
       } catch {
         return new NextResponse("Database Error", { status: 500 });
       }
+      revalidateOrderPaths(orderId);
     }
   }
 

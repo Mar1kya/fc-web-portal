@@ -70,7 +70,7 @@ export async function softDeletePost(id: string) {
 
     revalidatePath(`/${locale}/admin`);
     revalidatePath(`/${locale}/admin/news`);
-    revalidatePath(`/${locale}/admin/news/trash`);
+    revalidatePath(`/${locale}/admin/news/archive`);
     revalidatePath(`/${locale}/news`);
     revalidatePath(`/${locale}`);
 
@@ -126,7 +126,7 @@ export async function restorePost(id: string) {
 
     revalidatePath(`/${locale}/admin`);
     revalidatePath(`/${locale}/admin/news`);
-    revalidatePath(`/${locale}/admin/news/trash`);
+    revalidatePath(`/${locale}/admin/news/archive`);
     revalidatePath(`/${locale}/news`);
     revalidatePath(`/${locale}`);
 
@@ -173,7 +173,7 @@ export async function hardDeletePost(id: string) {
 
     revalidatePath(`/${locale}/admin`);
     revalidatePath(`/${locale}/admin/news`);
-    revalidatePath(`/${locale}/admin/news/trash`);
+    revalidatePath(`/${locale}/admin/news/archive`);
 
     return {
       success: true,
