@@ -307,7 +307,7 @@
   },
   "StaffProfile": {
     "Metadata": {
-      "description": "Official profile: {name}. Role: {role}. View the biography, latest news, and photo gallery for FC Polissya."
+      "description": "Official profile: {name}. Role: {role}. View the biography, latest news, and photo gallery."
     }
   },
   "StandingsPage": {
@@ -566,7 +566,7 @@
       "noPhoto": "No photo",
       "Metadata": {
         "title": "Jersey: {name} #{number}",
-        "description": "Buy the official FC Polissya match jersey with the original printing of {name}."
+        "description": "Buy the official Emerald Gang match jersey with the original printing of {name}."
       }
     },
     "CheckoutPage": {

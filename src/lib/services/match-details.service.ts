@@ -11,6 +11,17 @@ type SofaPlayerItem = {
   };
 };
 
+type SofaIncidentItem = {
+  incidentType: string;
+  incidentClass?: string;
+  isHome: boolean;
+  time: number;
+  playerIn?: { id: number; name: string };
+  playerOut?: { id: number; name: string };
+  player?: { id: number; name: string };
+  assist1?: { id: number; name: string };
+};
+
 async function fetchSofaMatchDetails(
   sofascoreId: number,
   endpointPath: string,
@@ -37,7 +48,9 @@ export async function processMatchSync(matchDbId: string) {
     });
 
     if (!match || !match.sofascoreId) {
-      throw new Error(`Match ${matchDbId} not found or missing sofascoreId`);
+      throw new Error(
+        `Матч ${matchDbId} не знайдено або відсутній sofascoreId`,
+      );
     }
 
     const [lineupsData, incidentsData, defaultData] = await Promise.all([
@@ -56,162 +69,204 @@ export async function processMatchSync(matchDbId: string) {
     const homeCoach = eventDetails?.homeTeam?.manager?.name || null;
     const awayCoach = eventDetails?.awayTeam?.manager?.name || null;
 
-    await prisma.$transaction(async (tx) => {
-      await tx.matchEvent.deleteMany({ where: { matchId: matchDbId } });
-      await tx.matchLineup.deleteMany({ where: { matchId: matchDbId } });
+    const allSofaIdsToFetch = new Set<number>();
+    const incidents: SofaIncidentItem[] = incidentsData.incidents || [];
+    const isOurHomeGame = match.isHomeGame;
 
-      let opponentPlayersJSON: {
-        name: string;
-        position: string;
-        number: string;
-        isStarter: boolean;
-      }[] = [];
+    let ourTeamLineupRaw = null;
+    let opponentLineupRaw = null;
 
-      if (lineupsData.home && lineupsData.away) {
-        const { home, away } = lineupsData;
-        const isPolissyaHome = match.isHomeGame;
+    if (lineupsData.home && lineupsData.away) {
+      ourTeamLineupRaw = isOurHomeGame ? lineupsData.home : lineupsData.away;
+      opponentLineupRaw = isOurHomeGame ? lineupsData.away : lineupsData.home;
 
-        const polissyaLineup = isPolissyaHome ? home : away;
-        const opponentLineupRaw = isPolissyaHome ? away : home;
+      (ourTeamLineupRaw.players as SofaPlayerItem[]).forEach((p) => {
+        allSofaIdsToFetch.add(p.player.id);
+      });
+    }
 
-        opponentPlayersJSON = opponentLineupRaw.players.map(
-          (p: SofaPlayerItem) => ({
-            name: p.player.name,
-            position: p.player.position,
-            number: p.player.jerseyNumber,
-            isStarter: !p.substitute,
-          }),
-        );
+    incidents.forEach((inc) => {
+      if (inc.playerIn?.id) allSofaIdsToFetch.add(inc.playerIn.id);
+      if (inc.playerOut?.id) allSofaIdsToFetch.add(inc.playerOut.id);
+      if (inc.player?.id) allSofaIdsToFetch.add(inc.player.id);
+      if (inc.assist1?.id) allSofaIdsToFetch.add(inc.assist1.id);
+    });
 
-        for (const item of polissyaLineup.players as SofaPlayerItem[]) {
-          const playerInDb = await tx.player.findUnique({
-            where: { sofascoreId: item.player.id },
-          });
+    const playersInDb = await prisma.player.findMany({
+      where: { sofascoreId: { in: Array.from(allSofaIdsToFetch) } },
+      select: { id: true, sofascoreId: true },
+    });
 
-          if (playerInDb) {
-            await tx.matchLineup.create({
-              data: {
-                matchId: matchDbId,
-                playerId: playerInDb.id,
-                isStarter: !item.substitute,
-                played: !item.substitute,
-              },
-            });
-          }
-        }
-      } else {
-        console.log(`No lineups found for match ${match.slug}.`);
+    const playerMap = new Map<number, string>();
+    playersInDb.forEach((p) => {
+      if (p.sofascoreId !== null) {
+        playerMap.set(p.sofascoreId, p.id);
       }
+    });
 
-      const incidents = incidentsData.incidents || [];
+    await prisma.$transaction(
+      async (tx) => {
+        await tx.matchEvent.deleteMany({ where: { matchId: matchDbId } });
+        await tx.matchLineup.deleteMany({ where: { matchId: matchDbId } });
 
-      for (const incident of incidents) {
-        if (incident.incidentType === "substitution") {
-          const isOpponentSub = incident.isHome !== match.isHomeGame;
+        let opponentPlayersJSON: {
+          name: string;
+          position: string;
+          number: string;
+          isStarter: boolean;
+        }[] = [];
 
-          if (incident.playerIn) {
-            if (!isOpponentSub) {
-              const playerInDb = await tx.player.findUnique({
-                where: { sofascoreId: incident.playerIn.id },
+        if (ourTeamLineupRaw && opponentLineupRaw) {
+          opponentPlayersJSON = opponentLineupRaw.players.map(
+            (p: SofaPlayerItem) => ({
+              name: p.player.name,
+              position: p.player.position,
+              number: p.player.jerseyNumber,
+              isStarter: !p.substitute,
+            }),
+          );
+
+          for (const item of ourTeamLineupRaw.players as SofaPlayerItem[]) {
+            const playerDbId = playerMap.get(item.player.id);
+
+            if (playerDbId) {
+              await tx.matchLineup.create({
+                data: {
+                  matchId: matchDbId,
+                  playerId: playerDbId,
+                  isStarter: !item.substitute,
+                  played: !item.substitute,
+                },
               });
-              if (playerInDb) {
+            }
+          }
+        } else {
+          console.log(`No lineups found for match ${matchDbId}.`);
+        }
+
+        for (const incident of incidents) {
+          if (incident.incidentType === "substitution") {
+            const isOpponentSub = incident.isHome !== match.isHomeGame;
+
+            if (incident.playerIn) {
+              const playerInDbId = playerMap.get(incident.playerIn.id) || null;
+
+              if (!isOpponentSub && playerInDbId) {
                 await tx.matchLineup.updateMany({
-                  where: { matchId: matchDbId, playerId: playerInDb.id },
+                  where: { matchId: matchDbId, playerId: playerInDbId },
                   data: { played: true },
                 });
               }
+
+              await processEvent(
+                tx,
+                matchDbId,
+                EventType.SUBSTITUTION_IN,
+                incident.time,
+                isOpponentSub ? null : playerInDbId,
+                incident.playerIn.name,
+                isOpponentSub,
+              );
             }
 
+            if (incident.playerOut) {
+              const playerOutDbId =
+                playerMap.get(incident.playerOut.id) || null;
+
+              await processEvent(
+                tx,
+                matchDbId,
+                EventType.SUBSTITUTION_OUT,
+                incident.time,
+                isOpponentSub ? null : playerOutDbId,
+                incident.playerOut.name,
+                isOpponentSub,
+              );
+            }
+            continue;
+          }
+
+          let eventType: EventType | null = null;
+          let isOpponentEvent = incident.isHome !== match.isHomeGame;
+          let playerName = incident.player?.name || "";
+
+          if (incident.incidentType === "goal") {
+            eventType = EventType.GOAL;
+
+            if (incident.incidentClass === "ownGoal") {
+              playerName += " (OG)";
+              isOpponentEvent = !isOpponentEvent;
+            } else if (incident.incidentClass === "penalty") {
+              playerName += " (Pen.)";
+            }
+
+            const playerDbId = incident.player
+              ? playerMap.get(incident.player.id) || null
+              : null;
+
             await processEvent(
               tx,
               matchDbId,
-              EventType.SUBSTITUTION_IN,
+              eventType,
               incident.time,
-              incident.playerIn.id,
-              incident.playerIn.name,
-              isOpponentSub,
+              isOpponentEvent ? null : playerDbId,
+              playerName,
+              isOpponentEvent,
             );
+
+            if (incident.assist1 && incident.incidentClass !== "ownGoal") {
+              const assistDbId = playerMap.get(incident.assist1.id) || null;
+
+              await processEvent(
+                tx,
+                matchDbId,
+                EventType.ASSIST,
+                incident.time,
+                isOpponentEvent ? null : assistDbId,
+                incident.assist1.name,
+                isOpponentEvent,
+              );
+            }
+            continue;
+          } else if (incident.incidentClass === "yellow") {
+            eventType = EventType.YELLOW_CARD;
+          } else if (incident.incidentClass === "red") {
+            eventType = EventType.RED_CARD;
           }
-          if (incident.playerOut) {
+
+          if (eventType) {
+            const playerDbId = incident.player
+              ? playerMap.get(incident.player.id) || null
+              : null;
+
             await processEvent(
               tx,
               matchDbId,
-              EventType.SUBSTITUTION_OUT,
+              eventType,
               incident.time,
-              incident.playerOut.id,
-              incident.playerOut.name,
-              isOpponentSub,
-            );
-          }
-          continue;
-        }
-
-        let eventType: EventType | null = null;
-        let isOpponentEvent = incident.isHome !== match.isHomeGame;
-        let playerName = incident.player?.name || "";
-
-        if (incident.incidentType === "goal") {
-          eventType = EventType.GOAL;
-
-          if (incident.incidentClass === "ownGoal") {
-            playerName += " (OG)";
-            isOpponentEvent = !isOpponentEvent;
-          } else if (incident.incidentClass === "penalty") {
-            playerName += " (Pen.)";
-          }
-
-          await processEvent(
-            tx,
-            matchDbId,
-            eventType,
-            incident.time,
-            incident.player?.id,
-            playerName,
-            isOpponentEvent,
-          );
-
-          if (incident.assist1 && incident.incidentClass !== "ownGoal") {
-            await processEvent(
-              tx,
-              matchDbId,
-              EventType.ASSIST,
-              incident.time,
-              incident.assist1.id,
-              incident.assist1.name,
+              isOpponentEvent ? null : playerDbId,
+              playerName,
               isOpponentEvent,
             );
           }
-          continue;
-        } else if (incident.incidentClass === "yellow") {
-          eventType = EventType.YELLOW_CARD;
-        } else if (incident.incidentClass === "red") {
-          eventType = EventType.RED_CARD;
         }
 
-        if (eventType) {
-          await processEvent(
-            tx,
-            matchDbId,
-            eventType,
-            incident.time,
-            incident.player?.id,
-            playerName,
-            isOpponentEvent,
-          );
-        }
-      }
-
-      await tx.match.update({
-        where: { id: matchDbId },
-        data: {
-          isDetailsSynced: true,
-          opponentLineup: opponentPlayersJSON,
-          stadium: stadiumName,
-          homeCoachName: homeCoach,
-          awayCoachName: awayCoach,
-        },
-      });
-    });
+        await tx.match.update({
+          where: { id: matchDbId },
+          data: {
+            isDetailsSynced: true,
+            opponentLineup: opponentPlayersJSON,
+            stadium: stadiumName,
+            homeCoachName: homeCoach,
+            awayCoachName: awayCoach,
+          },
+        });
+      },
+      {
+        maxWait: 5000,
+        timeout: 15000,
+      },
+    );
 
     return { success: true };
   } catch (error: unknown) {
@@ -227,19 +282,10 @@ async function processEvent(
   matchId: string,
   type: EventType,
   minute: number,
-  playerSofaId: number | undefined,
+  playerIdDb: string | null,
   customName: string,
   isOpponent: boolean,
 ) {
-  let playerIdDb: string | null = null;
-
-  if (!isOpponent && playerSofaId) {
-    const playerInDb = await tx.player.findUnique({
-      where: { sofascoreId: playerSofaId },
-    });
-    if (playerInDb) playerIdDb = playerInDb.id;
-  }
-
   await tx.matchEvent.create({
     data: {
       matchId,
