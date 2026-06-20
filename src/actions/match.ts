@@ -545,7 +545,9 @@ export async function updateMatch(
     const playerIds = new Set<string>();
 
     if (data.emeraldGangLineup) {
-      data.emeraldGangLineup.forEach((p) => playerIds.add(p.playerId));
+      data.emeraldGangLineup
+        .filter((p) => p.played) 
+        .forEach((p) => playerIds.add(p.playerId));
     }
     if (data.events) {
       data.events.forEach((e) => {

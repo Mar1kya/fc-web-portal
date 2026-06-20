@@ -41,12 +41,12 @@ const eventTypeTranslations: Record<EventType, string> = {
     SUBSTITUTION_OUT: "Відхід з поля",
 };
 type MatchFormEvent = {
-    id: string; 
-    type: EventType; 
-    minute: number; 
-    playerId: string | null; 
-    customPlayerName: string | null; 
-    isOpponent: boolean; 
+    id: string;
+    type: EventType;
+    minute: number;
+    playerId: string | null;
+    customPlayerName: string | null;
+    isOpponent: boolean;
     goalModifier: 'NONE' | 'PENALTY' | 'OWN_GOAL';
 };
 
@@ -69,14 +69,18 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
     const [highlightsUrl, setHighlightsUrl] = useState(initialData.highlightsUrl || "");
     const [postMatchUrl, setPostMatchUrl] = useState(initialData.postMatchUrl || "");
 
-    const [lineup, setLineup] = useState<{ playerId: string; isStarter: boolean; played: boolean }[]>(
-        initialData.lineup.map(l => ({ playerId: l.playerId, isStarter: l.isStarter, played: l.played }))
+    const [lineup, setLineup] = useState<{ playerId: string; isStarter: boolean; inSquad: boolean }[]>(
+        initialData.lineup.map(l => ({
+            playerId: l.playerId,
+            isStarter: l.isStarter,
+            inSquad: true
+        }))
     );
 
     const startersCount = lineup.filter(l => l.isStarter).length;
-    const squadCount = lineup.filter(l => l.played).length;
+    const squadCount = lineup.filter(l => l.inSquad).length;
 
-    const togglePlayer = (playerId: string, field: 'played' | 'isStarter') => {
+    const togglePlayer = (playerId: string, field: 'inSquad' | 'isStarter') => {
         setLineup(prev => {
             const existing = prev.find(p => p.playerId === playerId);
             const currentIsStarter = existing?.isStarter || false;
@@ -87,13 +91,13 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
             }
 
             if (existing) {
-                const newPlayed = field === 'played' ? !existing.played : existing.played;
+                const newInSquad = field === 'inSquad' ? !existing.inSquad : existing.inSquad;
                 const newStarter = field === 'isStarter' ? !existing.isStarter : existing.isStarter;
                 return prev.map(p => p.playerId === playerId
-                    ? { ...p, played: newPlayed, isStarter: newPlayed ? newStarter : false }
+                    ? { ...p, inSquad: newInSquad, isStarter: newInSquad ? newStarter : false }
                     : p);
             }
-            return [...prev, { playerId, played: field === 'played', isStarter: field === 'isStarter' }];
+            return [...prev, { playerId, inSquad: field === 'inSquad', isStarter: field === 'isStarter' }];
         });
     };
 
@@ -129,9 +133,9 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
         }]);
     };
 
-   const updateEvent = <K extends keyof MatchFormEvent>(
-        index: number, 
-        field: K, 
+    const updateEvent = <K extends keyof MatchFormEvent>(
+        index: number,
+        field: K,
         value: MatchFormEvent[K]
     ) => {
         setEvents(prevEvents => {
@@ -164,7 +168,17 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
         homeScore: homeScore === "" ? undefined : Number(homeScore),
         awayScore: awayScore === "" ? undefined : Number(awayScore),
         stadium, homeCoachName, awayCoachName, highlightsUrl, postMatchUrl,
-        emeraldGangLineup: lineup.filter(l => l.played),
+        emeraldGangLineup: lineup
+            .filter(l => l.inSquad)
+            .map(l => ({
+                playerId: l.playerId,
+                isStarter: l.isStarter,
+                played: l.isStarter || events.some(
+                    e => e.type === EventType.SUBSTITUTION_IN &&
+                        e.playerId === l.playerId &&
+                        !e.isOpponent
+                ),
+            })),
         events: events.map(({ id, goalModifier, ...rest }) => {
             let finalCustomName = rest.customPlayerName || "";
 
@@ -377,18 +391,18 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                             <ScrollArea className="h-125 pr-4 rounded-md">
                                 <div className="p-2 space-y-1">
                                     {players.map((player) => {
-                                        const playerState = lineup.find(l => l.playerId === player.id) || { played: false, isStarter: false };
+                                        const playerState = lineup.find(l => l.playerId === player.id) || { inSquad: false, isStarter: false };
                                         return (
                                             <div key={player.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-colors gap-3">
                                                 <span className="font-medium">{player.number ? `${player.number}. ` : ''}{player.name}</span>
                                                 <div className="flex gap-6">
                                                     <div className="flex items-center space-x-2">
-                                                        <Checkbox id={`played-${player.id}`} checked={playerState.played} onCheckedChange={() => togglePlayer(player.id, 'played')} disabled={isPending} />
+                                                        <Checkbox id={`played-${player.id}`} checked={playerState.inSquad} onCheckedChange={() => togglePlayer(player.id, 'inSquad')} disabled={isPending} />
                                                         <Label htmlFor={`played-${player.id}`} className="cursor-pointer font-normal">В заявці</Label>
                                                     </div>
                                                     <div className="flex items-center space-x-2 w-24">
-                                                        <Checkbox id={`starter-${player.id}`} checked={playerState.isStarter} onCheckedChange={() => togglePlayer(player.id, 'isStarter')} disabled={!playerState.played || isPending} />
-                                                        <Label htmlFor={`starter-${player.id}`} className={`cursor-pointer font-normal ${!playerState.played ? 'opacity-50' : ''}`}>Основа</Label>
+                                                        <Checkbox id={`starter-${player.id}`} checked={playerState.isStarter} onCheckedChange={() => togglePlayer(player.id, 'isStarter')} disabled={!playerState.inSquad || isPending} />
+                                                        <Label htmlFor={`starter-${player.id}`} className={`cursor-pointer font-normal ${!playerState.inSquad ? 'opacity-50' : ''}`}>Основа</Label>
                                                     </div>
                                                 </div>
                                             </div>

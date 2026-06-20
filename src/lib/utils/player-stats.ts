@@ -1,37 +1,72 @@
-import { MatchEvent, MatchLineup, Player, PlayerPosition } from "../../../generated/prisma";
+import {
+    EventType,
+    MatchEvent,
+    MatchLineup,
+    Player,
+    PlayerPosition,
+} from "../../../generated/prisma";
+
+type MatchEventSnapshot = Pick<MatchEvent, "type" | "minute" | "isOpponent">;
+
+type MatchContext = {
+    id: string;
+    isHomeGame: boolean;
+    events?: MatchEventSnapshot[];
+};
 
 export type PlayerWithHybridStats = Player & {
     lineupEntries?: (MatchLineup & {
-        match?: { homeScore: number | null; awayScore: number | null; isHomeGame: boolean } | null;
+        match?: MatchContext | null;
     })[];
     events?: MatchEvent[];
 };
 
 export function calculateHybridStats(player: PlayerWithHybridStats) {
     const isGoalkeeper = player.position === PlayerPosition.GOALKEEPER;
-    const liveMatches = player.lineupEntries?.length || 0;
+    const playedEntries = player.lineupEntries?.filter((entry) => entry.played) ?? [];
+    const liveMatches = playedEntries.length;
     const totalMatches = player.initialMatches + liveMatches;
-    const liveGoals = player.events?.filter(e => e.type === "GOAL" && !e.isOpponent).length || 0;
-    const liveAssists = player.events?.filter(e => e.type === "ASSIST" && !e.isOpponent).length || 0;
+
+    const liveGoals =
+        player.events?.filter((e) => e.type === EventType.GOAL && !e.isOpponent).length ?? 0;
+    const liveAssists =
+        player.events?.filter((e) => e.type === EventType.ASSIST && !e.isOpponent).length ?? 0;
     const totalGoals = player.initialGoals + liveGoals;
     const totalAssists = player.initialAssists + liveAssists;
 
     let liveCleanSheets = 0;
     let liveConceded = 0;
 
-    if (isGoalkeeper && player.lineupEntries) {
-        player.lineupEntries.forEach(entry => {
+    if (isGoalkeeper) {
+        for (const entry of playedEntries) {
             const match = entry.match;
-            if (!match || match.homeScore === null || match.awayScore === null) return;
+            if (!match) continue;
 
-            const opponentGoals = match.isHomeGame ? match.awayScore : match.homeScore;
+            const playerMatchEvents =
+                player.events?.filter((e) => e.matchId === match.id) ?? [];
 
-            liveConceded += opponentGoals;
-            
-            if (opponentGoals === 0) {
-                liveCleanSheets += 1;
-            }
-        });
+            const subInMinute = playerMatchEvents.find(
+                (e) => e.type === EventType.SUBSTITUTION_IN
+            )?.minute;
+
+            const subOutMinute = playerMatchEvents.find(
+                (e) => e.type === EventType.SUBSTITUTION_OUT
+            )?.minute;
+
+            const minuteEntered: number | null = entry.isStarter ? 0 : (subInMinute ?? null);
+            const minuteLeft = subOutMinute ?? Infinity;
+            if (minuteEntered === null) continue; 
+            const goalsConceded = (match.events ?? []).filter(
+                (e) =>
+                    e.type === EventType.GOAL &&
+                    e.isOpponent &&
+                    e.minute > minuteEntered &&
+                    e.minute <= minuteLeft
+            ).length;
+
+            liveConceded += goalsConceded;
+            if (goalsConceded === 0) liveCleanSheets++;
+        }
     }
 
     const totalCleanSheets = player.initialCleanSheets + liveCleanSheets;

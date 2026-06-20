@@ -74,6 +74,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
             media: {
                 where: { deletedAt: null },
             },
+
             lineupEntries: {
                 where: {
                     played: true,
@@ -81,17 +82,31 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
                 },
                 include: {
                     match: {
-                        select: { homeScore: true, awayScore: true, isHomeGame: true }
-                    }
-                }
+                        select: {
+                            id: true,           
+                            isHomeGame: true, 
+                            events: {          
+                                where: {
+                                    isOpponent: true,
+                                    type: "GOAL",
+                                },
+                                select: {
+                                    type: true,
+                                    minute: true,
+                                    isOpponent: true,
+                                },
+                            },
+                        },
+                    },
+                },
             },
+
             events: {
                 where: {
                     match: { deletedAt: null, status: "FINISHED" }
                 }
-            }
-        },
-    });
+            },
+        }});
 
     if (!player) {
         notFound();
