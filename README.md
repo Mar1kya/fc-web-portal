@@ -188,5 +188,4 @@ fc-web-portal/
 - **ESLint** — статичний аналіз, запускається у CI
 - **TypeScript** — суворий type-check на всіх рівнях застосунку
 - **Lighthouse** — 98/100 Performance (Desktop), 96/100 (Mobile)
-- **Тестування** — 18 функціональних сценаріїв, 11 граничних випадків
 - **Кросбраузерність** — Chromium, WebKit, Gecko
