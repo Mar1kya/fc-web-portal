@@ -169,7 +169,7 @@ export default function MatchHero({ match, locale }: MatchHeroProps) {
                         </div>
                     )}
                     {match.status === MatchStatus.LIVE && (
-                        <span className="mt-3 text-[10px] md:text-xs font-bold text-white bg-red-500 px-3 py-1 rounded-full animate-pulse uppercase">
+                        <span className="mt-3 text-[14px] font-bold text-white bg-red-500 px-3 py-1 rounded-full animate-pulse uppercase">
                             {t("live")}
                         </span>
                     )}

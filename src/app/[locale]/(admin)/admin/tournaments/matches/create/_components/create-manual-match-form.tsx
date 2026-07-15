@@ -19,8 +19,13 @@ type SelectOption = {
     name: string;
 }
 
+type SeasonOption = SelectOption & {
+    startDate: Date | null;
+    endDate: Date | null;
+};
+
 type CreateManualMatchFormProps = {
-    seasons: SelectOption[];
+    seasons: SeasonOption[]; 
     tournaments: SelectOption[];
     opponents: SelectOption[];
 }
@@ -37,6 +42,32 @@ export function CreateManualMatchForm({ seasons, tournaments, opponents }: Creat
     const [homeCoachName, setHomeCoachName] = useState<string>("");
     const [awayCoachName, setAwayCoachName] = useState<string>("");
     const [round, setRound] = useState<number | "">("");
+
+    function toDatetimeLocalValue(date: Date): string {
+        return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+            .toISOString()
+            .slice(0, 16);
+    }
+
+    const selectedSeason = seasons.find(s => s.id === seasonId);
+
+    const seasonMinDateValue = selectedSeason?.startDate
+        ? toDatetimeLocalValue(new Date(selectedSeason.startDate))
+        : undefined;
+
+    const seasonMaxDateValue = selectedSeason?.endDate
+        ? toDatetimeLocalValue(
+            new Date(new Date(selectedSeason.endDate).setHours(23, 59, 59, 999))
+        )
+        : undefined;
+
+    const isDateOutOfSeasonRange = Boolean(
+        selectedSeason?.startDate &&
+        selectedSeason?.endDate &&
+        date &&
+        (new Date(date) < new Date(selectedSeason.startDate) ||
+            new Date(date) > new Date(new Date(selectedSeason.endDate).setHours(23, 59, 59, 999)))
+    );
 
     const boundData: BoundMatchData = {
         seasonId,
@@ -144,10 +175,23 @@ export function CreateManualMatchForm({ seasons, tournaments, opponents }: Creat
                                 type="datetime-local"
                                 value={date}
                                 onChange={(e) => setDate(e.target.value)}
+                                min={seasonMinDateValue}
+                                max={seasonMaxDateValue}
                                 disabled={isPending}
                             />
+                            {selectedSeason?.startDate && selectedSeason?.endDate && (
+                                <p className="text-xs text-muted-foreground">
+                                    Сезон {selectedSeason.name}: {new Intl.DateTimeFormat("uk").format(new Date(selectedSeason.startDate))} — {new Intl.DateTimeFormat("uk").format(new Date(selectedSeason.endDate))}
+                                </p>
+                            )}
+                            {isDateOutOfSeasonRange && (
+                                <p className="text-red-500 text-xs">
+                                    Дата виходить за межі обраного сезону
+                                </p>
+                            )}
                             {state?.errors?.date && <p className="text-red-500 text-sm">{state.errors.date[0]}</p>}
                         </div>
+
                         <div className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm h-fit self-end mb-1">
                             <div className="space-y-0.5">
                                 <Label htmlFor="isHomeGame" className="text-base font-medium">

@@ -1,4 +1,4 @@
-import { OrderStatusEnum, PostType, TeamContext } from "../../generated/prisma";
+import { MatchStatus, OrderStatusEnum, PostType, TeamContext } from "../../generated/prisma";
 
 export const MIN_PASSWORD_LENGTH = 8;
 export const MIN_NAME_LENGTH = 2;
@@ -130,3 +130,10 @@ export function getPaymentBadgeConfig(
   return { label: "Оплата при отриманні", className: "bg-blue-500/10 text-blue-500 border-none" };
 }
  
+export const matchStatusTranslations: Record<MatchStatus, string> = {
+    SCHEDULED: "Заплановано",
+    LIVE: "Наживо",
+    FINISHED: "Завершено",
+    POSTPONED: "Перенесено",
+    CANCELED: "Скасовано",
+};

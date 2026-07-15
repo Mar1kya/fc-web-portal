@@ -30,7 +30,9 @@ export default async function CreateManualMatchPage() {
 
     const seasons = seasonsData.map(s => ({
         id: s.id,
-        name: s.name
+        name: s.name,
+        startDate: s.startDate,
+        endDate: s.endDate
     }));
 
     const tournaments = tournamentsData.map(t => ({

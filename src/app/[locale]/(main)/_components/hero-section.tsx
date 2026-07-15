@@ -96,9 +96,8 @@ export default async function HeroSection({ match, locale }: HeroSectionProps) {
                                 VS
                             </div>
                         )}
-
                         {isLive && (
-                            <span className="mt-3 text-[10px] md:text-xs font-bold text-white bg-red-500 px-3 py-1 rounded-full animate-pulse uppercase">
+                            <span className="mt-3 text-[14px] font-bold text-white bg-red-500 px-3 py-1 rounded-2xl animate-pulse uppercase">
                                 {t("live")}
                             </span>
                         )}
@@ -111,7 +110,6 @@ export default async function HeroSection({ match, locale }: HeroSectionProps) {
                             {awayTeamName}
                         </h2>
                     </div>
-
                 </div>
                 {match.stadium && (
                     <div className="mt-8 md:mt-12 flex items-center justify-center gap-2 text-xs md:text-sm font-medium text-muted-foreground bg-muted/30 w-fit mx-auto px-4 py-2 rounded-full border border-border/50">
@@ -122,20 +120,21 @@ export default async function HeroSection({ match, locale }: HeroSectionProps) {
                 <div className="flex items-center justify-center gap-3 md:gap-4 mt-8 md:mt-10">
                     <Button
                         asChild
-                        className="font-bold uppercase tracking-[0.15em] text-[10px] md:text-xs h-10 md:h-11 px-5 md:px-6"
+                        variant="secondary"
+                        className="font-semibold uppercase tracking-[0.15em] text-[10px] md:text-xs h-10 md:h-11"
                     >
                         <Link href={`/matches/${match.slug}`}>
-                            {isFinished ? t("matchReport") : t("matchCenter")}
-                            <ChevronRight className="w-4 h-4 ml-1.5" />
+                            {t("matchCenter")}
+                            <ChevronRight className="w-4 h-4" />
                         </Link>
                     </Button>
                     <Button
                         asChild
                         variant="outline"
-                        className="font-bold uppercase tracking-[0.15em] text-[10px] md:text-xs h-10 md:h-11 px-5 md:px-6"
+                        className="font-semibold uppercase tracking-[0.15em] text-[10px] md:text-xs h-10 md:h-11"
                     >
                         <Link href="/matches">
-                            <Calendar className="w-4 h-4 mr-2" />
+                            <Calendar className="w-4 h-4" />
                             {t("allMatches")}
                         </Link>
                     </Button>

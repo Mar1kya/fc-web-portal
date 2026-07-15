@@ -14,10 +14,17 @@ import { Switch } from "@/components/ui/switch"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Checkbox } from "@/components/ui/checkbox"
 import { EventType, Match, MatchEvent, MatchLineup, MatchStatus, TeamContext } from "../../../../../../../../../../generated/prisma"
-import { teamContextTranslations } from "@/lib/constants"
+import { teamContextTranslations, matchStatusTranslations } from "@/lib/constants"
 import { BoundMatchUpdateData, updateMatch } from "@/actions/match"
 
 type SelectOption = { id: string; name: string; number?: number; hasStandings?: boolean }
+
+type SeasonOption = SelectOption & {
+    startDate: Date | null;
+    endDate: Date | null;
+};
+
+
 
 type MatchWithDetails = Match & {
     lineup: MatchLineup[];
@@ -26,7 +33,7 @@ type MatchWithDetails = Match & {
 
 type EditMatchFormProps = {
     initialData: MatchWithDetails;
-    seasons: SelectOption[];
+    seasons: SeasonOption[];
     tournaments: SelectOption[];
     opponents: SelectOption[];
     players: SelectOption[];
@@ -161,6 +168,30 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
         setHomeScore(awayScore);
         setAwayScore(tempScore);
     };
+    function toDatetimeLocalValue(date: Date): string {
+        return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+            .toISOString()
+            .slice(0, 16);
+    }
+    const selectedSeason = seasons.find(s => s.id === seasonId);
+
+    const seasonMinDateValue = selectedSeason?.startDate
+        ? toDatetimeLocalValue(new Date(selectedSeason.startDate))
+        : undefined;
+
+    const seasonMaxDateValue = selectedSeason?.endDate
+        ? toDatetimeLocalValue(
+            new Date(new Date(selectedSeason.endDate).setHours(23, 59, 59, 999))
+        )
+        : undefined;
+
+    const isDateOutOfSeasonRange = Boolean(
+        selectedSeason?.startDate &&
+        selectedSeason?.endDate &&
+        date &&
+        (new Date(date) < new Date(selectedSeason.startDate) ||
+            new Date(date) > new Date(new Date(selectedSeason.endDate).setHours(23, 59, 59, 999)))
+    );
 
     const boundData = {
         seasonId, tournamentId, opponentId, isHomeGame, teamContext, status,
@@ -244,8 +275,8 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                                     <Select value={status} onValueChange={(val) => setStatus(val as MatchStatus)} disabled={isPending}>
                                         <SelectTrigger><SelectValue /></SelectTrigger>
                                         <SelectContent>
-                                            {Object.keys(MatchStatus).map((key) => (
-                                                <SelectItem key={key} value={key}>{key}</SelectItem>
+                                            {Object.entries(matchStatusTranslations).map(([key, label]) => (
+                                                <SelectItem key={key} value={key}>{label}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -267,8 +298,20 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                                             type="datetime-local"
                                             value={date}
                                             onChange={e => setDate(e.target.value)}
+                                            min={seasonMinDateValue}
+                                            max={seasonMaxDateValue}
                                             disabled={isPending}
                                         />
+                                        {selectedSeason?.startDate && selectedSeason?.endDate && (
+                                            <p className="text-xs text-muted-foreground">
+                                                Сезон {selectedSeason.name}: {new Intl.DateTimeFormat("uk").format(new Date(selectedSeason.startDate))} — {new Intl.DateTimeFormat("uk").format(new Date(selectedSeason.endDate))}
+                                            </p>
+                                        )}
+                                        {isDateOutOfSeasonRange && (
+                                            <p className="text-red-500 text-xs">
+                                                Дата виходить за межі обраного сезону
+                                            </p>
+                                        )}
                                         {state?.errors?.date && <p className="text-red-500 text-xs">{state.errors.date[0]}</p>}
                                     </div>
                                     <div className="space-y-2">
