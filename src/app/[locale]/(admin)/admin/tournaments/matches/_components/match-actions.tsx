@@ -66,14 +66,14 @@ export function MatchActions({ match }: { match: Match }) {
                             Оглянути
                         </Link>
                     </DropdownMenuItem>
-                    {match.status === MatchStatus.FINISHED && (
+                    {(match.status === MatchStatus.FINISHED || match.status === MatchStatus.LIVE) && (
                         <DropdownMenuItem
                             onClick={(e) => handleSync(e.nativeEvent)}
                             disabled={isPending || isSyncing}
                             className="cursor-pointer"
                         >
                             <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                            Синхронізувати деталі
+                            Синхронізувати {match.status === MatchStatus.LIVE ? 'живі дані' : 'деталі'}
                         </DropdownMenuItem>
                     )}
                     <DropdownMenuItem asChild className="cursor-pointer">

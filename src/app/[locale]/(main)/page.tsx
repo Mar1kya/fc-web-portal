@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
       url: "/",
       images: [
         {
-          url: "/main.png", 
+          url: "/main.png",
           width: 1200,
           height: 630,
           alt: t("title"),
@@ -31,6 +31,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
   };
 }
+const getThresholdDate = () => new Date(Date.now() - 4 * 60 * 60 * 1000);
+const getCurrentDate = () => new Date();
+
 export default async function HomePage() {
   const locale = await getLocale();
   const t = await getTranslations("HomePage");
@@ -38,6 +41,9 @@ export default async function HomePage() {
   const activeSeason = await prisma.season.findFirst({
     where: { isActive: true },
   });
+
+  const seasonFilter = activeSeason ? { seasonId: activeSeason.id } : {};
+  const heroMatchDateThreshold = getThresholdDate();
 
   const [
     heroMatchInitial,
@@ -53,7 +59,14 @@ export default async function HomePage() {
       where: {
         deletedAt: null,
         teamContext: "MAIN_TEAM",
-        status: { in: ["LIVE", "SCHEDULED"] },
+        ...seasonFilter,
+        OR: [
+          { status: "LIVE" },
+          {
+            status: "SCHEDULED",
+            date: { gte: heroMatchDateThreshold }
+          }
+        ],
       },
       orderBy: [{ date: "asc" }],
       include: {
@@ -62,7 +75,12 @@ export default async function HomePage() {
       },
     }),
     prisma.match.findFirst({
-      where: { deletedAt: null, teamContext: "MAIN_TEAM", status: "FINISHED" },
+      where: {
+        deletedAt: null,
+        teamContext: "MAIN_TEAM",
+        status: "FINISHED",
+        ...seasonFilter
+      },
       orderBy: { date: "desc" },
       include: {
         opponent: { include: { translations: true } },
@@ -74,7 +92,8 @@ export default async function HomePage() {
         deletedAt: null,
         teamContext: "MAIN_TEAM",
         status: "SCHEDULED",
-        date: { gte: new Date() },
+        date: { gte: getCurrentDate() },
+        ...seasonFilter
       },
       orderBy: { date: "asc" },
       include: {
@@ -87,7 +106,8 @@ export default async function HomePage() {
         deletedAt: null,
         teamContext: "MAIN_TEAM",
         status: "SCHEDULED",
-        date: { gte: new Date() },
+        date: { gte: getCurrentDate() },
+        ...seasonFilter
       },
       orderBy: { date: "asc" },
       skip: 1,
@@ -115,23 +135,18 @@ export default async function HomePage() {
         variants: { select: { stock: true } },
       },
     }),
-
     prisma.tournament.findMany({
       where: {
         deletedAt: null,
         hasStandings: true,
         standings: {
-          some: activeSeason
-            ? { seasonId: activeSeason.id }
-            : {},
+          some: activeSeason ? { seasonId: activeSeason.id } : {},
         },
       },
       include: {
         translations: { where: { language: locale } },
         standings: {
-          where: activeSeason
-            ? { seasonId: activeSeason.id }
-            : {},
+          where: activeSeason ? { seasonId: activeSeason.id } : {},
           orderBy: { rank: "asc" },
         },
       },
