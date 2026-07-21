@@ -12,7 +12,6 @@
       "finished": "Finished",
       "upcoming": "Upcoming",
       "round": "Round",
-      "matchReport": "Match report",
       "matchCenter": "Match center",
       "allMatches": "Schedule"
     },
@@ -355,7 +354,14 @@
       "homeGame": "Home",
       "awayGame": "Away",
       "round": "Round {round}",
-      "qualification": "Qualifying Round {round}"
+      "qualification": "Qualifying Round {round}",
+      "Status": {
+        "SCHEDULED": "Scheduled",
+        "LIVE": "Live",
+        "FINISHED": "Finished",
+        "POSTPONED": "Postponed",
+        "CANCELED": "Canceled"
+      }
     },
     "Metadata": {
       "title": "Match Schedule ({team})",

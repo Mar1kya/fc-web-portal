@@ -74,6 +74,8 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     };
 }
 
+const getThresholdDate = () => new Date(Date.now() - 4 * 60 * 60 * 1000);
+
 export default async function MatchesPage({ searchParams }: { searchParams: Promise<{ context?: string; season?: string }> }) {
     const { context, season: seasonSlug } = await searchParams;
     const locale = await getLocale();
@@ -93,10 +95,13 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         currentSeason = allSeasons.find(s => s.isActive) || allSeasons[0];
     }
 
+    const matchDateThreshold = getThresholdDate();
+
     const previousMatch = await prisma.match.findFirst({
         where: {
             status: MatchStatus.FINISHED,
             teamContext: currentContext,
+            seasonId: currentSeason?.id,
             deletedAt: null
         },
         orderBy: { date: "desc" },
@@ -105,9 +110,16 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
 
     const upcomingMatches = await prisma.match.findMany({
         where: {
-            status: { in: [MatchStatus.SCHEDULED, MatchStatus.LIVE, MatchStatus.POSTPONED] },
             teamContext: currentContext,
-            deletedAt: null
+            seasonId: currentSeason?.id,
+            deletedAt: null,
+            OR: [
+                { status: MatchStatus.LIVE },
+                {
+                    status: { in: [MatchStatus.SCHEDULED, MatchStatus.POSTPONED] },
+                    date: { gte: matchDateThreshold }
+                }
+            ]
         },
         orderBy: { date: "asc" },
         take: 2,

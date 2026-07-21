@@ -34,6 +34,28 @@ export async function revalidateMatchPaths(
   });
 }
 
+async function validateMatchDateWithinSeason(
+  seasonId: string,
+  date: Date,
+): Promise<string | null> {
+  const season = await prisma.season.findUnique({
+    where: { id: seasonId },
+    select: { name: true, startDate: true, endDate: true },
+  });
+
+  if (season && season.startDate && season.endDate) {
+    const minDate = new Date(season.startDate);
+    const maxDate = new Date(season.endDate);
+    maxDate.setUTCHours(23, 59, 59, 999);
+
+    if (date < minDate || date > maxDate) {
+      return `Дата повинна бути в межах сезону ${season.name}`;
+    }
+  }
+
+  return null;
+}
+
 const mapMatchStatus = (sofaStatus: string): MatchStatus => {
   switch (sofaStatus) {
     case "finished":
@@ -364,6 +386,17 @@ export async function createManualMatch(
 
     const data = validatedFields.data;
 
+    const dateError = await validateMatchDateWithinSeason(
+      data.seasonId,
+      data.date,
+    );
+    if (dateError) {
+      return {
+        errors: { date: [dateError] },
+        message: "Перевірте дату матчу",
+      };
+    }
+
     const opponent = await prisma.opponent.findUnique({
       where: { id: data.opponentId },
       select: { slug: true },
@@ -449,22 +482,15 @@ export async function updateMatch(
 
     const data = validatedFields.data;
 
-    const season = await prisma.season.findUnique({
-      where: { id: data.seasonId },
-      select: { name: true, startDate: true, endDate: true },
-    });
-
-    if (season && season.startDate && season.endDate) {
-      const minDate = new Date(season.startDate);
-      const maxDate = new Date(season.endDate);
-      maxDate.setUTCHours(23, 59, 59, 999);
-
-      if (data.date < minDate || data.date > maxDate) {
-        return {
-          errors: { date: [`Дата повинна бути в межах сезону ${season.name}`] },
-          message: "Перевірте дату матчу",
-        };
-      }
+    const dateError = await validateMatchDateWithinSeason(
+      data.seasonId,
+      data.date,
+    );
+    if (dateError) {
+      return {
+        errors: { date: [dateError] },
+        message: "Перевірте дату матчу",
+      };
     }
 
     const opponent = await prisma.opponent.findUnique({
@@ -546,7 +572,7 @@ export async function updateMatch(
 
     if (data.emeraldGangLineup) {
       data.emeraldGangLineup
-        .filter((p) => p.played) 
+        .filter((p) => p.played)
         .forEach((p) => playerIds.add(p.playerId));
     }
     if (data.events) {

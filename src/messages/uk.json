@@ -8,11 +8,10 @@
   "HomePage": {
     "Hero": {
       "noMatch": "Матчів поки немає",
-      "live": "LIVE",
+      "live": "НАЖИВО",
       "finished": "Завершено",
       "upcoming": "Майбутній",
       "round": "Тур",
-      "matchReport": "Звіт про матч",
       "matchCenter": "Матч-центр",
       "allMatches": "Розклад"
     },
@@ -355,7 +354,14 @@
       "homeGame": "Вдома",
       "awayGame": "У гостях",
       "round": "Тур {round}",
-      "qualification": "{round}-й кв. раунд"
+      "qualification": "{round}-й кв. раунд",
+      "Status": {
+        "SCHEDULED": "Заплановано",
+        "LIVE": "Наживо",
+        "FINISHED": "Завершено",
+        "POSTPONED": "Перенесено",
+        "CANCELED": "Скасовано"
+      }
     },
     "Metadata": {
       "title": "Розклад матчів ({team})",
@@ -370,7 +376,7 @@
       "ownGoal": "Автогол",
       "penalty": "Пен.",
       "unknownPlayer": "Невідомий гравець",
-      "live": "Прямий ефір"
+      "live": "НАЖИВО"
     },
     "Tabs": {
       "lineups": "Склади команд",

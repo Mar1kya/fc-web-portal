@@ -68,6 +68,14 @@ export async function processMatchSync(matchDbId: string) {
       eventDetails?.venue?.stadium?.name || eventDetails?.venue?.name || null;
     const homeCoach = eventDetails?.homeTeam?.manager?.name || null;
     const awayCoach = eventDetails?.awayTeam?.manager?.name || null;
+    const liveHomeScore: number | null =
+      eventDetails?.homeScore?.current ??
+      eventDetails?.homeScore?.display ??
+      null;
+    const liveAwayScore: number | null =
+      eventDetails?.awayScore?.current ??
+      eventDetails?.awayScore?.display ??
+      null;
 
     const allSofaIdsToFetch = new Set<number>();
     const incidents: SofaIncidentItem[] = incidentsData.incidents || [];
@@ -259,6 +267,8 @@ export async function processMatchSync(matchDbId: string) {
             stadium: stadiumName,
             homeCoachName: homeCoach,
             awayCoachName: awayCoach,
+            ...(liveHomeScore !== null && { homeScore: liveHomeScore }),
+            ...(liveAwayScore !== null && { awayScore: liveAwayScore }),
           },
         });
       },
@@ -267,7 +277,6 @@ export async function processMatchSync(matchDbId: string) {
         timeout: 15000,
       },
     );
-
     return { success: true };
   } catch (error: unknown) {
     const errorMessage =

@@ -29,7 +29,11 @@ export default async function EditMatchPage({ params }: { params: Promise<{ id: 
     }
 
     const [seasonsData, tournamentsData, opponentsData, playersData] = await Promise.all([
-        prisma.season.findMany({ where: { deletedAt: null }, orderBy: { createdAt: 'desc' } }),
+        prisma.season.findMany({
+            where: { deletedAt: null },
+            select: { id: true, name: true, startDate: true, endDate: true },
+            orderBy: { startDate: "desc" },
+        }),
         prisma.tournament.findMany({
             where: { deletedAt: null },
             include: { translations: { where: { language: 'uk' } } },
@@ -47,7 +51,12 @@ export default async function EditMatchPage({ params }: { params: Promise<{ id: 
         }),
     ]);
 
-    const seasons = seasonsData.map(s => ({ id: s.id, name: s.name }));
+    const seasons = seasonsData.map(s => ({
+        id: s.id,
+        name: s.name,
+        startDate: s.startDate,
+        endDate: s.endDate
+    }));
     const tournaments = tournamentsData.map(t => ({ id: t.id, name: t.translations[0]?.name || t.slug, hasStandings: t.hasStandings }));
     const opponents = opponentsData.map(o => ({ id: o.id, name: o.translations[0]?.name || o.slug }));
     const players = playersData.map(p => ({
