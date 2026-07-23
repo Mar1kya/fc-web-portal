@@ -159,6 +159,7 @@
       "confirmPassword": "Confirm password",
       "confirmPasswordDescription": "Repeat your new password",
       "updateProfileButton": "Update profile",
+      "updating": "Updating",
       "profilePhoto": "Profile photo",
       "photoUploadError": "Error uploading photo",
       "photoUploadedSuccess": "Photo uploaded successfully!",

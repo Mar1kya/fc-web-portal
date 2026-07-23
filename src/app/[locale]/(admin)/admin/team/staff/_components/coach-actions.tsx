@@ -13,7 +13,7 @@ import {
     AlertDialogTrigger,
     AlertDialogCancel,
 } from "@/components/ui/alert-dialog"
-import { MoreHorizontal, Pencil, Eye, Trash2 } from "lucide-react"
+import { MoreHorizontal, Edit, Eye, Archive } from "lucide-react"
 import { Link } from "@/i18n/navigation"
 import { toast } from "sonner"
 import { getTranslation } from "@/lib/utils/get-translation"
@@ -65,7 +65,7 @@ export function CoachActions({ coach }: CoachActionsProps) {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                         <Link href={`/admin/team/staff/${coach.slug}/edit`} className="cursor-pointer">
-                            <Pencil className="mr-2 h-4 w-4" />
+                            <Edit className="mr-2 h-4 w-4" />
                             Редагувати
                         </Link>
                     </DropdownMenuItem>
@@ -74,7 +74,7 @@ export function CoachActions({ coach }: CoachActionsProps) {
                             className="text-red-500 focus:text-red-600 focus:bg-red-500/10 cursor-pointer"
                             onSelect={(e) => e.preventDefault()}
                         >
-                            <Trash2 className="mr-2 h-4 w-4" />
+                            <Archive className="mr-2 h-4 w-4" />
                             В архів
                         </DropdownMenuItem>
                     </AlertDialogTrigger>

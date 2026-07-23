@@ -9,6 +9,7 @@ import { getTranslation } from "@/lib/utils/get-translation"
 import { ArchiveActions } from "./archive-actions"
 import { PlayerPosition } from "../../../../../../../../../generated/prisma"
 import { PlayerWithRelations } from "../../_components/columns"
+import { TableAvatar } from "../../_components/table-avatar"
 
 const positionTranslations: Record<PlayerPosition, string> = {
     GOALKEEPER: "Воротар",
@@ -33,11 +34,10 @@ export const archiveColumns: ColumnDef<PlayerWithRelations>[] = [
             return (
                 <div className="flex items-center gap-3 opacity-60 grayscale transition-all hover:grayscale-0 hover:opacity-100">
                     <div className="relative w-10 h-10 rounded-full overflow-hidden bg-muted border shrink-0">
-                        {player.avatar ? (
-                            <Image src={player.avatar} alt="Avatar" fill className="object-cover" sizes="40px" unoptimized />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">?</div>
-                        )}
+                        <TableAvatar
+                            src={player.avatar}
+                            alt={translation?.name || "Аватар"}
+                        />
                     </div>
                     <div className="font-medium truncate text-muted-foreground">
                         {translation?.name || "Без імені"}

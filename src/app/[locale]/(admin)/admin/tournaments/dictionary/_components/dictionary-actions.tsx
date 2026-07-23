@@ -111,7 +111,7 @@ export function DictionaryActions({ entry }: DictionaryActionsProps) {
                         </Button>
                         <Button type="submit" disabled={isPending} className="min-w-30">
                             {isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                            Зберегти
+                            Оновити
                         </Button>
                     </div>
                 </form>

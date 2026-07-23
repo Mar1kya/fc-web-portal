@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Eye, MoreHorizontal, Loader2, Trash2 } from "lucide-react";
+import { Eye, MoreHorizontal, Loader2, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -70,7 +70,7 @@ export function OrderActions({ order }: { order: OrderPlain }) {
               className="text-red-500 focus:text-red-600 focus:bg-red-500/10 cursor-pointer"
               onSelect={(e) => e.preventDefault()}
             >
-              <Trash2 className="mr-2 h-4 w-4" />
+              <Archive className="mr-2 h-4 w-4" />
               В архів
             </DropdownMenuItem>
           </AlertDialogTrigger>

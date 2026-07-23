@@ -20,7 +20,7 @@ import {
     AlertDialogTrigger,
     AlertDialogCancel,
 } from "@/components/ui/alert-dialog"
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import { MoreHorizontal, Edit, Archive } from "lucide-react"
 import { Link } from "@/i18n/navigation"
 import { toast } from "sonner"
 import { type GalleryWithRelations } from "./columns"
@@ -67,7 +67,7 @@ export function GalleryActions({ gallery }: GalleryActionsProps) {
                             href={`/admin/gallery/${gallery.id}/edit`}
                             className="cursor-pointer"
                         >
-                            <Pencil className="mr-2 h-4 w-4" />
+                            <Edit className="mr-2 h-4 w-4" />
                             Редагувати
                         </Link>
                     </DropdownMenuItem>
@@ -76,7 +76,7 @@ export function GalleryActions({ gallery }: GalleryActionsProps) {
                             className="text-red-500 focus:text-red-600 focus:bg-red-500/10 cursor-pointer"
                             onSelect={(e) => e.preventDefault()}
                         >
-                            <Trash2 className="mr-2 h-4 w-4" />
+                            <Archive className="mr-2 h-4 w-4" />
                             В архів
                         </DropdownMenuItem>
                     </AlertDialogTrigger>

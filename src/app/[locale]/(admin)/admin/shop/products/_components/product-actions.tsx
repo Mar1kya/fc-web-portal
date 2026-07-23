@@ -53,7 +53,7 @@ export function ProductActions({ product }: { product: ProductPlain }) {
                     <DropdownMenuItem asChild className="cursor-pointer">
                         <Link href={`/shop/product/${product.slug}`} target="_blank">
                             <Eye className="mr-2 h-4 w-4" />
-                            Переглянути на сайті
+                            Оглянути
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild className="cursor-pointer">
