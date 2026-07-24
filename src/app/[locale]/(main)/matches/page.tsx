@@ -1,11 +1,13 @@
 import { prisma } from "@/lib/prisma";
-import { getLocale, getTranslations } from "next-intl/server";
-import { MatchStatus, TeamContext } from "../../../../../generated/prisma";
+import { getTranslations } from "next-intl/server";
+import { TeamContext } from "../../../../../generated/prisma";
 import H1 from "@/components/ui/heading";
-import { MatchDisplayData } from "./_components/match-card";
 import SeasonFilter from "./_components/season-filter";
-import MatchListItem from "./_components/match-list-item";
-import MatchesHighlight from "./_components/matches-highlight";
+import { Suspense } from "react";
+import MatchesHighlightSection from "./_components/matches-highlight-section";
+import MatchesListSection from "./_components/matches-list-section";
+import MatchesHighlightSkeleton from "./_components/matches-highlight-skeleton";
+import MatchesListSkeleton from "./_components/matches-list-skeleton";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ context?: string; season?: string }> }) {
     const { context, season: seasonSlug } = await searchParams;
@@ -74,11 +76,8 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     };
 }
 
-const getThresholdDate = () => new Date(Date.now() - 4 * 60 * 60 * 1000);
-
 export default async function MatchesPage({ searchParams }: { searchParams: Promise<{ context?: string; season?: string }> }) {
     const { context, season: seasonSlug } = await searchParams;
-    const locale = await getLocale();
     const t = await getTranslations("MatchesPage");
 
     const currentContext = context && Object.values(TeamContext).includes(context as TeamContext)
@@ -95,65 +94,6 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         currentSeason = allSeasons.find(s => s.isActive) || allSeasons[0];
     }
 
-    const matchDateThreshold = getThresholdDate();
-
-    const previousMatch = await prisma.match.findFirst({
-        where: {
-            status: MatchStatus.FINISHED,
-            teamContext: currentContext,
-            seasonId: currentSeason?.id,
-            deletedAt: null
-        },
-        orderBy: { date: "desc" },
-        include: { tournament: { include: { translations: true } }, opponent: { include: { translations: true } } }
-    });
-
-    const upcomingMatches = await prisma.match.findMany({
-        where: {
-            teamContext: currentContext,
-            seasonId: currentSeason?.id,
-            deletedAt: null,
-            OR: [
-                { status: MatchStatus.LIVE },
-                {
-                    status: { in: [MatchStatus.SCHEDULED, MatchStatus.POSTPONED] },
-                    date: { gte: matchDateThreshold }
-                }
-            ]
-        },
-        orderBy: { date: "asc" },
-        take: 2,
-        include: { tournament: { include: { translations: true } }, opponent: { include: { translations: true } } }
-    });
-
-    const nextMatch = upcomingMatches[0] || null;
-    const futureMatch = upcomingMatches[1] || null;
-
-    const seasonMatches = await prisma.match.findMany({
-        where: {
-            seasonId: currentSeason?.id,
-            teamContext: currentContext,
-            deletedAt: null,
-        },
-        orderBy: { date: "asc" },
-        include: {
-            tournament: { include: { translations: true } },
-            opponent: { include: { translations: true } },
-        }
-    }) as MatchDisplayData[];
-
-    const groupedMatches: Record<string, MatchDisplayData[]> = {};
-
-    seasonMatches.forEach((match) => {
-        const date = new Date(match.date);
-        const monthYear = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(date);
-        const capitalizedMonthYear = monthYear.charAt(0).toUpperCase() + monthYear.slice(1);
-        if (!groupedMatches[capitalizedMonthYear]) {
-            groupedMatches[capitalizedMonthYear] = [];
-        }
-        groupedMatches[capitalizedMonthYear].push(match);
-    });
-
     return (
         <>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b pb-4 mb-2 border-border gap-4">
@@ -162,38 +102,18 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
                     <SeasonFilter seasons={allSeasons} currentSeasonSlug={currentSeason.slug} />
                 )}
             </div>
-            <MatchesHighlight
-                previousMatch={previousMatch}
-                nextMatch={nextMatch}
-                futureMatch={futureMatch}
-                locale={locale}
-            />
-            <div className="space-y-5 mt-10">
-                {Object.keys(groupedMatches).length === 0 ? (
-                    <div className="text-center py-10 text-muted-foreground border border-dashed rounded-lg">
-                        {t("noMatches")}
-                    </div>
-                ) : (
-                    Object.entries(groupedMatches).map(([monthYear, matches]) => (
-                        <div key={monthYear} className="space-y-4">
-                            <div className="border-b pb-2 mb-4">
-                                <h2 className="text-2xl font-black text-foreground tracking-tight">
-                                    {monthYear}
-                                </h2>
-                            </div>
-                            <div className="flex flex-col">
-                                {matches.map((match) => (
-                                    <MatchListItem
-                                        key={match.id}
-                                        match={match}
-                                        locale={locale}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    ))
-                )}
-            </div>
+            <Suspense
+                key={`highlight-${currentContext}-${currentSeason?.id}`}
+                fallback={<MatchesHighlightSkeleton />}
+            >
+                <MatchesHighlightSection context={currentContext} seasonId={currentSeason?.id} />
+            </Suspense>
+            <Suspense
+                key={`list-${currentContext}-${currentSeason?.id}`}
+                fallback={<MatchesListSkeleton />}
+            >
+                <MatchesListSection context={currentContext} seasonId={currentSeason?.id} />
+            </Suspense>
         </>
     );
 }

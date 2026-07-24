@@ -3,6 +3,8 @@ import TeamTabs from "./_components/team-tabs";
 import H1 from "@/components/ui/heading";
 import RosterList from "./_components/roster-list";
 import { TeamContext, PlayerPosition } from "../../../../../generated/prisma";
+import { Suspense } from "react";
+import RosterListSkeleton from "./_components/roster-list-skeleton";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const resolvedSearchParams = await searchParams;
@@ -73,7 +75,9 @@ export default async function TeamPage({ params, searchParams }: { params: Promi
                 <H1>{pageTitle}</H1>
                 <TeamTabs />
             </div>
-            <RosterList searchParams={resolvedSearchParams} locale={locale} />
+            <Suspense key={JSON.stringify(resolvedSearchParams)} fallback={<RosterListSkeleton />}>
+                <RosterList searchParams={resolvedSearchParams} locale={locale} />
+            </Suspense>
         </>
     );
 }

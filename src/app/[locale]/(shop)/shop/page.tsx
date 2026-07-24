@@ -1,20 +1,12 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
-import { prisma } from "@/lib/prisma";
-import ProductCard from "./_components/product-card";
 import { Button } from "@/components/ui/button";
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
-} from "@/components/ui/carousel";
-import { ComponentProps } from "react";
+import { Suspense } from "react";
 import H1 from "@/components/ui/heading";
-
-type ExpectedProductType = ComponentProps<typeof ProductCard>["product"];
+import HotProductsSection from "./_components/hot-products-section";
+import NewProductsSection from "./_components/new-products-section";
+import ProductCarouselSkeleton from "./_components/product-carousel-skeleton";
 
 export async function generateMetadata() {
     const t = await getTranslations("Shop.Home.Metadata");
@@ -40,23 +32,6 @@ export async function generateMetadata() {
 
 export default async function ShopHomePage() {
     const t = await getTranslations("Shop.Home");
-
-    const hotProductsRaw = await prisma.product.findMany({
-        where: { isFeatured: true, isArchived: false, deletedAt: null },
-        include: { translations: true, media: true, variants: true }
-    });
-    const hotProducts = hotProductsRaw
-        .filter(p => p.variants.reduce((sum, v) => sum + v.stock, 0) > 0)
-        .slice(0, 12);
-
-    const newProductsRaw = await prisma.product.findMany({
-        where: { isArchived: false, deletedAt: null },
-        orderBy: { createdAt: 'desc' },
-        include: { translations: true, media: true, variants: true }
-    });
-    const newProducts = newProductsRaw
-        .filter(p => p.variants.reduce((sum, v) => sum + v.stock, 0) > 0)
-        .slice(0, 12);
 
     return (
         <div className="flex flex-col gap-12">
@@ -88,28 +63,9 @@ export default async function ShopHomePage() {
                     </div>
                 </div>
             </section>
-            {hotProducts.length > 0 && (
-                <section>
-                    <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
-                        <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
-                            <h2 className="text-2xl font-bold uppercase tracking-tight">{t("hotTitle")}</h2>
-                            <div className="flex items-center gap-2">
-                                <CarouselPrevious className="static translate-y-0 translate-x-0 h-9 w-9" />
-                                <CarouselNext className="static translate-y-0 translate-x-0 h-9 w-9" />
-                            </div>
-                        </div>
-                        <CarouselContent className="-ml-4 sm:-ml-6">
-                            {hotProducts.map(product => (
-                                <CarouselItem key={product.id} className="pl-4 sm:pl-6 basis-1/2 md:basis-1/3 lg:basis-1/4 flex">
-                                    <div className="w-full">
-                                        <ProductCard product={product as unknown as ExpectedProductType} />
-                                    </div>
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                    </Carousel>
-                </section>
-            )}
+            <Suspense fallback={<ProductCarouselSkeleton title={t("hotTitle")} />}>
+                <HotProductsSection />
+            </Suspense>
             <section className="relative w-full h-62.5 md:h-75 rounded-3xl overflow-hidden bg-card border border-border flex items-center shadow-sm">
                 <div className="absolute right-0 top-0 h-full w-1/2 opacity-20">
                     <div className="w-full h-full bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-red-900/60 to-transparent"></div>
@@ -128,28 +84,9 @@ export default async function ShopHomePage() {
                     </div>
                 </div>
             </section>
-            {newProducts.length > 0 && (
-                <section>
-                    <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
-                        <div className="flex items-end justify-between border-b border-border pb-4 mb-6">
-                            <h2 className="text-2xl font-bold uppercase tracking-tight">{t("newTitle")}</h2>
-                            <div className="flex items-center gap-2">
-                                <CarouselPrevious className="static translate-y-0 translate-x-0 h-9 w-9" />
-                                <CarouselNext className="static translate-y-0 translate-x-0 h-9 w-9" />
-                            </div>
-                        </div>
-                        <CarouselContent className="-ml-4 sm:-ml-6">
-                            {newProducts.map(product => (
-                                <CarouselItem key={product.id} className="pl-4 sm:pl-6 basis-1/2 md:basis-1/3 lg:basis-1/4 flex">
-                                    <div className="w-full">
-                                        <ProductCard product={product as unknown as ExpectedProductType} />
-                                    </div>
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                    </Carousel>
-                </section>
-            )}
+            <Suspense fallback={<ProductCarouselSkeleton title={t("newTitle")} />}>
+                <NewProductsSection />
+            </Suspense>
         </div>
     );
 }

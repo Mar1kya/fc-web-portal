@@ -2,6 +2,10 @@ import LatestNews from "./_components/latest-news";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PostType, TeamContext } from "../../../../../generated/prisma";
 import { parse, isValid } from "date-fns";
+import { Suspense } from "react";
+import NewsFilters from "./_components/news-filters";
+import H1 from "@/components/ui/heading";
+import NewsGridSkeleton from "./_components/news-grid-skeleton";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const resolvedSearchParams = await searchParams;
@@ -71,7 +75,17 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 }
 export default async function NewsPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const resolvedSearchParams = await searchParams;
-    return <>
-        <LatestNews searchParams={resolvedSearchParams} />
-    </>
+    const t = await getTranslations("NewsPage");
+
+    return (
+        <section className="container mx-auto">
+            <div className="flex justify-between items-end mb-8 border-b pb-4 border-border">
+                <H1>{t("title")}</H1>
+                <NewsFilters />
+            </div>
+            <Suspense key={JSON.stringify(resolvedSearchParams)} fallback={<NewsGridSkeleton />}>
+                <LatestNews searchParams={resolvedSearchParams} />
+            </Suspense>
+        </section>
+    );
 }
