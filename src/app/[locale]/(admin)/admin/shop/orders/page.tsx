@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Archive } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./_components/columns";
+import { cancelExpiredOrders } from "@/lib/utils/expire-order";
 
 export const metadata = {
     title: "Замовлення",
@@ -11,6 +12,8 @@ export const metadata = {
 };
 
 export default async function OrdersPage() {
+    await cancelExpiredOrders();
+
     const rawOrders = await prisma.order.findMany({
         where: { deletedAt: null },
         include: {

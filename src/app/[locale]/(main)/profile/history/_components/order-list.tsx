@@ -4,6 +4,7 @@ import OrderHistoryCard from "./order-history-card";
 import { PAGINATION } from "@/lib/constants"; 
 import { Prisma } from "../../../../../../../generated/prisma";
 import AppPagination from "@/components/layout/app-pagination";
+import { cancelExpiredOrders } from "@/lib/utils/expire-order";
 
 type OrderListProps = {
     userId: string;
@@ -19,6 +20,8 @@ export default async function OrderList({ userId, searchParams, locale }: OrderL
     
     const pageParam = typeof page === 'string' ? parseInt(page) : 1;
     const currentPage = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
+
+    await cancelExpiredOrders(userId);
 
     const whereCondition: Prisma.OrderWhereInput = {
         userId: userId,
