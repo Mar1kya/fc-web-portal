@@ -4,6 +4,9 @@ import { getLocale, getTranslations } from "next-intl/server"
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { redirect } from "@/i18n/navigation";
+import { Suspense } from "react";
+import { ProfileData } from "./_components/profile-data";
+import ProfileFormSkeleton from "./_components/profile-form-skeleton";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
@@ -16,26 +19,19 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function ProfilePage() {
     const t = await getTranslations("ProfilePage");
-    const locale = await getLocale()
+    const locale = await getLocale();
     const session = await auth();
+
     if (!session?.user) {
-        return redirect({ locale, href: "/login" })
-    }
-    const user = await prisma.user.findUnique({
-        where: {
-            email: session?.user.email
-        }
-    })
-    if (!user) {
         return redirect({ locale, href: "/login" });
     }
-    const userField = {
-        name: user.name,
-        email: user.email,
-        image: user.image,
-    }
-    return <>
-        <H1 className="pb-6 text-center lg:text-left">{t("title")}</H1>
-        <ProfileForm user={userField} />
-    </>
+
+    return (
+        <>
+            <H1 className="pb-6 text-center lg:text-left">{t("title")}</H1>
+            <Suspense fallback={<ProfileFormSkeleton />}>
+                <ProfileData email={session.user.email!} locale={locale} />
+            </Suspense>
+        </>
+    );
 }

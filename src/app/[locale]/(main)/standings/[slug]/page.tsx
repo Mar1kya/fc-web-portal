@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getTranslation } from "@/lib/utils/get-translation";
 import SeasonFilters from "../_components/season-filters";
-import StandingsTable from "../_components/standings-table";
 import H1 from "@/components/ui/heading";
+import { Suspense } from "react";
+import StandingsSection from "../_components/standings-section";
+import StandingsTableSkeleton from "../_components/standings-table-skeleton";
 
 export async function generateMetadata({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ season?: string }> }) {
     const { slug } = await params;
@@ -77,7 +79,6 @@ export default async function FullStandingsPage({ params, searchParams }: { para
     const { slug } = await params;
     const { season } = await searchParams;
     const locale = await getLocale();
-
     const t = await getTranslations("StandingsPage");
 
     const tournament = await prisma.tournament.findUnique({
@@ -107,18 +108,6 @@ export default async function FullStandingsPage({ params, searchParams }: { para
         currentSeason = availableSeasons.find((s) => s.isActive) || availableSeasons[0];
     }
 
-    const standings = await prisma.standing.findMany({
-        where: {
-            tournamentId: tournament.id,
-            seasonId: currentSeason.id,
-        },
-        orderBy: { rank: "asc" },
-    });
-
-    const dictionaries = await prisma.teamDictionary.findMany({
-        include: { translations: true },
-    });
-
     const translatedTournamentName = getTranslation(tournament, locale)?.name || tournament.slug;
 
     return (
@@ -130,10 +119,15 @@ export default async function FullStandingsPage({ params, searchParams }: { para
                     currentSeasonSlug={currentSeason.slug}
                 />
             </div>
-            <StandingsTable
-                standings={standings}
-                dictionaries={dictionaries}
-            />
+            <Suspense 
+                key={currentSeason.id} 
+                fallback={<StandingsTableSkeleton />} 
+            >
+                <StandingsSection 
+                    tournamentId={tournament.id} 
+                    seasonId={currentSeason.id} 
+                />
+            </Suspense>
         </>
     );
 }

@@ -8,44 +8,7 @@ type GetCategoryProductsParams = {
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-type FilterableProduct = {
-  price: Prisma.Decimal | number | string;
-  salePrice: Prisma.Decimal | number | string | null;
-  isOnSale: boolean;
-  demographic: Demographic;
-  color: string | null;
-  apparelType: string | null;
-  variants: { size: string; stock: number }[];
-};
-
-const STANDARD_SIZES = [
-  "XXS",
-  "XS",
-  "S",
-  "M",
-  "L",
-  "XL",
-  "XXL",
-  "3XL",
-  "4XL",
-  "ONE SIZE",
-];
-
-const sortSizes = (sizes: string[]) => {
-  return sizes.sort((a, b) => {
-    const indexA = STANDARD_SIZES.indexOf(a.toUpperCase());
-    const indexB = STANDARD_SIZES.indexOf(b.toUpperCase());
-    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-    if (indexA !== -1) return -1;
-    if (indexB !== -1) return 1;
-    return a.localeCompare(b, undefined, {
-      numeric: true,
-      sensitivity: "base",
-    });
-  });
-};
-
-export async function getCategoryProductsData({
+export async function getCategoryProducts({
   categoryId,
   isSale,
   searchParams,
@@ -72,13 +35,8 @@ export async function getCategoryProductsData({
     deletedAt: null,
     isArchived: false,
   };
-
-  if (categoryId) {
-    baseWhere.categoryId = categoryId;
-  }
-  if (isSale) {
-    baseWhere.isOnSale = true;
-  }
+  if (categoryId) baseWhere.categoryId = categoryId;
+  if (isSale) baseWhere.isOnSale = true;
 
   const filtersWhere: Prisma.ProductWhereInput = {
     AND: [
@@ -111,139 +69,10 @@ export async function getCategoryProductsData({
     ],
   };
 
-  const [filteredProductsRaw, allProductsForAggregations] = await Promise.all([
-    prisma.product.findMany({
-      where: { ...baseWhere, ...filtersWhere },
-      include: { translations: true, media: true, variants: true },
-    }),
-    prisma.product.findMany({
-      where: baseWhere,
-      select: {
-        price: true,
-        salePrice: true,
-        isOnSale: true,
-        demographic: true,
-        color: true,
-        apparelType: true,
-        variants: { select: { size: true, stock: true } },
-      },
-    }),
-  ]);
-
-  const inStockProducts = allProductsForAggregations.filter(
-    (p) => p.variants.reduce((sum, v) => sum + v.stock, 0) > 0,
-  );
-
-  const allPrices = inStockProducts.map((p) =>
-    p.isOnSale && p.salePrice ? Number(p.salePrice) : Number(p.price),
-  );
-  const absoluteMinPrice = allPrices.length > 0 ? Math.min(...allPrices) : 0;
-  const absoluteMaxPrice = allPrices.length > 0 ? Math.max(...allPrices) : 1000;
-
-  const rawAvailableSizes = Array.from(
-    new Set(
-      inStockProducts.flatMap((p) =>
-        p.variants.filter((v) => v.stock > 0).map((v) => v.size),
-      ),
-    ),
-  );
-
-  const availableFilters = {
-    demographics: Array.from(
-      new Set(inStockProducts.map((p) => p.demographic).filter(Boolean)),
-    ) as string[],
-    colors: Array.from(
-      new Set(inStockProducts.map((p) => p.color).filter(Boolean)),
-    ) as string[],
-    apparelTypes: Array.from(
-      new Set(inStockProducts.map((p) => p.apparelType).filter(Boolean)),
-    ) as string[],
-    sizes: sortSizes(rawAvailableSizes),
-    absoluteMinPrice,
-    absoluteMaxPrice,
-  };
-
-  const passesFilters = (
-    product: FilterableProduct,
-    skipCategory: "demographic" | "color" | "apparelType" | "size" | null,
-  ) => {
-    const actualPrice =
-      product.isOnSale && product.salePrice
-        ? Number(product.salePrice)
-        : Number(product.price);
-
-    if (minPrice && actualPrice < minPrice) return false;
-    if (maxPrice && actualPrice > maxPrice) return false;
-
-    if (
-      skipCategory !== "demographic" &&
-      activeDemographics.length > 0 &&
-      !activeDemographics.includes(product.demographic)
-    )
-      return false;
-
-    if (
-      skipCategory !== "color" &&
-      activeColors.length > 0 &&
-      (!product.color || !activeColors.includes(product.color))
-    )
-      return false;
-
-    if (
-      skipCategory !== "apparelType" &&
-      activeApparelTypes.length > 0 &&
-      (!product.apparelType ||
-        !activeApparelTypes.includes(product.apparelType))
-    )
-      return false;
-
-    if (
-      skipCategory !== "size" &&
-      activeSizes.length > 0 &&
-      !product.variants.some((v) => v.stock > 0 && activeSizes.includes(v.size))
-    )
-      return false;
-
-    return true;
-  };
-
-  const rawDynamicSizes = Array.from(
-    new Set(
-      inStockProducts
-        .filter((p) => passesFilters(p, "size"))
-        .flatMap((p) =>
-          p.variants.filter((v) => v.stock > 0).map((v) => v.size),
-        ),
-    ),
-  );
-
-  const dynamicFilters = {
-    demographics: Array.from(
-      new Set(
-        inStockProducts
-          .filter((p) => passesFilters(p, "demographic"))
-          .map((p) => p.demographic)
-          .filter(Boolean),
-      ),
-    ) as string[],
-    colors: Array.from(
-      new Set(
-        inStockProducts
-          .filter((p) => passesFilters(p, "color"))
-          .map((p) => p.color)
-          .filter(Boolean),
-      ),
-    ) as string[],
-    apparelTypes: Array.from(
-      new Set(
-        inStockProducts
-          .filter((p) => passesFilters(p, "apparelType"))
-          .map((p) => p.apparelType)
-          .filter(Boolean),
-      ),
-    ) as string[],
-    sizes: sortSizes(rawDynamicSizes),
-  };
+  const filteredProductsRaw = await prisma.product.findMany({
+    where: { ...baseWhere, ...filtersWhere },
+    include: { translations: true, media: true, variants: true },
+  });
 
   const sortedProducts = filteredProductsRaw.sort((a, b) => {
     const aTotalStock = a.variants.reduce((sum, v) => sum + v.stock, 0);
@@ -267,9 +96,9 @@ export async function getCategoryProductsData({
   const pageParam =
     typeof searchParams.page === "string" ? parseInt(searchParams.page) : 1;
   const currentPage = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
-
-  const totalPages = Math.ceil(sortedProducts.length / PAGINATION.SHOP_PER_PAGE);
-
+  const totalPages = Math.ceil(
+    sortedProducts.length / PAGINATION.SHOP_PER_PAGE,
+  );
   const paginatedProducts = sortedProducts.slice(
     (currentPage - 1) * PAGINATION.SHOP_PER_PAGE,
     currentPage * PAGINATION.SHOP_PER_PAGE,
@@ -279,7 +108,5 @@ export async function getCategoryProductsData({
     sortedProducts: paginatedProducts,
     totalPages,
     currentPage,
-    availableFilters,
-    dynamicFilters,
   };
 }

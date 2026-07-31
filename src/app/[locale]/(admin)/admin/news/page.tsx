@@ -1,54 +1,17 @@
-import { prisma } from "@/lib/prisma"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { Archive, Plus } from "lucide-react"
-import { columns } from "./_components/columns"
-import { DataTable, DataTableFilterOption } from "@/components/ui/data-table"
-import { postStatusOptions, postTypeTranslations, teamContextTranslations } from "@/lib/constants"
+import { Suspense } from "react";
+import AdminTableSkeleton from "../_components/admin-table-skeleton";
+import NewsTableSection from "./_components/news-table-section";
 
 export const metadata = {
     title: "Новини",
     description: "Управління публікаціями, інтерв'ю та заявами клубу."
 }
 
-const newsFilters: DataTableFilterOption[] = [
-    {
-        columnId: "teamContext",
-        placeholder: "Всі команди",
-        options: Object.entries(teamContextTranslations).map(([value, label]) => ({
-            value,
-            label,
-        })),
-    },
-    {
-        columnId: "type",
-        placeholder: "Всі категорії",
-        options: Object.entries(postTypeTranslations).map(([value, label]) => ({
-            value,
-            label,
-        })),
-    },
-    {
-        columnId: "isPublished",
-        placeholder: "Всі статуси",
-        options: postStatusOptions,
-    },
-];
 
-export default async function AdminNewsPage() {
-    const posts = await prisma.post.findMany({
-        where: {
-            deletedAt: null
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        include: {
-            translations: true,
-            media: true
-        }
-    });
-
+export default function AdminNewsPage() {
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -73,14 +36,9 @@ export default async function AdminNewsPage() {
                     </Button>
                 </div>
             </div>
-            <div className="mt-4">
-                <DataTable
-                    columns={columns}
-                    data={posts}
-                    searchPlaceholder="Пошук за заголовком..."
-                    filters={newsFilters}
-                />
-            </div>
+            <Suspense fallback={<AdminTableSkeleton columns={7} rows={10} />}>
+                <NewsTableSection />
+            </Suspense>
         </div>
-    )
+    );
 }

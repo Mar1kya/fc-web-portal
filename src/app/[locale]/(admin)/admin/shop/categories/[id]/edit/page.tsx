@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         where: { id },
         include: { translations: true }
     });
-    
+
     const name = category ? (getTranslation(category, "uk")?.name || category.slug) : "Невідомо";
 
     return {
@@ -54,9 +54,7 @@ export default async function EditCategoryPage({ params }: { params: Promise<{ i
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <EditCategoryForm category={category} />
-            </div>
+            <EditCategoryForm category={category} />
         </div>
     )
 }

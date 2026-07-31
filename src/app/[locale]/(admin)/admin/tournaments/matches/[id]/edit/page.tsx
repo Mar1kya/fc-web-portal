@@ -81,15 +81,13 @@ export default async function EditMatchPage({ params }: { params: Promise<{ id: 
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <EditMatchForm
-                    initialData={match}
-                    seasons={seasons}
-                    tournaments={tournaments}
-                    opponents={opponents}
-                    players={players}
-                />
-            </div>
+            <EditMatchForm
+                initialData={match}
+                seasons={seasons}
+                tournaments={tournaments}
+                opponents={opponents}
+                players={players}
+            />
         </div>
     )
 }

@@ -40,9 +40,7 @@ export default async function EditOpponentPage({ params }: { params: Promise<{ i
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <EditOpponentForm opponent={opponent} />
-            </div>
+            <EditOpponentForm opponent={opponent} />
         </div>
     )
 }

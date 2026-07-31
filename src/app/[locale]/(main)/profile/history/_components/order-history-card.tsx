@@ -1,11 +1,11 @@
 import { getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatPrice } from "@/lib/utils";
-import Link from "next/link";
 import Image from "next/image";
 import { buttonVariants } from "@/components/ui/button";
 import { Prisma } from "../../../../../../../generated/prisma";
 import { getPaymentBadgeConfig, statusColors } from "@/lib/constants";
+import { Link } from "@/i18n/navigation";
 
 type OrderWithItems = Prisma.OrderGetPayload<{
     include: {
@@ -144,7 +144,7 @@ export default async function OrderHistoryCard({
                         </span>
                     </div>
                     <Link
-                        href={`/${locale}/shop/order/${order.id}`}
+                        href={`/shop/order/${order.id}`}
                         className={cn(
                             buttonVariants({ variant: needsPayment ? "default" : "outline", size: "sm" }),
                             "h-10 px-4 font-bold uppercase tracking-wider"

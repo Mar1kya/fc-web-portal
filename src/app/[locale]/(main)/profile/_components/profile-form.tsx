@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { User } from "lucide-react";
+import { Loader2, User } from "lucide-react";
 import { useTranslations } from "next-intl"
 import Image from "next/image"
 import { cn, getHighResImage } from "@/lib/utils"
@@ -100,7 +100,16 @@ export default function ProfileForm({ user }: ProfileUser) {
                         </Field>
                     </FieldGroup>
                     <Button type="submit" disabled={isPending || isUploading}>
-                        {t("updateProfileButton")}
+                        {isPending || isUploading ? (
+                            <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                {t("updating")}
+                            </>) : (
+                            <>
+                                {t("updateProfileButton")}
+                            </>
+                        )
+                        }
                     </Button>
                 </div>
                 <div className="flex flex-col items-center justify-start shrink-0 w-full lg:w-64 xl:w-72 lg:border-l border-border lg:pl-10 xl:pl-12 pt-2 pb-8 lg:pb-0">

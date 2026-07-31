@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         where: { id },
         include: { translations: true }
     });
-    
+
     const name = tournament ? (getTranslation(tournament, "uk")?.name || tournament.slug) : "Невідомо";
 
     return {
@@ -51,9 +51,7 @@ export default async function EditTournamentPage({ params }: { params: Promise<{
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <EditTournamentForm tournament={tournament} />
-            </div>
+            <EditTournamentForm tournament={tournament} />
         </div>
     )
 }

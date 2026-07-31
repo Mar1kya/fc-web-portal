@@ -216,8 +216,8 @@ export function EditGalleryForm({ gallery, matches }: EditGalleryFormProps) {
                 </Button>
                 <Button type="submit" className="w-full sm:w-auto min-w-48" disabled={isPending}>
                     {isPending ? (
-                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Збереження...</>
-                    ) : "Зберегти зміни"}
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Оновлення...</>
+                    ) : "Оновлення галереї"}
                 </Button>
             </div>
         </form>

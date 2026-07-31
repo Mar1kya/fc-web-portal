@@ -2,35 +2,16 @@ import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { DataTable } from "@/components/ui/data-table";
-import { galleryArchiveColumns } from "./_components/archive-columns";
+import AdminTableSkeleton from "../../_components/admin-table-skeleton";
+import { Suspense } from "react";
+import GalleryArchiveTableSection from "./_components/gallery-archive-table-section";
 
 export const metadata = {
     title: "Архів галерей",
     description: "Управління видаленими галереями",
 };
 
-export default async function GalleryTrashPage() {
-    const archivedGalleries = await prisma.gallery.findMany({
-        where: {
-            deletedAt: { not: null },
-        },
-        include: {
-            translations: true,
-            media: true,
-            match: {
-                include: {
-                    opponent: {
-                        include: { translations: true },
-                    },
-                },
-            },
-        },
-        orderBy: {
-            deletedAt: "desc",
-        },
-    });
-
+export default function GalleryTrashPage() {
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -47,13 +28,9 @@ export default async function GalleryTrashPage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-2">
-                <DataTable
-                    columns={galleryArchiveColumns}
-                    data={archivedGalleries}
-                    searchPlaceholder="Пошук за назвою галереї..."
-                />
-            </div>
+            <Suspense fallback={<AdminTableSkeleton />}>
+                <GalleryArchiveTableSection />
+            </Suspense>
         </div>
     );
 }

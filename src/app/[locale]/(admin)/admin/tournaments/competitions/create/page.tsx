@@ -26,9 +26,7 @@ export default function CreateTournamentPage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <CreateTournamentForm />
-            </div>
+            <CreateTournamentForm />
         </div>
     )
 }

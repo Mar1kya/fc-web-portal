@@ -167,7 +167,7 @@ export function SeasonModal({ season, trigger, open: controlledOpen, onOpenChang
                         </Button>
                         <Button type="submit" disabled={isPending} className="min-w-30">
                             {isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                            {season ? "Зберегти" : "Створити"}
+                            {season ? "Оновити" : "Створити"}
                         </Button>
                     </div>
                 </form>

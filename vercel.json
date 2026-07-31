@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/sync-details",
       "schedule": "30 3 * * 1"
+    },
+    {
+      "path": "/api/cron/cancel-expired-orders",
+      "schedule": "0 4 * * *"
     }
   ]
 }

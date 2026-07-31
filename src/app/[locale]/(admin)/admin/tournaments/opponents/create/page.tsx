@@ -25,9 +25,7 @@ export default function CreateOpponentPage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <CreateOpponentForm />
-            </div>
+            <CreateOpponentForm />
         </div>
     )
 }

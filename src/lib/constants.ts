@@ -23,7 +23,7 @@ export const teamContextTranslations: Record<TeamContext, string> = {
   MAIN_TEAM: "Основна команда",
   U19: "U-19",
   ACADEMY: "Академія",
-  GENERAL: "Клуб",
+  GENERAL: "Загальний склад",
 };
 export const postStatusOptions = [
   { value: "PUBLISHED", label: "Опубліковано" },

@@ -4,36 +4,16 @@ import { Button } from "@/components/ui/button"
 import { Archive, Plus } from "lucide-react"
 import { columns } from "./_components/columns"
 import { DataTable } from "@/components/ui/data-table"
+import { Suspense } from "react"
+import AdminTableSkeleton from "../_components/admin-table-skeleton"
+import GalleryTableSection from "./_components/gallery-table-section"
 
 export const metadata = {
     title: "Галерея",
     description: "Управління фотогалереями матчів та подій клубу."
 }
 
-export default async function AdminGalleryPage() {
-    const galleries = await prisma.gallery.findMany({
-        where: {
-            deletedAt: null,
-        },
-        orderBy: {
-            createdAt: "desc",
-        },
-        include: {
-            translations: true,
-            media: true,
-            match: {
-                include: {
-                    opponent: {
-                        include: {
-                            translations: true,
-                        },
-                    },
-                    tournament: true,
-                },
-            },
-        },
-    })
-
+export default function AdminGalleryPage() {
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -58,13 +38,9 @@ export default async function AdminGalleryPage() {
                     </Button>
                 </div>
             </div>
-            <div className="mt-4">
-                <DataTable
-                    columns={columns}
-                    data={galleries}
-                    searchPlaceholder="Пошук за назвою галереї..."
-                />
-            </div>
+            <Suspense fallback={<AdminTableSkeleton />}>
+                <GalleryTableSection />
+            </Suspense>
         </div>
     )
 }

@@ -1,10 +1,10 @@
 import { Metadata } from "next";
-import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Plus, Archive } from "lucide-react";
-import { DataTable } from "@/components/ui/data-table";
-import { columns } from "./_components/columns";
+import { Suspense } from "react";
+import AdminTableSkeleton from "../../_components/admin-table-skeleton";
+import ProductsTableSection from "./_components/products-table-section";
 
 export const metadata: Metadata = {
     title: "Товари",
@@ -12,41 +12,6 @@ export const metadata: Metadata = {
 };
 
 export default async function ProductsPage() {
-    const rawProducts = await prisma.product.findMany({
-        where: {
-            deletedAt: null,
-        },
-        include: {
-            translations: true,
-            category: {
-                include: { translations: true }
-            },
-            media: true,
-            variants: true,
-        },
-        orderBy: {
-            createdAt: "desc",
-        },
-    });
-
-    const products = rawProducts.map(product => ({
-        ...product,
-        price: Number(product.price),
-        salePrice: product.salePrice ? Number(product.salePrice) : null,
-    }));
-
-    const filterConfigs = [
-        {
-            columnId: "status",
-            placeholder: "Статус товару",
-            options: [
-                { label: "Топ продажу", value: "FEATURED" },
-                { label: "Акція", value: "SALE" },
-                { label: "Звичайні", value: "NORMAL" },
-            ]
-        }
-    ];
-
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -71,14 +36,9 @@ export default async function ProductsPage() {
                     </Button>
                 </div>
             </div>
-            <div className="mt-2">
-                <DataTable
-                    columns={columns}
-                    data={products}
-                    searchPlaceholder="Пошук за назвою товару..."
-                    filters={filterConfigs}
-                />
-            </div>
+            <Suspense fallback={<AdminTableSkeleton />}>
+                <ProductsTableSection />
+            </Suspense>
         </div>
     );
 }

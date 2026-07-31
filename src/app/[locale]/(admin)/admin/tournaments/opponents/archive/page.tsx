@@ -1,9 +1,9 @@
-import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { DataTable } from "@/components/ui/data-table";
-import { archiveColumns } from "./_components/archive-columns";
+import { Suspense } from "react";
+import AdminTableSkeleton from "../../../_components/admin-table-skeleton";
+import OpponentsArchiveTableSection from "./_components/opponents-archive-table-section";
 
 export const metadata = {
     title: "Архів суперників",
@@ -11,18 +11,6 @@ export const metadata = {
 };
 
 export default async function OpponentsArchivePage() {
-    const archivedOpponents = await prisma.opponent.findMany({
-        where: {
-            deletedAt: { not: null }
-        },
-        include: {
-            translations: true
-        },
-        orderBy: {
-            deletedAt: "desc"
-        }
-    });
-
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -39,13 +27,9 @@ export default async function OpponentsArchivePage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <DataTable
-                    columns={archiveColumns}
-                    data={archivedOpponents}
-                    searchPlaceholder="Пошук команди..."
-                />
-            </div>
+            <Suspense fallback={<AdminTableSkeleton />}>
+                <OpponentsArchiveTableSection />
+            </Suspense>
         </div>
     );
 }

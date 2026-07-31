@@ -26,9 +26,7 @@ export default function CreateCoachPage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <CreateCoachForm />
-            </div>
+            <CreateCoachForm />
         </div>
     )
 }

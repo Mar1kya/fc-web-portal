@@ -61,9 +61,7 @@ export default async function EditGalleryPage({ params }: { params: Promise<{ id
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <EditGalleryForm gallery={gallery} matches={matches} />
-            </div>
+            <EditGalleryForm gallery={gallery} matches={matches} />
         </div>
     )
 }

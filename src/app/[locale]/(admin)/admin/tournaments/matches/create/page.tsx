@@ -22,7 +22,7 @@ export default async function CreateManualMatchPage() {
             orderBy: { slug: 'asc' }
         }),
         prisma.opponent.findMany({
-            where: { deletedAt: null }, 
+            where: { deletedAt: null },
             include: { translations: { where: { language: 'uk' } } },
             orderBy: { slug: 'asc' }
         }),
@@ -61,13 +61,11 @@ export default async function CreateManualMatchPage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <CreateManualMatchForm
-                    seasons={seasons}
-                    tournaments={tournaments}
-                    opponents={opponents}
-                />
-            </div>
+            <CreateManualMatchForm
+                seasons={seasons}
+                tournaments={tournaments}
+                opponents={opponents}
+            />
         </div>
     )
 }

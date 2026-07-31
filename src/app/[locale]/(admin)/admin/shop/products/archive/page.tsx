@@ -1,10 +1,10 @@
 import { Metadata } from "next";
-import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { DataTable } from "@/components/ui/data-table";
-import { archiveColumns } from "./_components/archive-columns";
+import { Suspense } from "react";
+import AdminTableSkeleton from "../../../_components/admin-table-skeleton";
+import ProductsArchiveTableSection from "./_components/products-archive-table-section";
 
 export const metadata: Metadata = {
     title: "Архів товарів",
@@ -12,29 +12,6 @@ export const metadata: Metadata = {
 };
 
 export default async function ProductsArchivePage() {
-    const rawArchivedProducts = await prisma.product.findMany({
-        where: {
-            deletedAt: { not: null }
-        },
-        include: {
-            translations: true,
-            category: {
-                include: { translations: true }
-            },
-            media: true,
-            variants: true,
-        },
-        orderBy: {
-            deletedAt: "desc"
-        }
-    });
-
-    const archivedProducts = rawArchivedProducts.map(product => ({
-        ...product,
-        price: Number(product.price),
-        salePrice: product.salePrice ? Number(product.salePrice) : null,
-    }));
-
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -51,13 +28,9 @@ export default async function ProductsArchivePage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <DataTable 
-                    columns={archiveColumns} 
-                    data={archivedProducts} 
-                    searchPlaceholder="Пошук за назвою товару..."
-                />
-            </div>
+            <Suspense fallback={<AdminTableSkeleton />}>
+                <ProductsArchiveTableSection />
+            </Suspense>
         </div>
     );
 }

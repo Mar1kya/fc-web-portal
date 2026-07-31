@@ -71,17 +71,15 @@ export default async function EditProductPage({
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <EditProductForm
-                    initialData={{
-                        ...product,
-                        price: Number(product.price),
-                        salePrice: product.salePrice != null ? Number(product.salePrice) : null,
-                    }}
-                    categories={categories}
-                    players={players}
-                />
-            </div>
+            <EditProductForm
+                initialData={{
+                    ...product,
+                    price: Number(product.price),
+                    salePrice: product.salePrice != null ? Number(product.salePrice) : null,
+                }}
+                categories={categories}
+                players={players}
+            />
         </div>
     )
 }
