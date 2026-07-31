@@ -1,42 +1,33 @@
 import { Metadata } from "next"
-import { prisma } from "@/lib/prisma"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
-import { DataTable, DataTableFilterOption } from "@/components/ui/data-table"
-import { PlayerPosition } from "../../../../../../../../generated/prisma"
-import { archiveColumns } from "./_components/archive-columns"
+import { Suspense } from "react"
+import { prisma } from "@/lib/prisma"
+import PlayersArchivTableSection from "./_components/players-archive-table-section"
+import AdminTableSkeleton from "../../../_components/admin-table-skeleton"
+import { TeamContext } from "../../../../../../../../generated/prisma"
+import { TeamSwitcher } from "@/components/shared/team-switcher"
 
 export const metadata: Metadata = {
     title: "Архів гравців",
     description: "Управління видаленими профілями гравців."
 }
 
-const archiveFilters: DataTableFilterOption[] = [
-    {
-        columnId: "position",
-        placeholder: "Всі позиції",
-        options: [
-            { value: PlayerPosition.GOALKEEPER, label: "Воротарі" },
-            { value: PlayerPosition.DEFENDER, label: "Захисники" },
-            { value: PlayerPosition.MIDFIELDER, label: "Півзахисники" },
-            { value: PlayerPosition.FORWARD, label: "Нападники" },
-        ]
-    }
-];
+export default async function PlayersArchivePage({ searchParams }: { searchParams: Promise<{ team?: string }> }) {
+    const { team } = await searchParams;
 
-export default async function PlayersArchivePage() {
-    const archivedPlayers = await prisma.player.findMany({
-        where: {
-            deletedAt: { not: null }
-        },
-        orderBy: {
-            deletedAt: "desc"
-        },
-        include: {
-            translations: true
-        }
+    const existingTeamsObj = await prisma.player.findMany({
+        where: { deletedAt: { not: null } },
+        distinct: ['teamContext'],
+        select: { teamContext: true },
     });
+
+    const availableTeams = existingTeamsObj.map(t => t.teamContext);
+
+    const currentTeam = team && availableTeams.includes(team as TeamContext)
+        ? (team as TeamContext)
+        : availableTeams[0] || TeamContext.MAIN_TEAM;
 
     return (
         <div className="flex flex-col gap-6">
@@ -54,14 +45,14 @@ export default async function PlayersArchivePage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <DataTable 
-                    columns={archiveColumns} 
-                    data={archivedPlayers} 
-                    searchPlaceholder="Пошук за ім'ям..."
-                    filters={archiveFilters}
-                />
-            </div>
+            <TeamSwitcher
+                availableTeams={availableTeams}
+                currentTeam={currentTeam}
+                basePath="/admin/team/players/archive"
+            />
+            <Suspense key={currentTeam} fallback={<AdminTableSkeleton />}>
+                <PlayersArchivTableSection currentTeam={currentTeam} />
+            </Suspense>
         </div>
     )
 }

@@ -26,9 +26,7 @@ export default function CreatePlayerPage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <CreatePlayerForm />
-            </div>
+            <CreatePlayerForm />
         </div>
     )
 }

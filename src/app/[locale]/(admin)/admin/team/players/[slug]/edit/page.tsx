@@ -45,9 +45,7 @@ export default async function EditPlayerPage({ params }: { params: Promise<{ slu
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <EditPlayerForm player={player} />
-            </div>
+            <EditPlayerForm player={player} />
         </div>
     )
 }

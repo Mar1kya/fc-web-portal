@@ -1,11 +1,11 @@
 
 import { Metadata } from "next";
-import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { DataTable } from "@/components/ui/data-table";
-import { archiveColumns } from "./_components/archive-columns";
+import { Suspense } from "react";
+import AdminTableSkeleton from "../../../_components/admin-table-skeleton";
+import OrdersArchiveTableSection from "./_components/orders-archive-table-section";
 
 export const metadata: Metadata = {
     title: "Архів замовлень",
@@ -13,34 +13,6 @@ export const metadata: Metadata = {
 };
 
 export default async function OrdersArchivePage() {
-    const rawOrders = await prisma.order.findMany({
-        where: { deletedAt: { not: null } },
-        include: {
-            orderItems: {
-                include: {
-                    product: {
-                        select: {
-                            translations: {
-                                where: { language: "uk" },
-                                select: { language: true, name: true },
-                            },
-                        },
-                    },
-                },
-            },
-        },
-        orderBy: { deletedAt: "desc" },
-    });
-
-    const orders = rawOrders.map((order) => ({
-        ...order,
-        totalPrice: Number(order.totalPrice),
-        orderItems: order.orderItems.map((item) => ({
-            ...item,
-            fixedPrice: Number(item.fixedPrice),
-        })),
-    }));
-
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -57,13 +29,9 @@ export default async function OrdersArchivePage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <DataTable
-                    columns={archiveColumns}
-                    data={orders}
-                    searchPlaceholder="Пошук за клієнтом..."
-                />
-            </div>
+            <Suspense fallback={<AdminTableSkeleton />}>
+                <OrdersArchiveTableSection />
+            </Suspense>
         </div>
     );
 }

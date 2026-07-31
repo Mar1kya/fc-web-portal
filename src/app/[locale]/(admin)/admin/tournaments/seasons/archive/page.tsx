@@ -1,9 +1,9 @@
-import { prisma } from "@/lib/prisma"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
-import { DataTable } from "@/components/ui/data-table"
-import { archiveColumns } from "./_components/archive-columns"
+import { Suspense } from "react"
+import SeasonsArchiveTableSection from "./_components/seasons-archive-table-section"
+import AdminTableSkeleton from "../../../_components/admin-table-skeleton"
 
 export const metadata = {
     title: "Архів сезонів",
@@ -11,15 +11,6 @@ export const metadata = {
 }
 
 export default async function SeasonsArchivePage() {
-    const archivedSeasons = await prisma.season.findMany({
-        where: {
-            deletedAt: { not: null }
-        },
-        orderBy: {
-            deletedAt: "desc"
-        }
-    });
-
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -36,13 +27,9 @@ export default async function SeasonsArchivePage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <DataTable
-                    columns={archiveColumns}
-                    data={archivedSeasons}
-                    searchPlaceholder="Пошук за назвою сезону..."
-                />
-            </div>
+            <Suspense fallback={<AdminTableSkeleton />}>
+                <SeasonsArchiveTableSection />
+            </Suspense>
         </div>
     )
 }

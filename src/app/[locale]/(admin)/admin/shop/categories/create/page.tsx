@@ -26,9 +26,7 @@ export default function CreateCategoryPage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <CreateCategoryForm />
-            </div>
+            <CreateCategoryForm />
         </div>
     )
 }

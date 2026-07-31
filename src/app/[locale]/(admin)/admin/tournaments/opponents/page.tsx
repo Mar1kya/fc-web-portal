@@ -1,9 +1,9 @@
-import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Archive, Plus } from "lucide-react";
-import { DataTable } from "@/components/ui/data-table";
-import { columns } from "./_components/columns";
+import { Suspense } from "react";
+import AdminTableSkeleton from "../../_components/admin-table-skeleton";
+import OpponentsTableSection from "./_components/opponents-table-section";
 
 export const metadata = {
     title: "Суперники",
@@ -11,18 +11,6 @@ export const metadata = {
 };
 
 export default async function OpponentsPage() {
-    const opponents = await prisma.opponent.findMany({
-        where: {
-            deletedAt: null,
-        },
-        include: {
-            translations: true,
-        },
-        orderBy: {
-            slug: "asc",
-        },
-    });
-
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -47,13 +35,9 @@ export default async function OpponentsPage() {
                     </Button>
                 </div>
             </div>
-            <div className="mt-2">
-                <DataTable
-                    columns={columns}
-                    data={opponents}
-                    searchPlaceholder="Пошук суперника..."
-                />
-            </div>
+            <Suspense fallback={<AdminTableSkeleton />}>
+                <OpponentsTableSection />
+            </Suspense>
         </div>
     );
 }

@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { archiveColumns } from "./_components/archive-columns";
+import CompetitionsArchiveTableSection from "./_components/competitions-archive-table-section";
+import { Suspense } from "react";
+import AdminTableSkeleton from "../../../_components/admin-table-skeleton";
 
 export const metadata: Metadata = {
     title: "Архів турнірів",
@@ -12,18 +15,6 @@ export const metadata: Metadata = {
 };
 
 export default async function TournamentsArchivePage() {
-    const archivedTournaments = await prisma.tournament.findMany({
-        where: {
-            deletedAt: { not: null }
-        },
-        include: {
-            translations: true
-        },
-        orderBy: {
-            deletedAt: "desc"
-        }
-    });
-
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -40,13 +31,9 @@ export default async function TournamentsArchivePage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <DataTable 
-                    columns={archiveColumns} 
-                    data={archivedTournaments} 
-                    searchPlaceholder="Пошук за назвою турніру..."
-                />
-            </div>
+            <Suspense fallback={<AdminTableSkeleton />}>
+                <CompetitionsArchiveTableSection />
+            </Suspense>
         </div>
     );
 }

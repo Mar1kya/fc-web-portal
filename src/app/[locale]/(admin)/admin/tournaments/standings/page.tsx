@@ -1,8 +1,9 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
-import { DataTable } from "@/components/ui/data-table";
-import { columns } from "./_components/columns";
 import { StandingsControls } from "./_components/standings-controls";
+import StandingsTableSection from "./_components/standings-table-section";
+import AdminTableSkeleton from "../../_components/admin-table-skeleton";
 import { getTranslation } from "@/lib/utils/get-translation";
 
 export const metadata: Metadata = {
@@ -25,16 +26,6 @@ export default async function StandingsPage({ searchParams }: { searchParams: Pr
     const currentSeasonId = params.seasonId || (activeSeason?.id || "");
     const currentTournamentId = params.tournamentId || (tournaments[0]?.id || "");
 
-    const standings = await prisma.standing.findMany({
-        where: {
-            seasonId: currentSeasonId,
-            tournamentId: currentTournamentId,
-        },
-        orderBy: {
-            rank: "asc"
-        }
-    });
-
     return (
         <div className="flex flex-col gap-6">
             <div>
@@ -43,18 +34,22 @@ export default async function StandingsPage({ searchParams }: { searchParams: Pr
                     Перегляд та примусове оновлення турнірних таблиць зі стороннього API.
                 </p>
             </div>
-            <div className="mt-2">
+            <div className="mt-2 space-y-4">
                 <StandingsControls
                     seasons={seasons}
                     tournaments={tournaments}
                     currentSeasonId={currentSeasonId}
                     currentTournamentId={currentTournamentId}
                 />
-                <DataTable
-                    columns={columns}
-                    data={standings}
-                    searchPlaceholder="Пошук команди..."
-                />
+                <Suspense
+                    key={`${currentSeasonId}-${currentTournamentId}`}
+                    fallback={<AdminTableSkeleton columns={10} />}
+                >
+                    <StandingsTableSection
+                        seasonId={currentSeasonId}
+                        tournamentId={currentTournamentId}
+                    />
+                </Suspense>
             </div>
         </div>
     );

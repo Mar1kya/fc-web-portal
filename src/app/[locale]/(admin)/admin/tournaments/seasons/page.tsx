@@ -1,10 +1,10 @@
-import { prisma } from "@/lib/prisma"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { Archive, Plus } from "lucide-react"
-import { columns } from "./_components/columns"
-import { DataTable } from "@/components/ui/data-table"
 import { SeasonModal } from "./_components/season-modal"
+import SeasonsTableSection from "./_components/seasons-table-section"
+import { Suspense } from "react"
+import AdminTableSkeleton from "../../_components/admin-table-skeleton"
 
 export const metadata = {
     title: "Сезони",
@@ -12,15 +12,6 @@ export const metadata = {
 }
 
 export default async function SeasonsPage() {
-    const seasons = await prisma.season.findMany({
-        where: {
-            deletedAt: null
-        },
-        orderBy: {
-            startDate: "desc"
-        }
-    });
-
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -37,23 +28,19 @@ export default async function SeasonsPage() {
                             Архів
                         </Link>
                     </Button>
-                    <SeasonModal 
+                    <SeasonModal
                         trigger={
                             <Button className="gap-2 flex-1 sm:flex-none">
-                                <Plus className="w-4 h-4" /> 
+                                <Plus className="w-4 h-4" />
                                 Створити сезон
                             </Button>
                         }
                     />
                 </div>
             </div>
-            <div className="mt-4">
-                <DataTable 
-                    columns={columns} 
-                    data={seasons} 
-                    searchPlaceholder="Пошук за назвою (напр. 2025/26)..."
-                />
-            </div>
+            <Suspense fallback={<AdminTableSkeleton />}>
+                <SeasonsTableSection />
+            </Suspense>
         </div>
     )
 }

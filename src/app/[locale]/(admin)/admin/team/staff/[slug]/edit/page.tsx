@@ -43,10 +43,7 @@ export default async function EditCoachPage({ params }: { params: Promise<{ slug
                     </Link>
                 </Button>
             </div>
-
-            <div className="mt-4">
-                <EditCoachForm coach={coach} />
-            </div>
+            <EditCoachForm coach={coach} />
         </div>
     )
 }

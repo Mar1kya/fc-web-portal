@@ -44,9 +44,7 @@ export default async function CreateGalleryPage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <CreateGalleryForm matches={matches} />
-            </div>
+            <CreateGalleryForm matches={matches} />
         </div>
     )
 }

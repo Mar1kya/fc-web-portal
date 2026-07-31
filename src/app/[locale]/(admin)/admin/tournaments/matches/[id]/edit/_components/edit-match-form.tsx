@@ -24,8 +24,6 @@ type SeasonOption = SelectOption & {
     endDate: Date | null;
 };
 
-
-
 type MatchWithDetails = Match & {
     lineup: MatchLineup[];
     events: MatchEvent[];

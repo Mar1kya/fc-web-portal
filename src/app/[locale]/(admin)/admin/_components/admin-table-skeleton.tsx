@@ -15,7 +15,7 @@ interface AdminTableSkeletonProps {
 
 export default function AdminTableSkeleton({ 
     columns = 6, 
-    rows = 8 
+    rows = 10 
 }: AdminTableSkeletonProps) {
     return (
         <div className="rounded-md border border-border/50 bg-card overflow-hidden">

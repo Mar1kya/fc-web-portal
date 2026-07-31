@@ -1,50 +1,17 @@
 import { Metadata } from "next"
-import { prisma } from "@/lib/prisma"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
-import { trashColumns } from "./_components/archive-columns"
-import { DataTable, DataTableFilterOption } from "@/components/ui/data-table"
-import { postTypeTranslations, teamContextTranslations } from "@/lib/constants"
+import { Suspense } from "react"
+import AdminTableSkeleton from "../../_components/admin-table-skeleton"
+import NewsArchiveTableSection from "./_components/news-archive-table-section"
 
 export const metadata: Metadata = {
     title: "Кошик новин",
     description: "Управління видаленими публікаціями."
 }
 
-const trashFilters: DataTableFilterOption[] = [
-    {
-        columnId: "teamContext", 
-        placeholder: "Всі команди",
-        options: Object.entries(teamContextTranslations).map(([value, label]) => ({
-            value,
-            label,
-        })),
-    },
-    {
-        columnId: "type",
-        placeholder: "Всі категорії",
-        options: Object.entries(postTypeTranslations).map(([value, label]) => ({
-            value,
-            label,
-        })),
-    },
-];
-
-export default async function ArchivePage() {
-    const trashedPosts = await prisma.post.findMany({
-        where: {
-            deletedAt: { not: null }
-        },
-        orderBy: {
-            deletedAt: "desc"
-        },
-        include: {
-            translations: true,
-            media: true
-        }
-    });
-
+export default function ArchivePage() {
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -61,14 +28,9 @@ export default async function ArchivePage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <DataTable 
-                    columns={trashColumns} 
-                    data={trashedPosts} 
-                    searchPlaceholder="Пошук за заголовком..."
-                    filters={trashFilters}
-                />
-            </div>
+            <Suspense fallback={<AdminTableSkeleton columns={6} rows={10} />}>
+                <NewsArchiveTableSection />
+            </Suspense>
         </div>
     )
 }

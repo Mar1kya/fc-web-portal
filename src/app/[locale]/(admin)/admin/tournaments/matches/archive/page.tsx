@@ -2,28 +2,31 @@ import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { DataTable } from "@/components/ui/data-table";
-import { archiveColumns } from "./_components/archive-columns";
+import { TeamContext } from "../../../../../../../../generated/prisma";
+import { TeamSwitcher } from "@/components/shared/team-switcher";
+import { Suspense } from "react";
+import AdminTableSkeleton from "../../../_components/admin-table-skeleton";
+import MatchesArchiveTableSection from "./_components/matches-archive-table-section";
 
 export const metadata = {
     title: "Архів матчів",
     description: "Управління видаленими матчами",
 };
 
-export default async function MatchesArchivePage() {
-    const archivedMatches = await prisma.match.findMany({
-        where: {
-            deletedAt: { not: null },
-        },
-        include: {
-            opponent: {
-                include: { translations: true }
-            },
-        },
-        orderBy: {
-            deletedAt: "desc",
-        },
+export default async function MatchesArchivePage({ searchParams }: { searchParams: Promise<{ team?: string }> }) {
+    const { team } = await searchParams;
+
+    const existingTeamsObj = await prisma.match.findMany({
+        where: { deletedAt: { not: null } },
+        distinct: ['teamContext'],
+        select: { teamContext: true },
     });
+
+    const availableTeams = existingTeamsObj.map(t => t.teamContext);
+
+    const currentTeam = team && availableTeams.includes(team as TeamContext)
+        ? (team as TeamContext)
+        : availableTeams[0] || TeamContext.MAIN_TEAM;
 
     return (
         <div className="flex flex-col gap-6">
@@ -41,13 +44,14 @@ export default async function MatchesArchivePage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-2">
-                <DataTable
-                    columns={archiveColumns}
-                    data={archivedMatches}
-                    searchPlaceholder="Пошук за назвою команди..."
-                />
-            </div>
+            <TeamSwitcher
+                availableTeams={availableTeams}
+                currentTeam={currentTeam}
+                basePath="/admin/tournaments/matches/archive"
+            />
+            <Suspense key={currentTeam} fallback={<AdminTableSkeleton />}>
+                <MatchesArchiveTableSection currentTeam={currentTeam} />
+            </Suspense>
         </div>
     );
 }

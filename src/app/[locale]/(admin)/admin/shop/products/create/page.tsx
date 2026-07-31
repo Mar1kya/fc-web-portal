@@ -18,7 +18,7 @@ export default async function CreateProductPage() {
             orderBy: { slug: 'asc' }
         }),
         prisma.player.findMany({
-            where: { deletedAt: null }, 
+            where: { deletedAt: null },
             include: { translations: { where: { language: 'uk' } } },
             orderBy: [{ number: 'asc' }, { slug: 'asc' }]
         }),
@@ -35,7 +35,7 @@ export default async function CreateProductPage() {
 
         return {
             id: p.id,
-            name: playerName, 
+            name: playerName,
             number: p.number
         };
     });
@@ -56,12 +56,10 @@ export default async function CreateProductPage() {
                     </Link>
                 </Button>
             </div>
-            <div className="mt-4">
-                <CreateProductForm
-                    categories={categories}
-                    players={players}
-                />
-            </div>
+            <CreateProductForm
+                categories={categories}
+                players={players}
+            />
         </div>
     )
 }

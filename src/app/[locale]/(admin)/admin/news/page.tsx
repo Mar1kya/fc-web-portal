@@ -36,11 +36,9 @@ export default function AdminNewsPage() {
                     </Button>
                 </div>
             </div>
-            <div className="mt-4">
-                <Suspense fallback={<AdminTableSkeleton columns={7} rows={10} />}>
-                    <NewsTableSection />
-                </Suspense>
-            </div>
+            <Suspense fallback={<AdminTableSkeleton columns={7} rows={10} />}>
+                <NewsTableSection />
+            </Suspense>
         </div>
     );
 }
