@@ -6,6 +6,11 @@ import bcrypt from "bcryptjs";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { createLinkOrderSchema, createProfileSchema } from "@/lib/schemas";
+import {
+  checkRateLimit,
+  formatRetryAfter,
+  getClientIp,
+} from "@/lib/rate-limit";
 
 export type ProfileState = {
   errors?: {
@@ -121,6 +126,31 @@ export async function linkGuestOrder(
     return { message: t("unauthorized") };
   }
 
+  const ip = await getClientIp();
+  const userKey = `link-order:user:${session.user.id}`;
+  const ipKey = `link-order:ip:${ip}`;
+
+  const [userLimit, ipLimit] = await Promise.all([
+    checkRateLimit(userKey, 5, 10 * 60 * 1000),
+    checkRateLimit(ipKey, 20, 60 * 60 * 1000),
+  ]);
+
+  if (!userLimit.allowed) {
+    return {
+      message: t("tooManyAttempts", {
+        time: formatRetryAfter(userLimit.retryAfterMs ?? 0),
+      }),
+    };
+  }
+
+  if (!ipLimit.allowed) {
+    return {
+      message: t("tooManyAttempts", {
+        time: formatRetryAfter(ipLimit.retryAfterMs ?? 0),
+      }),
+    };
+  }
+
   const LinkOrderSchema = createLinkOrderSchema(t);
   const formValues = Object.fromEntries(formData.entries());
   const validatedFields = LinkOrderSchema.safeParse(formValues);
@@ -155,6 +185,7 @@ export async function linkGuestOrder(
     if (order.userId !== null) {
       return { message: t("notFound") };
     }
+
     await prisma.order.update({
       where: { id: order.id },
       data: { userId: session.user.id },

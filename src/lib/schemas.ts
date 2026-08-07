@@ -90,7 +90,10 @@ export const createLinkOrderSchema = (
   t: (key: string, values?: Record<string, string | number>) => string,
 ) => {
   return z.object({
-    orderId: z.string().min(1, t("orderIdRequired")),
+    orderId: z
+      .string()
+      .trim()
+      .regex(/^#?[a-zA-Z0-9]{6}$/, t("orderIdRequired")),
     phone: zPhone(t("phoneRequired")),
   });
 };
@@ -267,35 +270,40 @@ export const categorySchema = z.object({
 });
 
 export const productSchema = z.object({
-    name_uk: z.string().min(2, "Назва українською обов'язкова"),
-    name_en: z.string().min(2, "Назва англійською обов'язкова"),
-    description_uk: z.string().min(10, "Опис українською занадто короткий"),
-    description_en: z.string().min(10, "Опис англійською занадто короткий"),
-    categoryId: z.string().min(1, "Оберіть категорію"),
-    demographic: z.nativeEnum(Demographic).default(Demographic.UNISEX),
-    price: z.coerce.number().min(0.01, "Ціна має бути більшою за 0"),
-    salePrice: z.coerce.number().min(0).optional().nullable(),
-    isOnSale: z.boolean().default(false),
-    isFeatured: z.boolean().default(false),
-    isArchived: z.boolean().default(false),
-    color: z.string().optional().nullable(),
-    apparelType: z.string().optional().nullable(),
-    seasonYear: z.string().optional().nullable(),
-    matchType: z.string().optional().nullable(),
-    relatedPlayerIds: z.array(z.string()).optional(),
-    mediaUrls: z.array(z.string()).optional(),
-    variants: z.array(
-        z.object({
-            size: z.string().min(1, "Вкажіть розмір"),
-            stock: z.coerce.number().min(0, "Залишок не може бути від'ємним"),
-            sku: z.string().optional().nullable(),
-        })
+  name_uk: z.string().min(2, "Назва українською обов'язкова"),
+  name_en: z.string().min(2, "Назва англійською обов'язкова"),
+  description_uk: z.string().min(10, "Опис українською занадто короткий"),
+  description_en: z.string().min(10, "Опис англійською занадто короткий"),
+  categoryId: z.string().min(1, "Оберіть категорію"),
+  demographic: z.nativeEnum(Demographic).default(Demographic.UNISEX),
+  price: z.coerce.number().min(0.01, "Ціна має бути більшою за 0"),
+  salePrice: z.coerce.number().min(0).optional().nullable(),
+  isOnSale: z.boolean().default(false),
+  isFeatured: z.boolean().default(false),
+  isArchived: z.boolean().default(false),
+  color: z.string().optional().nullable(),
+  apparelType: z.string().optional().nullable(),
+  seasonYear: z.string().optional().nullable(),
+  matchType: z.string().optional().nullable(),
+  relatedPlayerIds: z.array(z.string()).optional(),
+  mediaUrls: z.array(z.string()).optional(),
+  variants: z
+    .array(
+      z.object({
+        size: z.string().min(1, "Вкажіть розмір"),
+        stock: z.coerce.number().min(0, "Залишок не може бути від'ємним"),
+        sku: z.string().optional().nullable(),
+      }),
     )
     .min(1, "Додайте хоча б один розмір")
-    .refine((variants) => {
-        const sizes = variants.map(v => v.size.toUpperCase().trim());
+    .refine(
+      (variants) => {
+        const sizes = variants.map((v) => v.size.toUpperCase().trim());
         return sizes.length === new Set(sizes).size;
-    }, {
-        message: "У товарі є дублікати розмірів. Кожен розмір можна додати лише один раз.",
-    }),
+      },
+      {
+        message:
+          "У товарі є дублікати розмірів. Кожен розмір можна додати лише один раз.",
+      },
+    ),
 });

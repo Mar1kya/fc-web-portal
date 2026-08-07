@@ -13,9 +13,11 @@ type CheckoutSummaryProps = {
     cartItems: CartItem[];
     totalPrice: number;
     isPending: boolean;
+    isSyncing?: boolean;
+    hasUnavailable?: boolean;
 };
 
-export default function CheckoutSummary({ cartItems, totalPrice, isPending }: CheckoutSummaryProps) {
+export default function CheckoutSummary({ cartItems, totalPrice, isPending, isSyncing, hasUnavailable }: CheckoutSummaryProps) {
     const t = useTranslations("Shop.CheckoutPage");
     const locale = useLocale();
 
@@ -27,7 +29,7 @@ export default function CheckoutSummary({ cartItems, totalPrice, isPending }: Ch
                     {cartItems.map(item => {
                         const translatedData = getTranslation({ translations: item.translations }, locale);
                         const itemName = translatedData?.name || "";
-                        
+
                         return (
                             <div key={item.cartItemId} className="flex gap-3 items-start">
                                 <div className="relative w-16 h-20 rounded-md overflow-hidden bg-muted/50 border border-border/50 shrink-0">
@@ -74,17 +76,22 @@ export default function CheckoutSummary({ cartItems, totalPrice, isPending }: Ch
                     <span className="text-2xl font-black text-emerald-600">{formatPrice(totalPrice)}</span>
                 </div>
                 <div className="pt-2">
-                    <Button 
-                        type="submit" 
+                    <Button
+                        type="submit"
                         variant="default"
                         size="lg"
-                        disabled={isPending || cartItems.length === 0} 
+                        disabled={isPending || isSyncing || hasUnavailable || cartItems.length === 0}
                         className="w-full h-14 font-bold uppercase tracking-wider text-base transition-all"
                     >
                         {isPending ? (
                             <>
                                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                                 {t("Form.processing")}
+                            </>
+                        ) : isSyncing ? (
+                            <>
+                                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                {t("Form.syncing")}
                             </>
                         ) : (
                             <>
