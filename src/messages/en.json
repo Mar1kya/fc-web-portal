@@ -217,7 +217,8 @@
         "unauthorized": "You are not authorized",
         "invalidData": "Please check the entered data",
         "defaultError": "An error occurred. Please try again.",
-        "alreadyLinked": "This order is already linked to your account!"
+        "alreadyLinked": "This order is already linked to your account!",
+        "tooManyAttempts": "Too many attempts. Please try again in {time}."
       }
     },
     "Metadata": {
@@ -599,7 +600,8 @@
         "payOnline": "Card Online",
         "payOnDelivery": "Cash on Delivery",
         "submitButton": "Place Order",
-        "processing": "Processing..."
+        "processing": "Processing...",
+        "syncing": "Checking availability..."
       },
       "Summary": {
         "title": "Your Order",
@@ -607,7 +609,8 @@
         "shippingNotice": "Shipping calculated by carrier",
         "total": "Total",
         "size": "Size",
-        "qty": "Qty"
+        "qty": "Qty",
+        "unavailableWarning": "This item is currently unavailable."
       },
       "Metadata": {
         "title": "Checkout",

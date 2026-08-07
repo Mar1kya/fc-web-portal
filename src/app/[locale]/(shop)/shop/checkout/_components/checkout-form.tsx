@@ -10,7 +10,7 @@ import { useActionState, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { processCheckout } from "@/actions/checkout"
 import { useCartStore } from "@/store/useCartStore"
-import { useStore } from "@/hooks/useStore"
+import { useLiveCart } from "@/hooks/useLiveCart"
 import { Store, Box, Truck, CreditCard, Banknote } from "lucide-react"
 import CheckoutSummary from "./checkout-summary"
 
@@ -38,11 +38,17 @@ const StepTitle = ({ number, title }: { number: number; title: string }) => (
 
 export default function CheckoutForm({ initialData, className, ...props }: CheckoutFormProps) {
     const t = useTranslations("Shop.CheckoutPage");
-    const cartItems = useStore(useCartStore, (state) => state.items) || [];
-    const totalPrice = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    const {
+        items: liveItems,
+        totalPrice,
+        isLoading: isCartSyncing,
+        hasUnavailable,
+    } = useLiveCart();
+
     const [deliveryMethod, setDeliveryMethod] = useState<"branch" | "postomat" | "courier">("branch");
     const [paymentMethod, setPaymentMethod] = useState<"card" | "cod">("card");
-    const processCheckoutWithData = processCheckout.bind(null, cartItems, deliveryMethod, paymentMethod);
+    const rawCartItems = useCartStore((s) => s.items);
+    const processCheckoutWithData = processCheckout.bind(null, rawCartItems, deliveryMethod, paymentMethod);
     const [state, actionFn, isPending] = useActionState(processCheckoutWithData, undefined);
 
     useEffect(() => {
@@ -71,6 +77,11 @@ export default function CheckoutForm({ initialData, className, ...props }: Check
 
     return (
         <div className={cn("w-full", className)} {...props}>
+            {hasUnavailable && (
+                <div className="mb-6 flex items-center gap-3 p-4 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400 text-sm">
+                    {t("Summary.unavailableWarning")}
+                </div>
+            )}
             <form action={actionFn} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-8 space-y-6">
                     <Card className="border-border/50 shadow-sm overflow-hidden">
@@ -193,7 +204,13 @@ export default function CheckoutForm({ initialData, className, ...props }: Check
                         </CardContent>
                     </Card>
                 </div>
-                <CheckoutSummary cartItems={cartItems} totalPrice={totalPrice} isPending={isPending} />
+                <CheckoutSummary
+                    cartItems={liveItems}
+                    totalPrice={totalPrice}
+                    isPending={isPending}
+                    isSyncing={isCartSyncing}
+                    hasUnavailable={hasUnavailable}
+                />
             </form>
         </div>
     )

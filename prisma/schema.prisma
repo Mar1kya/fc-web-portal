@@ -582,3 +582,12 @@ model Season {
 
   @@index([deletedAt])
 }
+
+model RateLimit {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  count       Int      @default(0)
+  windowStart DateTime @default(now())
+
+  @@index([key])
+}

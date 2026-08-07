@@ -6,7 +6,7 @@ export interface CartItem {
   cartItemId: string;
   slug: string;
   productId: string;
-  variantId: string | null;
+  variantId: string;
   translations: { language: string; name: string }[];
   price: number;
   image: string;
@@ -30,14 +30,28 @@ interface CartState {
   toggleCart: (isOpen?: boolean) => void;
 }
 
-const generateCartItemId = (item: Omit<CartItem, "cartItemId" | "quantity">) => {
+const generateCartItemId = (
+  item: Omit<CartItem, "cartItemId" | "quantity">,
+) => {
   const baseId = item.variantId || item.productId;
   let customPart = "";
   if (item.customName) customPart += `-${item.customName}`;
   if (item.customNumber) customPart += `-${item.customNumber}`;
-  
+
   return `${baseId}${customPart}`;
 };
+
+const getStockTakenByOthers = (
+  items: CartItem[],
+  target: { productId: string; variantId: string | null; cartItemId: string },
+) =>
+  items
+    .filter((i) => {
+      if (i.cartItemId === target.cartItemId) return false;
+      if (target.variantId) return i.variantId === target.variantId;
+      return i.variantId === null && i.productId === target.productId;
+    })
+    .reduce((sum, i) => sum + i.quantity, 0);
 
 export const useCartStore = create<CartState>()(
   persist(
@@ -48,31 +62,44 @@ export const useCartStore = create<CartState>()(
       addItem: (item, quantity = 1) => {
         set((state) => {
           const cartItemId = generateCartItemId(item);
-          const existingItem = state.items.find((i) => i.cartItemId === cartItemId);
+          const existingItem = state.items.find(
+            (i) => i.cartItemId === cartItemId,
+          );
 
-          const stockTakenByOthers = state.items
-            .filter((i) => i.variantId === item.variantId && i.cartItemId !== cartItemId)
-            .reduce((sum, i) => sum + i.quantity, 0);
+          const stockTakenByOthers = getStockTakenByOthers(state.items, {
+            productId: item.productId,
+            variantId: item.variantId,
+            cartItemId,
+          });
 
-          const availablePhysicalStock = Math.max(0, item.stock - stockTakenByOthers);
+          const availablePhysicalStock = Math.max(
+            0,
+            item.stock - stockTakenByOthers,
+          );
 
           if (existingItem) {
             const newQuantity = Math.min(
               existingItem.quantity + quantity,
               availablePhysicalStock,
-              MAX_QTY_PER_ITEM
+              MAX_QTY_PER_ITEM,
             );
             return {
               items: state.items.map((i) =>
-                i.cartItemId === cartItemId ? { ...i, quantity: newQuantity } : i
+                i.cartItemId === cartItemId
+                  ? { ...i, quantity: newQuantity }
+                  : i,
               ),
               isOpen: true,
             };
           }
 
-          const quantityToAdd = Math.min(quantity, availablePhysicalStock, MAX_QTY_PER_ITEM);
-          
-          if (quantityToAdd <= 0) return { items: state.items, isOpen: true }; 
+          const quantityToAdd = Math.min(
+            quantity,
+            availablePhysicalStock,
+            MAX_QTY_PER_ITEM,
+          );
+
+          if (quantityToAdd <= 0) return { items: state.items, isOpen: true };
 
           return {
             items: [
@@ -92,30 +119,39 @@ export const useCartStore = create<CartState>()(
 
       updateQuantity: (cartItemId, quantity) => {
         set((state) => {
-          const itemToUpdate = state.items.find(i => i.cartItemId === cartItemId);
+          const itemToUpdate = state.items.find(
+            (i) => i.cartItemId === cartItemId,
+          );
           if (!itemToUpdate) return state;
 
-          const stockTakenByOthers = state.items
-            .filter(i => i.variantId === itemToUpdate.variantId && i.cartItemId !== cartItemId)
-            .reduce((sum, i) => sum + i.quantity, 0);
+          const stockTakenByOthers = getStockTakenByOthers(state.items, {
+            productId: itemToUpdate.productId,
+            variantId: itemToUpdate.variantId,
+            cartItemId,
+          });
 
-          const availablePhysicalStock = Math.max(0, itemToUpdate.stock - stockTakenByOthers);
+          const availablePhysicalStock = Math.max(
+            0,
+            itemToUpdate.stock - stockTakenByOthers,
+          );
 
           const validQuantity = Math.max(
             1,
-            Math.min(quantity, availablePhysicalStock, MAX_QTY_PER_ITEM)
+            Math.min(quantity, availablePhysicalStock, MAX_QTY_PER_ITEM),
           );
 
           return {
             items: state.items.map((i) =>
-              i.cartItemId === cartItemId ? { ...i, quantity: validQuantity } : i
+              i.cartItemId === cartItemId
+                ? { ...i, quantity: validQuantity }
+                : i,
             ),
           };
         });
       },
 
       clearCart: () => set({ items: [] }),
-      
+
       toggleCart: (isOpen) =>
         set((state) => ({
           isOpen: isOpen !== undefined ? isOpen : !state.isOpen,
@@ -125,16 +161,26 @@ export const useCartStore = create<CartState>()(
       name: "emerald-gang-cart",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ items: state.items }),
-    }
-  )
+      version: 1,
+      migrate: (persisted) => persisted as CartState,
+    },
+  ),
 );
+
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key === "emerald-gang-cart") {
+      useCartStore.persist.rehydrate();
+    }
+  });
+}
 
 export const useCartTotalItems = () =>
   useCartStore((state) =>
-    state.items.reduce((total, item) => total + item.quantity, 0)
+    state.items.reduce((total, item) => total + item.quantity, 0),
   );
 
-export const useCartTotalPrice = () =>
+export const useCartTotalPriceStale = () =>
   useCartStore((state) =>
-    state.items.reduce((total, item) => total + item.price * item.quantity, 0)
+    state.items.reduce((total, item) => total + item.price * item.quantity, 0),
   );

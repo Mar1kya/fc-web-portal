@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
 import { LOCALES } from "@/lib/constants";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "../../../../../generated/prisma";
 
 function revalidateOrderPaths(orderId: string) {
   LOCALES.forEach((locale) => {
@@ -41,12 +42,35 @@ export async function POST(req: Request) {
 
     if (orderId) {
       try {
-        await prisma.order.update({
-          where: { id: orderId },
-          data: {
-            isPaid: true,
+        await prisma.$transaction(
+          async (tx) => {
+            const order = await tx.order.findUnique({
+              where: { id: orderId },
+              include: { orderItems: true },
+            });
+            if (!order) return;
+
+            if (order.status === "CANCELLED") {
+              for (const item of order.orderItems) {
+                if (item.variantId) {
+                  await tx.productVariant.update({
+                    where: { id: item.variantId },
+                    data: { stock: { decrement: item.quantity } },
+                  });
+                }
+              }
+            }
+
+            await tx.order.update({
+              where: { id: orderId },
+              data: {
+                isPaid: true,
+                status: order.status === "CANCELLED" ? "PAID" : order.status,
+              },
+            });
           },
-        });
+          { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+        );
         revalidateOrderPaths(orderId);
       } catch {
         return new NextResponse("Database Error", { status: 500 });
@@ -58,34 +82,33 @@ export async function POST(req: Request) {
 
     if (orderId) {
       try {
-        await prisma.$transaction(async (tx) => {
-          const order = await tx.order.findUnique({
-            where: { id: orderId },
-            include: { orderItems: true },
-          });
+        await prisma.$transaction(
+          async (tx) => {
+            const order = await tx.order.findUnique({
+              where: { id: orderId },
+              include: { orderItems: true },
+            });
 
-          if (!order || order.status === "CANCELLED" || order.isPaid) {
-            return;
-          }
-
-          await tx.order.update({
-            where: { id: orderId },
-            data: { status: "CANCELLED" },
-          });
-
-          for (const item of order.orderItems) {
-            if (item.variantId) {
-              await tx.productVariant.update({
-                where: { id: item.variantId },
-                data: {
-                  stock: {
-                    increment: item.quantity,
-                  },
-                },
-              });
+            if (!order || order.status === "CANCELLED" || order.isPaid) {
+              return;
             }
-          }
-        });
+
+            await tx.order.update({
+              where: { id: orderId },
+              data: { status: "CANCELLED" },
+            });
+
+            for (const item of order.orderItems) {
+              if (item.variantId) {
+                await tx.productVariant.update({
+                  where: { id: item.variantId },
+                  data: { stock: { increment: item.quantity } },
+                });
+              }
+            }
+          },
+          { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+        );
       } catch {
         return new NextResponse("Database Error", { status: 500 });
       }

@@ -9,6 +9,7 @@ import { createCheckoutSchema } from "@/lib/schemas";
 import { CartItem } from "@/store/useCartStore";
 import { stripe } from "@/lib/stripe";
 import { getTranslation } from "@/lib/utils/get-translation";
+import { Prisma } from "../../generated/prisma";
 
 export async function getCheckoutInitialData() {
   const session = await auth();
@@ -66,6 +67,17 @@ export type CheckoutState = {
     variantId: string;
     availableStock: number;
   };
+};
+
+type ResolvedLine = {
+  productId: string;
+  variantId: string;
+  size: string | null;
+  quantity: number;
+  fixedPrice: Prisma.Decimal;
+  customName: string | null;
+  customNumber: string | null;
+  translations: { language: string; name: string }[];
 };
 
 export async function processCheckout(
@@ -127,86 +139,130 @@ export async function processCheckout(
       return { message: tErrors("emptyCart") };
     }
 
-    const totalPrice = cartItems.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0,
+    const order = await prisma.$transaction(
+      async (tx) => {
+        const resolvedLines: ResolvedLine[] = [];
+        let totalPrice = new Prisma.Decimal(0);
+
+        for (const item of cartItems) {
+          if (!item.variantId) {
+            throw new Error(`MissingVariantId:${item.productId}`);
+          }
+
+          if (!item.quantity || item.quantity < 1) {
+            throw new Error(`InvalidQuantity:${item.productId}`);
+          }
+
+          const variant = await tx.productVariant.findUnique({
+            where: { id: item.variantId },
+            include: {
+              product: {
+                include: { translations: true },
+              },
+            },
+          });
+
+          if (!variant || variant.productId !== item.productId) {
+            throw new Error(`VariantNotFound:${item.variantId}`);
+          }
+
+          if (variant.product.deletedAt || variant.product.isArchived) {
+            throw new Error(`ProductUnavailable:${item.productId}`);
+          }
+
+          if (variant.stock < item.quantity) {
+            throw new Error(`OutOfStock:${item.variantId}:${variant.stock}`);
+          }
+
+          await tx.productVariant.update({
+            where: { id: variant.id },
+            data: { stock: { decrement: item.quantity } },
+          });
+
+          const effectivePrice =
+            variant.product.isOnSale && variant.product.salePrice != null
+              ? variant.product.salePrice
+              : variant.product.price;
+
+          totalPrice = totalPrice.add(effectivePrice.mul(item.quantity));
+
+          resolvedLines.push({
+            productId: item.productId,
+            variantId: variant.id,
+            size: variant.size,
+            quantity: item.quantity,
+            fixedPrice: effectivePrice,
+            customName: item.customName || null,
+            customNumber: item.customNumber || null,
+            translations: variant.product.translations.map((t) => ({
+              language: t.language,
+              name: t.name,
+            })),
+          });
+        }
+
+        const createdOrder = await tx.order.create({
+          data: {
+            userId: session?.user?.id || null,
+            status: "PENDING",
+            isPaid: false,
+            paymentMethod: paymentMethod === "card" ? "CARD" : "COD",
+            totalPrice,
+            firstName,
+            lastName,
+            email,
+            phone,
+            city,
+            postalCode: postalCode || "",
+            address: finalAddress,
+            orderItems: {
+              create: resolvedLines.map((line) => ({
+                productId: line.productId,
+                variantId: line.variantId,
+                size: line.size,
+                quantity: line.quantity,
+                fixedPrice: line.fixedPrice,
+                customName: line.customName,
+                customNumber: line.customNumber,
+              })),
+            },
+          },
+        });
+
+        return { order: createdOrder, resolvedLines };
+      },
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        maxWait: 5000,
+        timeout: 10000,
+      },
     );
 
-    const order = await prisma.$transaction(async (tx) => {
-      for (const item of cartItems) {
-        if (!item.variantId) {
-          throw new Error(`MissingVariantId:${item.productId}`);
-        }
-
-        const variant = await tx.productVariant.findUnique({
-          where: { id: item.variantId },
-        });
-
-        if (!variant) {
-          throw new Error(`VariantNotFound:${item.variantId}`);
-        }
-
-        if (variant.stock < item.quantity) {
-          throw new Error(`OutOfStock:${item.variantId}:${variant.stock}`);
-        }
-
-        await tx.productVariant.update({
-          where: { id: variant.id },
-          data: {
-            stock: variant.stock - item.quantity,
-          },
-        });
-      }
-
-      return await tx.order.create({
-        data: {
-          userId: session?.user?.id || null,
-          status: "PENDING",
-          isPaid: false,
-          paymentMethod: paymentMethod === "card" ? "CARD" : "COD",
-          totalPrice,
-          firstName,
-          lastName,
-          email,
-          phone,
-          city,
-          postalCode: postalCode || "",
-          address: finalAddress,
-          orderItems: {
-            create: cartItems.map((item) => ({
-              productId: item.productId,
-              variantId: item.variantId,
-              size: item.size,
-              quantity: item.quantity,
-              fixedPrice: item.price,
-              customName: item.customName || null,
-              customNumber: item.customNumber || null,
-            })),
-          },
-        },
-      });
-    });
-
-    console.log("Order created successfully:", order.id);
+    console.log("Order created successfully:", order.order.id);
 
     const appUrl = process.env.AUTH_URL || "http://localhost:3000";
 
     if (paymentMethod === "cod") {
-      redirect({ href: `/shop/order/${order.id}`, locale: locale });
+      redirect({ href: `/shop/order/${order.order.id}`, locale: locale });
     } else {
-      const line_items = cartItems.map((item) => {
+      const line_items = order.resolvedLines.map((line) => {
         const translatedData = getTranslation(
-          { translations: item.translations },
+          { translations: line.translations },
           locale,
         );
-        const itemName = translatedData?.name || "Emerald Gang Produc";
+        const itemName = translatedData?.name || "Emerald Gang Product";
 
         const descriptionParts = [];
-        if (item.size) descriptionParts.push(`${tSummary("size")}: ${item.size}`);
-        if (item.customName) descriptionParts.push(`Name: ${item.customName}`);
-        if (item.customNumber) descriptionParts.push(`Number: ${item.customNumber}`);
-        
-        const description = descriptionParts.length > 0 ? descriptionParts.join(" • ") : undefined;
+        if (line.size)
+          descriptionParts.push(`${tSummary("size")}: ${line.size}`);
+        if (line.customName) descriptionParts.push(`Name: ${line.customName}`);
+        if (line.customNumber)
+          descriptionParts.push(`Number: ${line.customNumber}`);
+
+        const description =
+          descriptionParts.length > 0
+            ? descriptionParts.join(" • ")
+            : undefined;
 
         return {
           price_data: {
@@ -215,9 +271,9 @@ export async function processCheckout(
               name: itemName,
               description: description,
             },
-            unit_amount: Math.round(item.price * 100),
+            unit_amount: Math.round(Number(line.fixedPrice) * 100),
           },
-          quantity: item.quantity,
+          quantity: line.quantity,
         };
       });
 
@@ -226,10 +282,11 @@ export async function processCheckout(
         mode: "payment",
         billing_address_collection: "auto",
         line_items,
-        success_url: `${appUrl}/${locale}/shop/order/${order.id}`,
-        cancel_url: `${appUrl}/${locale}/shop/order/${order.id}`,
+        expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+        success_url: `${appUrl}/${locale}/shop/order/${order.order.id}`,
+        cancel_url: `${appUrl}/${locale}/shop/order/${order.order.id}`,
         metadata: {
-          orderId: order.id,
+          orderId: order.order.id,
         },
       });
 
@@ -240,26 +297,46 @@ export async function processCheckout(
       nativeRedirect(stripeSession.url);
     }
   } catch (error: unknown) {
-    const isRedirectError = 
-      error instanceof Error && 
-      (error.message === "NEXT_REDIRECT" || 
-      ("digest" in error && typeof error.digest === "string" && error.digest.startsWith("NEXT_REDIRECT")));
+    const isRedirectError =
+      error instanceof Error &&
+      (error.message === "NEXT_REDIRECT" ||
+        ("digest" in error &&
+          typeof error.digest === "string" &&
+          error.digest.startsWith("NEXT_REDIRECT")));
 
     if (isRedirectError) {
       throw error;
     }
-    
+
     if (error instanceof Error && error.message.startsWith("OutOfStock")) {
       const [, variantId, stockStr] = error.message.split(":");
       const availableStock = parseInt(stockStr, 10);
 
-      return { 
+      return {
         message: tErrors("outOfStock"),
         outOfStockItem: {
-            variantId,
-            availableStock
-        }
+          variantId,
+          availableStock,
+        },
       };
+    }
+
+    if (
+      error instanceof Error &&
+      error.message.startsWith("ProductUnavailable")
+    ) {
+      return { message: tErrors("productUnavailable") };
+    }
+
+    if (error instanceof Error && error.message.startsWith("VariantNotFound")) {
+      return { message: tErrors("productUnavailable") };
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2034"
+    ) {
+      return { message: tErrors("stockConflict") };
     }
 
     console.error("Checkout error:", error);
