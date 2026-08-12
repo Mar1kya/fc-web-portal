@@ -58,6 +58,9 @@ export default async function PlayerPage({ params }: { params: Promise<{ slug: s
                     media: {
                         orderBy: { createdAt: "asc" },
                         take: 1
+                    },
+                    color: {
+                        include: { translations: true }
                     }
                 }
             }
@@ -85,6 +88,7 @@ export default async function PlayerPage({ params }: { params: Promise<{ slug: s
             sku: product.variants[0]?.sku || undefined,
             matchType: product.matchType,
             image: product.media[0]?.url || null,
+            color: product.color,
             variants: product.variants.map(v => ({
                 id: v.id,
                 size: v.size,

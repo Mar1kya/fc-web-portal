@@ -20,11 +20,14 @@ import { UploadDropzone } from "@/lib/uploadthing"
 import Image from "next/image";
 import { STANDARD_SIZES } from "@/lib/constants"
 
-type SelectOption = { id: string; name: string; number?: number | null }
+type SelectOption = { id: string; name: string; number?: number | null };
+
+type ColorOption = { id: string; name: string; hex: string }
 
 type CreateProductFormProps = {
     categories: SelectOption[];
     players: SelectOption[];
+    colors: ColorOption[];
 }
 
 type VariantItem = {
@@ -34,7 +37,7 @@ type VariantItem = {
     sku: string;
 }
 
-export function CreateProductForm({ categories, players }: CreateProductFormProps) {
+export function CreateProductForm({ categories, players, colors }: CreateProductFormProps) {
     const router = useRouter();
     const [nameUk, setNameUk] = useState("");
     const [nameEn, setNameEn] = useState("");
@@ -47,7 +50,7 @@ export function CreateProductForm({ categories, players }: CreateProductFormProp
     const [isOnSale, setIsOnSale] = useState(false);
     const [isFeatured, setIsFeatured] = useState(false);
     const [isArchived, setIsArchived] = useState(false);
-    const [color, setColor] = useState("");
+    const [color, setColor] = useState("none");
     const [apparelType, setApparelType] = useState("");
     const [seasonYear, setSeasonYear] = useState("");
     const [matchType, setMatchType] = useState("");
@@ -97,7 +100,7 @@ export function CreateProductForm({ categories, players }: CreateProductFormProp
         isOnSale,
         isFeatured,
         isArchived,
-        color: color || null,
+        color: color === "none" ? null : color,
         apparelType: apparelType || null,
         seasonYear: seasonYear || null,
         matchType: matchType || null,
@@ -272,10 +275,18 @@ export function CreateProductForm({ categories, players }: CreateProductFormProp
                                 <Select value={color} onValueChange={setColor} disabled={isPending}>
                                     <SelectTrigger><SelectValue placeholder="Оберіть колір" /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="BLACK">Чорний</SelectItem>
-                                        <SelectItem value="WHITE">Білий</SelectItem>
-                                        <SelectItem value="GREEN">Зелений</SelectItem>
-                                        <SelectItem value="YELLOW">Жовтий</SelectItem>
+                                        <SelectItem value="none">Без кольору</SelectItem>
+                                        {colors.map((c) => (
+                                            <SelectItem key={c.id} value={c.id}>
+                                                <span className="flex items-center gap-2">
+                                                    <span
+                                                        className="h-3 w-3 rounded-full border border-border shrink-0"
+                                                        style={{ backgroundColor: c.hex }}
+                                                    />
+                                                    {c.name}
+                                                </span>
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>

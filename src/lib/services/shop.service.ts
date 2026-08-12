@@ -23,7 +23,9 @@ export async function getCategoryProducts({
       ? (searchParams.demographic.split(",") as Demographic[])
       : [];
   const activeColors =
-    typeof searchParams.color === "string" ? searchParams.color.split(",") : [];
+    typeof searchParams.color === "string"
+      ? searchParams.color.split(",").map((c) => c.toLowerCase())
+      : [];
   const activeApparelTypes =
     typeof searchParams.apparelType === "string"
       ? searchParams.apparelType.split(",")
@@ -43,7 +45,7 @@ export async function getCategoryProducts({
       activeDemographics.length > 0
         ? { demographic: { in: activeDemographics } }
         : {},
-      activeColors.length > 0 ? { color: { in: activeColors } } : {},
+      activeColors.length > 0 ? { color: { slug: { in: activeColors } } } : {},
       activeApparelTypes.length > 0
         ? { apparelType: { in: activeApparelTypes } }
         : {},

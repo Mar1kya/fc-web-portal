@@ -48,6 +48,7 @@
     "email": "Email",
     "password": "Password",
     "login-button": "Login",
+    "login-loading": "Login...",
     "not-account": "Don't have an account?",
     "sign-up": "Sign up",
     "Metadata": {
@@ -64,6 +65,7 @@
     "email": "Email",
     "password": "Password",
     "register-button": "Create Account",
+    "register-loading": "Creating...",
     "has-account": "Already have an account?",
     "sign-in": "Sign in",
     "Metadata": {

@@ -22,6 +22,8 @@ import { Demographic } from "../../../../../../../../../../generated/prisma"
 
 type SelectOption = { id: string; name: string; number?: number | null }
 
+type ColorOption = { id: string; name: string; hex: string }
+
 type ProductWithDetails = {
     id: string
     slug: string
@@ -46,6 +48,7 @@ type EditProductFormProps = {
     initialData: ProductWithDetails
     categories: SelectOption[]
     players: SelectOption[]
+    colors: ColorOption[]
 }
 
 type VariantItem = {
@@ -55,7 +58,7 @@ type VariantItem = {
     sku: string
 }
 
-export function EditProductForm({ initialData, categories, players }: EditProductFormProps) {
+export function EditProductForm({ initialData, categories, players, colors }: EditProductFormProps) {
     const router = useRouter()
     const ukTranslation = initialData.translations.find((t) => t.language === "uk")
     const enTranslation = initialData.translations.find((t) => t.language === "en")
@@ -72,7 +75,7 @@ export function EditProductForm({ initialData, categories, players }: EditProduc
     const [isOnSale, setIsOnSale] = useState(initialData.isOnSale)
     const [isFeatured, setIsFeatured] = useState(initialData.isFeatured)
     const [isArchived, setIsArchived] = useState(initialData.isArchived)
-    const [color, setColor] = useState(initialData.color ?? "")
+    const [color, setColor] = useState(initialData.color ?? "none");
     const [apparelType, setApparelType] = useState(initialData.apparelType ?? "")
     const [seasonYear, setSeasonYear] = useState(initialData.seasonYear ?? "")
     const [matchType, setMatchType] = useState(initialData.matchType ?? "")
@@ -130,7 +133,7 @@ export function EditProductForm({ initialData, categories, players }: EditProduc
         isOnSale,
         isFeatured,
         isArchived,
-        color: color || null,
+        color: color === "none" ? null : color,
         apparelType: apparelType || null,
         seasonYear: seasonYear || null,
         matchType: matchType || null,
@@ -378,14 +381,19 @@ export function EditProductForm({ initialData, categories, players }: EditProduc
                             <div className="space-y-2">
                                 <Label>Колір</Label>
                                 <Select value={color} onValueChange={setColor} disabled={isPending}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Оберіть колір" />
-                                    </SelectTrigger>
+                                    <SelectTrigger><SelectValue placeholder="Оберіть колір" /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="BLACK">Чорний</SelectItem>
-                                        <SelectItem value="WHITE">Білий</SelectItem>
-                                        <SelectItem value="GREEN">Зелений</SelectItem>
-                                        <SelectItem value="YELLOW">Жовтий</SelectItem>
+                                        {colors.map((c) => (
+                                            <SelectItem key={c.id} value={c.id}>
+                                                <span className="flex items-center gap-2">
+                                                    <span
+                                                        className="h-3 w-3 rounded-full border border-border shrink-0"
+                                                        style={{ backgroundColor: c.hex }}
+                                                    />
+                                                    {c.name}
+                                                </span>
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>

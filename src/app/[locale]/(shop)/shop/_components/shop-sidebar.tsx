@@ -18,9 +18,10 @@ import { formatPrice, getCurrencySymbol } from "@/lib/utils";
 type ShopSidebarProps = {
     availableFilters: { demographics: string[], colors: string[], apparelTypes: string[], sizes: string[], absoluteMinPrice: number, absoluteMaxPrice: number };
     dynamicFilters: { demographics: string[], colors: string[], apparelTypes: string[], sizes: string[] };
+    colorSwatches?: Record<string, { hex: string; name: string }>;
 }
 
-export default function ShopSidebar({ availableFilters, dynamicFilters }: ShopSidebarProps) {
+export default function ShopSidebar({ availableFilters, dynamicFilters, colorSwatches = {} }: ShopSidebarProps) {
     const t = useTranslations("Shop.Filters");
     const router = useRouter();
     const pathname = usePathname();
@@ -206,7 +207,16 @@ export default function ShopSidebar({ availableFilters, dynamicFilters }: ShopSi
                             {t("colorTitle")}
                         </AccordionTrigger>
                         <AccordionContent className="pt-1 pb-4">
-                            <FilterSection title="" items={availableFilters.colors} dynamicItems={dynamicFilters.colors} filterKey="color" isActive={isActive} toggleFilter={toggleFilter} t={t} />
+                            <FilterSection
+                                title=""
+                                items={availableFilters.colors}
+                                dynamicItems={dynamicFilters.colors}
+                                filterKey="color"
+                                isActive={isActive}
+                                toggleFilter={toggleFilter}
+                                t={t}
+                                colorSwatches={colorSwatches}
+                            />
                         </AccordionContent>
                     </AccordionItem>
                 )}

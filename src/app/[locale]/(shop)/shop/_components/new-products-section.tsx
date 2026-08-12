@@ -20,7 +20,16 @@ export default async function NewProductsSection() {
         },
         orderBy: { createdAt: 'desc' },
         take: 12,
-        include: { translations: true, media: true, variants: true }
+        include: {
+            translations: true,
+            media: true,
+            variants: true,
+            color: {
+                include: {
+                    translations: true
+                }
+            }
+        }
     });
 
     if (newProducts.length === 0) return null;

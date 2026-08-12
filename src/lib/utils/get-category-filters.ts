@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma, Demographic } from "../../../generated/prisma";
+import { STANDARD_SIZES } from "../constants";
 
 type GetCategoryFiltersParams = {
   categoryId?: string;
@@ -12,24 +13,10 @@ type FilterableProduct = {
   salePrice: Prisma.Decimal | number | string | null;
   isOnSale: boolean;
   demographic: Demographic;
-  color: string | null;
+  color: { slug: string } | null;
   apparelType: string | null;
   variants: { size: string; stock: number }[];
 };
-
-const STANDARD_SIZES = [
-  "XXS",
-  "XS",
-  "S",
-  "M",
-  "L",
-  "XL",
-  "XXL",
-  "3XL",
-  "4XL",
-  "ONE SIZE",
-];
-
 const sortSizes = (sizes: string[]) => {
   return sizes.sort((a, b) => {
     const indexA = STANDARD_SIZES.indexOf(a.toUpperCase());
@@ -57,7 +44,9 @@ export async function getCategoryFilters({
       ? (searchParams.demographic.split(",") as Demographic[])
       : [];
   const activeColors =
-    typeof searchParams.color === "string" ? searchParams.color.split(",") : [];
+    typeof searchParams.color === "string"
+      ? searchParams.color.split(",").map((c) => c.toLowerCase())
+      : [];
   const activeApparelTypes =
     typeof searchParams.apparelType === "string"
       ? searchParams.apparelType.split(",")
@@ -79,7 +68,7 @@ export async function getCategoryFilters({
       salePrice: true,
       isOnSale: true,
       demographic: true,
-      color: true,
+      color: { select: { slug: true } },
       apparelType: true,
       variants: { select: { size: true, stock: true } },
     },
@@ -108,7 +97,7 @@ export async function getCategoryFilters({
       new Set(inStockProducts.map((p) => p.demographic).filter(Boolean)),
     ) as string[],
     colors: Array.from(
-      new Set(inStockProducts.map((p) => p.color).filter(Boolean)),
+      new Set(inStockProducts.map((p) => p.color?.slug).filter(Boolean)),
     ) as string[],
     apparelTypes: Array.from(
       new Set(inStockProducts.map((p) => p.apparelType).filter(Boolean)),
@@ -140,7 +129,7 @@ export async function getCategoryFilters({
     if (
       skipCategory !== "color" &&
       activeColors.length > 0 &&
-      (!product.color || !activeColors.includes(product.color))
+      (!product.color || !activeColors.includes(product.color.slug.toLowerCase()))
     )
       return false;
 
@@ -185,7 +174,7 @@ export async function getCategoryFilters({
       new Set(
         inStockProducts
           .filter((p) => passesFilters(p, "color"))
-          .map((p) => p.color)
+          .map((p) => p.color?.slug)
           .filter(Boolean),
       ),
     ) as string[],

@@ -6,12 +6,18 @@ import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 
-export default function ActiveFilters() {
+type ColorSwatch = { hex: string; name: string };
+
+type ActiveFiltersProps = {
+    colorSwatches?: Record<string, ColorSwatch>;
+};
+
+export default function ActiveFilters({ colorSwatches = {} }: ActiveFiltersProps) {
     const t = useTranslations("Shop.Filters");
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const activeFilters: { key: string, value: string, label: string }[] = [];
+    const activeFilters: { key: string, value: string, label: string, hex?: string }[] = [];
 
     const minPrice = searchParams.get("minPrice");
     const maxPrice = searchParams.get("maxPrice");
@@ -27,6 +33,16 @@ export default function ActiveFilters() {
     ["demographic", "apparelType", "color", "size"].forEach((key) => {
         const values = searchParams.get(key)?.split(",") || [];
         values.forEach(val => {
+            if (key === "color") {
+                const swatch = colorSwatches[val.toLowerCase()];
+                activeFilters.push({
+                    key,
+                    value: val,
+                    label: swatch?.name ?? val,
+                    hex: swatch?.hex,
+                });
+                return;
+            }
             activeFilters.push({
                 key,
                 value: val,
@@ -73,6 +89,12 @@ export default function ActiveFilters() {
                     onClick={() => removeFilter(filter.key, filter.value)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-background text-sm font-medium transition-colors hover:bg-muted group"
                 >
+                    {filter.hex && (
+                        <span
+                            className="h-3 w-3 rounded-full border border-border/50 shrink-0"
+                            style={{ backgroundColor: filter.hex }}
+                        />
+                    )}
                     {filter.label}
                     <X className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground" />
                 </button>

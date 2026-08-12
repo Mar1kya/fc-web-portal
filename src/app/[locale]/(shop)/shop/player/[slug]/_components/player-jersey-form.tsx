@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { formatPrice, cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,17 @@ import { MAX_QTY_PER_ITEM } from "@/lib/constants";
 import H1 from "@/components/ui/heading";
 import PlayerJerseyGallery from "./player-jersey-gallery";
 import { ProductData, useProductForm, Variant } from "@/hooks/useProductForm";
+import { getTranslation } from "@/lib/utils/get-translation";
 
 type FormattedProduct = ProductData & {
     matchType: string | null;
     title: string;
     variants: Variant[];
+    color: {
+        slug: string;
+        hexCode: string;
+        translations: { language: string; name: string }[];
+    } | null;
 };
 
 type PlayerJerseyFormProps = {
@@ -25,6 +31,7 @@ type PlayerJerseyFormProps = {
 
 export default function PlayerJerseyForm({ player, products }: PlayerJerseyFormProps) {
     const tLocal = useTranslations("Shop.PlayerJerseyPage");
+    const locale = useLocale(); 
     const [activeProduct, setActiveProduct] = useState<FormattedProduct>(products[0]);
     const { state, actions, t } = useProductForm(
         activeProduct,
@@ -54,6 +61,17 @@ export default function PlayerJerseyForm({ player, products }: PlayerJerseyFormP
                     <H1 className="text-3xl sm:text-4xl font-extrabold tracking-tight uppercase leading-none">
                         {activeProduct.title}
                     </H1>
+                    {activeProduct.color && (
+                        <div className="flex items-center gap-2">
+                            <span
+                                className="h-5 w-5 rounded-full border border-border shrink-0"
+                                style={{ backgroundColor: activeProduct.color.hexCode }}
+                            />
+                            <span className="text-sm font-medium text-muted-foreground">
+                                {getTranslation(activeProduct.color, locale)?.name ?? activeProduct.color.slug}
+                            </span>
+                        </div>
+                    )}
                     <div className="flex items-center gap-3">
                         <Badge variant={state.isGlobalOutOfStock ? "secondary" : "outline"} className={cn(state.isGlobalOutOfStock ? "" : "text-emerald-600 border-emerald-600/30 bg-emerald-600/10")}>
                             {state.isGlobalOutOfStock ? t("outOfStock") : t("inStock")}

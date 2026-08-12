@@ -20,7 +20,16 @@ export default async function HotProductsSection() {
             variants: { some: { stock: { gt: 0 } } }
         },
         take: 12,
-        include: { translations: true, media: true, variants: true }
+        include: {
+            translations: true,
+            media: true,
+            variants: true,
+            color: {
+                include: {
+                    translations: true
+                }
+            }
+        }
     });
 
     if (hotProducts.length === 0) return null;

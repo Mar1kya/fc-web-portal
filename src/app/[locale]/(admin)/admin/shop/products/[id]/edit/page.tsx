@@ -31,7 +31,7 @@ export default async function EditProductPage({
         notFound()
     }
 
-    const [categoriesData, playersData] = await Promise.all([
+    const [categoriesData, playersData, colorsData] = await Promise.all([
         prisma.category.findMany({
             where: { deletedAt: null },
             include: { translations: { where: { language: "uk" } } },
@@ -42,7 +42,12 @@ export default async function EditProductPage({
             include: { translations: { where: { language: "uk" } } },
             orderBy: { number: "asc" },
         }),
-    ])
+        prisma.color.findMany({
+            where: { deletedAt: null },
+            include: { translations: { where: { language: "uk" } } },
+            orderBy: { position: "asc" },
+        }),
+    ]);
 
     const categories = categoriesData.map((c) => ({
         id: c.id,
@@ -54,6 +59,12 @@ export default async function EditProductPage({
         name: p.translations[0]?.name ?? p.slug,
         number: p.number,
     }))
+
+    const colors = colorsData.map((c) => ({
+        id: c.id,
+        name: c.translations[0]?.name ?? c.slug,
+        hex: c.hexCode,
+    }));
 
     return (
         <div className="flex flex-col gap-6">
@@ -76,9 +87,11 @@ export default async function EditProductPage({
                     ...product,
                     price: Number(product.price),
                     salePrice: product.salePrice != null ? Number(product.salePrice) : null,
+                    color: product.colorId, 
                 }}
                 categories={categories}
                 players={players}
+                colors={colors}
             />
         </div>
     )
