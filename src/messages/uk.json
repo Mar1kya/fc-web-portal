@@ -48,6 +48,7 @@
     "email": "Електронна пошта",
     "password": "Пароль",
     "login-button": "Увійти",
+    "login-loading": "Вхід...",
     "not-account": "Немає акаунта?",
     "sign-up": "Зареєструватися",
     "Metadata": {
@@ -64,6 +65,7 @@
     "email": "Електронна пошта",
     "password": "Пароль",
     "register-button": "Створити акаунт",
+    "register-loading": "Створення...",
     "has-account": "Вже є акаунт?",
     "sign-in": "Увійти",
     "Metadata": {

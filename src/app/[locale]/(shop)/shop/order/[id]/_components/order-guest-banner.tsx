@@ -21,12 +21,12 @@ export default async function OrderGuestBanner({ email }: { email: string }) {
             <CardContent className="pt-2 flex flex-wrap gap-3 items-center">
                 <GoogleLoginButton text={t("google-button")} />
                 <div className="hidden sm:block text-muted-foreground/50 text-sm font-medium">|</div>
-                <Link href="/auth/register">
+                <Link href="/register">
                     <Button size="sm" variant="ghost" className="font-bold text-xs h-9 hover:text-emerald-700">
                         {t("register")}
                     </Button>
                 </Link>
-                <Link href="/auth/login">
+                <Link href="/login">
                     <Button size="sm" variant="ghost" className="font-bold text-xs h-9 hover:text-emerald-700">
                         {t("login")}
                     </Button>

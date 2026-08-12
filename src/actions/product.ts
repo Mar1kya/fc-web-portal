@@ -74,6 +74,18 @@ export async function hardDeleteProduct(id: string) {
   }
 
   try {
+    const orderItemsCount = await prisma.orderItem.count({
+      where: { productId: id },
+    });
+
+    if (orderItemsCount > 0) {
+      return {
+        success: false,
+        message:
+          "Не вдалося видалити товар. Він прив'язаний до існуючих замовлень.",
+      };
+    }
+
     await prisma.product.delete({ where: { id } });
 
     revalidateProductPaths();
@@ -85,8 +97,7 @@ export async function hardDeleteProduct(id: string) {
     console.error("Hard delete product error:", error);
     return {
       success: false,
-      message:
-        "Не вдалося видалити товар. Можливо, він прив'язаний до існуючих замовлень.",
+      message: "Не вдалося видалити товар. Можливо, він прив'язаний до існуючих замовлень.",
     };
   }
 }
@@ -134,14 +145,12 @@ export async function createProduct(
         isFeatured: data.isFeatured,
         isArchived: data.isArchived,
         demographic: data.demographic,
-        color: data.color || null,
+        colorId: data.color || null,
+        categoryId: data.categoryId,
         apparelType: data.apparelType || null,
         seasonYear: data.seasonYear || null,
         matchType: data.matchType || null,
 
-        category: {
-          connect: { id: data.categoryId },
-        },
         translations: {
           create: [
             {
@@ -166,18 +175,11 @@ export async function createProduct(
         },
         media:
           data.mediaUrls && data.mediaUrls.length > 0
-            ? {
-                create: data.mediaUrls.map((url) => ({
-                  url,
-                  type: "IMAGE",
-                })),
-              }
+            ? { create: data.mediaUrls.map((url) => ({ url, type: "IMAGE" })) }
             : undefined,
         relatedPlayers:
           data.relatedPlayerIds && data.relatedPlayerIds.length > 0
-            ? {
-                connect: data.relatedPlayerIds.map((id) => ({ id })),
-              }
+            ? { connect: data.relatedPlayerIds.map((id) => ({ id })) }
             : undefined,
       },
     });
@@ -248,13 +250,11 @@ export async function updateProduct(
           isFeatured: data.isFeatured,
           isArchived: data.isArchived,
           demographic: data.demographic,
-          color: data.color || null,
+          colorId: data.color || null,
+          categoryId: data.categoryId,
           apparelType: data.apparelType || null,
           seasonYear: data.seasonYear || null,
           matchType: data.matchType || null,
-          category: {
-            connect: { id: data.categoryId },
-          },
           relatedPlayers: {
             set: data.relatedPlayerIds?.map((pId) => ({ id: pId })) ?? [],
           },

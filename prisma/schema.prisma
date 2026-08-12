@@ -79,14 +79,14 @@ enum MediaType {
 }
 
 model Media {
-  id           String             @id @default(cuid())
-  url          String
-  type         MediaType          @default(IMAGE)
-  posts        Post[]
-  players      Player[]
-  coaches      Coach[]
-  products     Product[]
-  galleries    Gallery[]
+  id        String    @id @default(cuid())
+  url       String
+  type      MediaType @default(IMAGE)
+  posts     Post[]
+  players   Player[]
+  coaches   Coach[]
+  products  Product[]
+  galleries Gallery[]
 
   createdAt DateTime  @default(now())
   deletedAt DateTime?
@@ -463,7 +463,8 @@ model Product {
   category       Category             @relation(fields: [categoryId], references: [id])
   media          Media[]
   demographic    Demographic          @default(UNISEX)
-  color          String?
+  colorId        String?
+  color          Color?               @relation(fields: [colorId], references: [id])
   apparelType    String?
   seasonYear     String?
   matchType      String?
@@ -479,7 +480,7 @@ model Product {
 
   @@index([categoryId, isArchived, deletedAt])
   @@index([demographic])
-  @@index([color])
+  @@index([colorId])
   @@index([apparelType])
   @@index([isOnSale])
   @@index([createdAt])
@@ -511,6 +512,32 @@ model ProductVariant {
   @@unique([productId, size])
   @@index([productId, stock])
   @@index([size, stock])
+}
+
+model Color {
+  id           String             @id @default(cuid())
+  slug         String             @unique
+  hexCode      String
+  translations ColorTranslation[]
+  products     Product[]
+  position     Int                @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+  @@index([position])
+}
+
+model ColorTranslation {
+  id       String @id @default(cuid())
+  colorId  String
+  color    Color  @relation(fields: [colorId], references: [id], onDelete: Cascade)
+  language String @db.VarChar(5)
+  name     String
+
+  @@unique([colorId, language])
 }
 
 enum OrderStatusEnum {

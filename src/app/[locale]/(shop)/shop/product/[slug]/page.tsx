@@ -62,7 +62,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             translations: true,
             media: true,
             category: { include: { translations: true } },
-            variants: { orderBy: { position: 'asc' } }
+            variants: { orderBy: { position: 'asc' } },
+            color: { include: { translations: true } }
         }
     });
 
@@ -105,6 +106,17 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     <H1 className="text-3xl sm:text-4xl font-extrabold tracking-tight uppercase leading-none">
                         {productName}
                     </H1>
+                    {product.color && (
+                        <div className="flex items-center gap-2">
+                            <span
+                                className="h-5 w-5 rounded-full border border-border shrink-0"
+                                style={{ backgroundColor: product.color.hexCode }}
+                            />
+                            <span className="text-sm font-medium text-muted-foreground">
+                                {getTranslation(product.color, locale)?.name ?? product.color.slug}
+                            </span>
+                        </div>
+                    )}
                     <ProductForm
                         product={{
                             id: product.id,

@@ -21,6 +21,7 @@ import { useTranslations } from "next-intl"
 import { useActionState, useEffect } from "react"
 import { register, loginWithGoogle } from "@/actions/auth"
 import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
 
 export default function RegisterForm({
     className,
@@ -84,7 +85,18 @@ export default function RegisterForm({
                                 {state?.errors?.password && <p className="text-red-500 text-sm">{state.errors.password[0]}</p>}
                             </Field>
                             <Field>
-                                <Button type="submit" disabled={isPending}>{t("register-button")}</Button>
+                                <Button type="submit" disabled={isPending}>
+                                    {isPending ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            {t("register-loading")}
+                                        </>) : (
+                                        <>
+                                            {t("register-button")}
+                                        </>
+                                    )
+                                    }
+                                </Button>
                                 <FieldDescription className="text-center">
                                     {t("has-account")} <Link href="/login">{t("sign-in")}</Link>
                                 </FieldDescription>

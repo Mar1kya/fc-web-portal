@@ -3,7 +3,12 @@
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type FilterSectionProps ={
+type ColorSwatch = {
+    hex: string;
+    name: string;
+};
+
+type FilterSectionProps = {
     title: string;
     items: string[];
     dynamicItems: string[];
@@ -11,10 +16,11 @@ type FilterSectionProps ={
     isActive: (key: string, value: string) => boolean;
     toggleFilter: (key: string, value: string) => void;
     t: (key: string) => string;
-    translateItems?: boolean; 
+    translateItems?: boolean;
+    colorSwatches?: Record<string, ColorSwatch>;
 }
 
-export default function FilterSection({ title, items, dynamicItems, filterKey, isActive, toggleFilter, t, translateItems = true }: FilterSectionProps) {
+export default function FilterSection({ title, items, dynamicItems, filterKey, isActive, toggleFilter, t, translateItems = true, colorSwatches }: FilterSectionProps) {
     if (!items || items.length === 0) return null;
 
     return (
@@ -24,37 +30,52 @@ export default function FilterSection({ title, items, dynamicItems, filterKey, i
                 {items.map((item) => {
                     const active = isActive(filterKey, item);
                     const isDisabled = !active && !dynamicItems.includes(item);
+                    const swatch = colorSwatches?.[item];
 
                     return (
-                        <label 
-                            key={item} 
+                        <label
+                            key={item}
                             className={cn(
                                 "flex items-center gap-3 group",
                                 isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
                             )}
                         >
-                            <input 
-                                type="checkbox" 
-                                className="peer hidden" 
+                            <input
+                                type="checkbox"
+                                className="peer hidden"
                                 checked={active}
                                 disabled={isDisabled}
                                 onChange={() => toggleFilter(filterKey, item)}
                             />
-                            <div className={cn(
-                                "h-4 w-4 shrink-0 rounded-sm border ring-offset-background flex items-center justify-center transition-colors",
-                                active ? "bg-emerald-600 border-emerald-600 text-white" : "border-input",
-                                !isDisabled && !active && "group-hover:border-emerald-500",
-                                isDisabled && "bg-muted"
-                            )}>
-                                {active && <Check className="h-3 w-3" strokeWidth={3} />}
-                            </div>
-                            
+                            {swatch ? (
+                                <div
+                                    className={cn(
+                                        "flex items-center justify-center rounded-full border-2 transition-all",
+                                        active ? "border-emerald-600" : "border-transparent"
+                                    )}
+                                >
+                                    <span
+                                        className="h-4 w-4 shrink-0 rounded-full border border-border"
+                                        style={{ backgroundColor: swatch.hex }}
+                                    />
+                                </div>
+                            ) : (
+                                <div className={cn(
+                                    "h-4 w-4 shrink-0 rounded-sm border ring-offset-background flex items-center justify-center transition-colors",
+                                    active ? "bg-emerald-600 border-emerald-600 text-white" : "border-input",
+                                    !isDisabled && !active && "group-hover:border-emerald-500",
+                                    isDisabled && "bg-muted"
+                                )}>
+                                    {active && <Check className="h-3 w-3" strokeWidth={3} />}
+                                </div>
+                            )}
+
                             <span className={cn(
                                 "text-sm font-medium leading-none transition-colors",
                                 active ? "text-foreground" : "text-muted-foreground",
                                 !isDisabled && !active && "group-hover:text-foreground"
                             )}>
-                                {translateItems ? t(`${filterKey}.${item}`) : item}
+                                {swatch ? swatch.name : (translateItems ? t(`${filterKey}.${item}`) : item)}
                             </span>
                         </label>
                     );

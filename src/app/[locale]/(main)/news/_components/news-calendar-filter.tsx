@@ -62,7 +62,7 @@ export default function NewsCalendarFilter({ activeDates, minYear }: { activeDat
     const endMonth = new Date(currentYear, 11);
 
     return (
-        <div className="rounded-xl border border-border bg-card/50 backdrop-blur-sm p-3 shadow-sm">
+        <div className="h-fit rounded-xl border border-border bg-card/50 backdrop-blur-sm p-3 shadow-sm [&_table]:block [&_thead]:block [&_tbody]:block [&_select]:appearance-none [&_select]:bg-transparent [&_select]:outline-none [&_select]:cursor-pointer">
             <Calendar
                 mode="single"
                 selected={selectedDate}

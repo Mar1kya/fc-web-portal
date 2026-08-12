@@ -7,6 +7,7 @@ import ShopSidebarSection from "../[slug]/_components/shop-sidebar-section";
 import ShopSidebarSkeleton from "../[slug]/_components/shop-sidebar-skeleton";
 import SaleProductsSection from "./_components/sale-products-section";
 import SaleProductsSkeleton from "./_components/sale-products-skeleton";
+import { getColorDictionary } from "@/lib/utils/get-color-dictionary";
 
 export async function generateMetadata() {
     const t = await getTranslations("Shop.SalePage.Metadata");
@@ -33,6 +34,8 @@ export async function generateMetadata() {
 export default async function SalePage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const resolvedSearchParams = await searchParams;
     const t = await getTranslations("Shop.SalePage");
+    const colorSwatches = await getColorDictionary();
+
 
     return (
         <div className="flex flex-col gap-6">
@@ -43,7 +46,7 @@ export default async function SalePage({ searchParams }: { searchParams: Promise
             <div className="flex flex-col lg:flex-row gap-8 items-start">
                 <div className="w-full lg:w-64 shrink-0">
                     <Suspense fallback={<ShopSidebarSkeleton />}>
-                        <ShopSidebarSection isSale searchParams={resolvedSearchParams} />
+                        <ShopSidebarSection isSale searchParams={resolvedSearchParams} colorSwatches={colorSwatches} />
                     </Suspense>
                 </div>
                 <div className="flex-1 w-full">

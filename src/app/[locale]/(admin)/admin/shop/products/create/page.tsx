@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 }
 
 export default async function CreateProductPage() {
-    const [categoriesData, playersData] = await Promise.all([
+    const [categoriesData, playersData, colorsData] = await Promise.all([
         prisma.category.findMany({
             where: { deletedAt: null },
             include: { translations: { where: { language: 'uk' } } },
@@ -21,6 +21,11 @@ export default async function CreateProductPage() {
             where: { deletedAt: null },
             include: { translations: { where: { language: 'uk' } } },
             orderBy: [{ number: 'asc' }, { slug: 'asc' }]
+        }),
+        prisma.color.findMany({
+            where: { deletedAt: null },
+            include: { translations: { where: { language: "uk" } } },
+            orderBy: { position: "asc" },
         }),
     ]);
 
@@ -39,6 +44,12 @@ export default async function CreateProductPage() {
             number: p.number
         };
     });
+
+    const colors = colorsData.map((c) => ({
+        id: c.id,
+        name: c.translations[0]?.name ?? c.slug,
+        hex: c.hexCode,
+    }));
 
     return (
         <div className="flex flex-col gap-6">
@@ -59,6 +70,7 @@ export default async function CreateProductPage() {
             <CreateProductForm
                 categories={categories}
                 players={players}
+                colors={colors}
             />
         </div>
     )
