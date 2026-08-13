@@ -129,6 +129,7 @@ model Post {
   @@index([isPublished])
   @@index([type])
   @@index([teamContext])
+  @@index([isPublished, deletedAt, publishedAt])
 }
 
 model PostTranslation {
