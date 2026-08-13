@@ -16,6 +16,7 @@ export default async function MatchesListSection({ context, seasonId }: { contex
             deletedAt: null,
         },
         orderBy: { date: "asc" },
+        take: 100,
         include: {
             tournament: { include: { translations: true } },
             opponent: { include: { translations: true } },

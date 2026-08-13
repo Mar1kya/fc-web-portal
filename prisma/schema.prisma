@@ -210,6 +210,7 @@ model Player {
   deletedAt DateTime?
 
   @@index([deletedAt])
+  @@index([teamContext, position, deletedAt])
 }
 
 model PlayerTranslation {
@@ -239,6 +240,7 @@ model Coach {
   deletedAt DateTime?
 
   @@index([deletedAt])
+  @@index([teamContext, deletedAt])
 }
 
 model CoachTranslation {
@@ -383,6 +385,7 @@ model Match {
   @@index([deletedAt])
   @@index([seasonId])
   @@index([teamContext])
+  @@index([seasonId, teamContext, deletedAt])
 }
 
 model MatchLineup {
@@ -486,6 +489,7 @@ model Product {
   @@index([isOnSale])
   @@index([createdAt])
   @@index([deletedAt])
+  @@index([categoryId, isArchived, deletedAt, isOnSale, createdAt])
 }
 
 model ProductTranslation {
