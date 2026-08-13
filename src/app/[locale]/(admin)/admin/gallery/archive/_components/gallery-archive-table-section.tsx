@@ -8,12 +8,14 @@ export default async function GalleryArchiveTableSection() {
             deletedAt: { not: null },
         },
         include: {
-            translations: true,
+            translations: { where: { language: "uk" } },
             media: true,
             match: {
                 include: {
                     opponent: {
-                        include: { translations: true },
+                        include: {
+                            translations: { where: { language: "uk" } },
+                        },
                     },
                 },
             },
@@ -21,6 +23,7 @@ export default async function GalleryArchiveTableSection() {
         orderBy: {
             deletedAt: "desc",
         },
+        take: 200,
     });
 
     return (

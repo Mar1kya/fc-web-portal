@@ -8,16 +8,17 @@ export default async function ProductsArchiveTableSection() {
             deletedAt: { not: null }
         },
         include: {
-            translations: true,
+            translations: { where: { language: "uk" } },
             category: {
-                include: { translations: true }
+                include: { translations: { where: { language: "uk" } } }
             },
-            media: true,
+            media: { take: 1 },
             variants: true,
         },
         orderBy: {
-            deletedAt: "desc"
-        }
+            createdAt: "desc",
+        },
+        take: 500,
     });
 
     const archivedProducts = rawArchivedProducts.map(product => ({

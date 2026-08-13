@@ -11,19 +11,20 @@ export default async function GalleryTableSection() {
             createdAt: "desc",
         },
         include: {
-            translations: true,
+            translations: { where: { language: "uk" } },
             media: true,
             match: {
                 include: {
                     opponent: {
                         include: {
-                            translations: true,
+                            translations: { where: { language: "uk" } },
                         },
                     },
                     tournament: true,
                 },
             },
         },
+        take: 200,
     })
 
     return (

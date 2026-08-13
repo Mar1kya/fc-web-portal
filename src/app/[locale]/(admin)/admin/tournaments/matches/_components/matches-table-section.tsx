@@ -32,18 +32,17 @@ export default async function MatchesTableSection({ currentTeam }: { currentTeam
         },
         include: {
             opponent: {
-                include: { translations: true }
+                include: { translations: { where: { language: "uk" } } }
             },
             tournament: {
-                include: { translations: true }
+                include: { translations: { where: { language: "uk" } } }
             },
             _count: {
                 select: { lineup: true, events: true }
             }
         },
-        orderBy: {
-            date: "desc",
-        },
+        orderBy: { date: "desc" },
+        take: 500,
     });
 
     return (

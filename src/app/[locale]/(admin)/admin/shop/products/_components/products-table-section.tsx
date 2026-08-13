@@ -20,16 +20,17 @@ export default async function ProductsTableSection() {
             deletedAt: null,
         },
         include: {
-            translations: true,
+            translations: { where: { language: "uk" } },
             category: {
-                include: { translations: true }
+                include: { translations: { where: { language: "uk" } } }
             },
-            media: true,
+            media: { take: 1 },
             variants: true,
         },
         orderBy: {
             createdAt: "desc",
         },
+        take: 500,
     });
 
     const products = rawProducts.map(product => ({

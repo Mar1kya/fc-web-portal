@@ -11,12 +11,11 @@ export default async function MatchesArchiveTableSection({ currentTeam }: { curr
         },
         include: {
             opponent: {
-                include: { translations: true }
+                include: { translations: { where: { language: "uk" } } }
             },
         },
-        orderBy: {
-            deletedAt: "desc",
-        },
+        orderBy: { deletedAt: "desc" },
+        take: 500,
     });
 
     return (

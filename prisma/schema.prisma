@@ -271,6 +271,8 @@ model Opponent {
   translations OpponentTranslation[]
   matches      Match[]
   deletedAt    DateTime?
+
+  @@index([deletedAt])
 }
 
 model OpponentTranslation {
@@ -326,6 +328,8 @@ model Standing {
   teamContext  TeamContext @default(MAIN_TEAM)
 
   updatedAt DateTime @updatedAt
+
+  @@index([seasonId, tournamentId, rank])
 }
 
 model TeamDictionary {
@@ -386,6 +390,7 @@ model Match {
   @@index([seasonId])
   @@index([teamContext])
   @@index([seasonId, teamContext, deletedAt])
+  @@index([teamContext, deletedAt, date])
 }
 
 model MatchLineup {
@@ -580,6 +585,7 @@ model Order {
   deletedAt DateTime?
 
   @@index([deletedAt])
+  @@index([isPaid, status, createdAt])
 }
 
 model OrderItem {

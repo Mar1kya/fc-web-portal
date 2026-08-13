@@ -7,9 +7,7 @@ export default async function CompetitionsTableSection() {
         where: {
             deletedAt: null,
         },
-        include: {
-            translations: true,
-        },
+        include: { translations: { where: { language: "uk" } } },
         orderBy: {
             hasStandings: "desc",
         },

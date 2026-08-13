@@ -22,7 +22,7 @@ export default async function PlayersTableSection({ currentTeam }: { currentTeam
             deletedAt: null,
             teamContext: currentTeam
         },
-        include: { translations: true },
+        include: { translations: { where: { language: "uk" } } },
         orderBy: { number: "asc" }
     });
 

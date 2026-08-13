@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { StandingsControls } from "./_components/standings-controls";
 import StandingsTableSection from "./_components/standings-table-section";
 import AdminTableSkeleton from "../../_components/admin-table-skeleton";
-import { getTranslation } from "@/lib/utils/get-translation";
 
 export const metadata: Metadata = {
     title: "Турнірні таблиці",
@@ -13,13 +12,22 @@ export const metadata: Metadata = {
 export default async function StandingsPage({ searchParams }: { searchParams: Promise<{ seasonId?: string, tournamentId?: string }> }) {
     const params = await searchParams;
 
-    const seasons = await prisma.season.findMany({ where: { deletedAt: null }, orderBy: { startDate: "desc" } });
-    const rawTournaments = await prisma.tournament.findMany({ where: { deletedAt: null, hasStandings: true }, include: { translations: true } });
+    const [seasons, rawTournaments] = await Promise.all([
+        prisma.season.findMany({
+            where: { deletedAt: null },
+            orderBy: { startDate: "desc" },
+            select: { id: true, name: true, isActive: true, startDate: true }
+        }),
+        prisma.tournament.findMany({
+            where: { deletedAt: null, hasStandings: true },
+            include: { translations: { where: { language: "uk" } } }
+        })
+    ]);
 
     const tournaments = rawTournaments.map(t => ({
         id: t.id,
         slug: t.slug,
-        name: getTranslation(t, "uk")?.name || t.slug
+        name: t.translations[0]?.name || t.slug
     }));
 
     const activeSeason = seasons.find(s => s.isActive) || seasons[0];

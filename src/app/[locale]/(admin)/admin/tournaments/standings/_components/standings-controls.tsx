@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCw } from "lucide-react";
 import { executeStandingsSync } from "@/actions/standings"; 
 
-type Item = { id: string; slug: string; name: string };
+type Item = { id: string; name: string };
 
 type ControlsProps  = {
     seasons: Item[];

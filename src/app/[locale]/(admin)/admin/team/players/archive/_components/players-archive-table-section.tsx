@@ -25,9 +25,7 @@ export default async function PlayersArchivTableSection({ currentTeam }: { curre
         orderBy: {
             deletedAt: "desc"
         },
-        include: {
-            translations: true
-        }
+        include: { translations: { where: { language: "uk" } } }
     });
 
     return (
