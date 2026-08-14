@@ -129,6 +129,7 @@ model Post {
   @@index([isPublished])
   @@index([type])
   @@index([teamContext])
+  @@index([isPublished, deletedAt, publishedAt])
 }
 
 model PostTranslation {
@@ -209,6 +210,7 @@ model Player {
   deletedAt DateTime?
 
   @@index([deletedAt])
+  @@index([teamContext, position, deletedAt])
 }
 
 model PlayerTranslation {
@@ -238,6 +240,7 @@ model Coach {
   deletedAt DateTime?
 
   @@index([deletedAt])
+  @@index([teamContext, deletedAt])
 }
 
 model CoachTranslation {
@@ -268,6 +271,8 @@ model Opponent {
   translations OpponentTranslation[]
   matches      Match[]
   deletedAt    DateTime?
+
+  @@index([deletedAt])
 }
 
 model OpponentTranslation {
@@ -323,6 +328,8 @@ model Standing {
   teamContext  TeamContext @default(MAIN_TEAM)
 
   updatedAt DateTime @updatedAt
+
+  @@index([seasonId, tournamentId, rank])
 }
 
 model TeamDictionary {
@@ -382,6 +389,8 @@ model Match {
   @@index([deletedAt])
   @@index([seasonId])
   @@index([teamContext])
+  @@index([seasonId, teamContext, deletedAt])
+  @@index([teamContext, deletedAt, date])
 }
 
 model MatchLineup {
@@ -485,6 +494,7 @@ model Product {
   @@index([isOnSale])
   @@index([createdAt])
   @@index([deletedAt])
+  @@index([categoryId, isArchived, deletedAt, isOnSale, createdAt])
 }
 
 model ProductTranslation {
@@ -575,6 +585,7 @@ model Order {
   deletedAt DateTime?
 
   @@index([deletedAt])
+  @@index([isPaid, status, createdAt])
 }
 
 model OrderItem {

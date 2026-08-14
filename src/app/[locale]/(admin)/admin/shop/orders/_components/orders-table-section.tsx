@@ -52,6 +52,7 @@ export default async function OrdersTableSection() {
             },
         },
         orderBy: { createdAt: "desc" },
+        take: 500,
     });
 
     const orders = rawOrders.map((order) => ({

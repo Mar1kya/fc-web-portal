@@ -9,7 +9,7 @@ export default async function CoachesTableSection({ currentTeam }: { currentTeam
             deletedAt: null,
             teamContext: currentTeam
         },
-        include: { translations: true },
+        include: { translations: { where: { language: "uk" } } },
         orderBy: { createdAt: "asc" }
     });
 

@@ -23,15 +23,12 @@ const trashFilters: DataTableFilterOption[] = [
 ];
 export default async function NewsArchiveTableSection() {
     const trashedPosts = await prisma.post.findMany({
-        where: {
-            deletedAt: { not: null }
-        },
-        orderBy: {
-            deletedAt: "desc"
-        },
+        where: { deletedAt: { not: null } },
+        orderBy: { deletedAt: "desc" },
+        take: 500,
         include: {
-            translations: true,
-            media: true
+            translations: { where: { language: "uk" } },
+            media: { take: 1 }
         }
     });
 

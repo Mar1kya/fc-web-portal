@@ -13,6 +13,7 @@ export default async function OpponentsTableSection() {
         orderBy: {
             slug: "asc",
         },
+        take: 500,
     });
 
     return (

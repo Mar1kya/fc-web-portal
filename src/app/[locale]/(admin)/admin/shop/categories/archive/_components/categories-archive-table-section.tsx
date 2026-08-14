@@ -8,10 +8,12 @@ export default async function CategoriesArchiveTableSection() {
             deletedAt: { not: null }
         },
         include: {
-            translations: true,
+            translations: { where: { language: "uk" } },
             _count: {
                 select: {
-                    products: true
+                    products: {
+                        where: { deletedAt: null }
+                    }
                 }
             }
         },

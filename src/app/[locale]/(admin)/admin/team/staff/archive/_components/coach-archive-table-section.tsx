@@ -12,9 +12,7 @@ export default async function CoachesArchivTableSection({ currentTeam }: { curre
         orderBy: {
             deletedAt: "desc"
         },
-        include: {
-            translations: true
-        }
+        include: { translations: { where: { language: "uk" } } },
     });
 
     return (

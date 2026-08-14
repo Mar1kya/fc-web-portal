@@ -30,15 +30,12 @@ const newsFilters: DataTableFilterOption[] = [
 
 export default async function NewsTableSection() {
     const posts = await prisma.post.findMany({
-        where: {
-            deletedAt: null
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
+        where: { deletedAt: null },
+        orderBy: { createdAt: "desc" },
+        take: 500,
         include: {
-            translations: true,
-            media: true
+            translations: { where: { language: "uk" } },
+            media: { take: 1 }
         }
     });
 

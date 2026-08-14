@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import ProductCard from "../../_components/product-card";
 import AppPagination from "@/components/layout/app-pagination";
 import { getCategoryProducts } from "@/lib/services/shop.service";
@@ -11,9 +11,11 @@ export default async function CategoryProductsSection({
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
   const t = await getTranslations("Shop.CategoryPage");
+  const locale = await getLocale();
   const { sortedProducts, totalPages, currentPage } = await getCategoryProducts({
     categoryId,
     searchParams,
+    locale,
   });
 
   if (sortedProducts.length === 0) {

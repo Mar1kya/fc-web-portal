@@ -8,7 +8,7 @@ export default async function CategoriesTableSection() {
             deletedAt: null,
         },
         include: {
-            translations: true,
+            translations: { where: { language: "uk" } },
             _count: {
                 select: {
                     products: {

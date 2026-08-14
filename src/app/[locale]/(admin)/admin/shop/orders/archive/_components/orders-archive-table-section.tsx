@@ -20,6 +20,7 @@ export default async function OrdersArchiveTableSection() {
             },
         },
         orderBy: { deletedAt: "desc" },
+        take: 500,
     });
 
     const orders = rawOrders.map((order) => ({

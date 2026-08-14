@@ -12,7 +12,8 @@ export default async function OpponentsArchiveTableSection() {
         },
         orderBy: {
             deletedAt: "desc"
-        }
+        },
+        take: 500,
     });
 
     return (

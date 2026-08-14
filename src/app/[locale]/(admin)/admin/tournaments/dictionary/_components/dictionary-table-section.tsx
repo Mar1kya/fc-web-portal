@@ -10,6 +10,7 @@ export default async function DictionaryTableSection() {
         orderBy: {
             originalName: "asc",
         },
+        take: 500,
     });
 
     return (

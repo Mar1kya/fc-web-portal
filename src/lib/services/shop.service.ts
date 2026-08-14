@@ -6,12 +6,14 @@ type GetCategoryProductsParams = {
   categoryId?: string;
   isSale?: boolean;
   searchParams: { [key: string]: string | string[] | undefined };
+  locale: string; 
 };
 
 export async function getCategoryProducts({
   categoryId,
   isSale,
   searchParams,
+  locale,
 }: GetCategoryProductsParams) {
   const sortParam =
     typeof searchParams.sort === "string" ? searchParams.sort : "newest";
@@ -71,44 +73,65 @@ export async function getCategoryProducts({
     ],
   };
 
-  const filteredProductsRaw = await prisma.product.findMany({
-    where: { ...baseWhere, ...filtersWhere },
-    include: { translations: true, media: true, variants: true },
-  });
-
-  const sortedProducts = filteredProductsRaw.sort((a, b) => {
-    const aTotalStock = a.variants.reduce((sum, v) => sum + v.stock, 0);
-    const bTotalStock = b.variants.reduce((sum, v) => sum + v.stock, 0);
-    if (aTotalStock > 0 && bTotalStock <= 0) return -1;
-    if (aTotalStock <= 0 && bTotalStock > 0) return 1;
-
-    const priceA =
-      a.isOnSale && a.salePrice ? Number(a.salePrice) : Number(a.price);
-    const priceB =
-      b.isOnSale && b.salePrice ? Number(b.salePrice) : Number(b.price);
-    if (sortParam === "price_asc") return priceA - priceB;
-    if (sortParam === "price_desc") return priceB - priceA;
-    if (sortParam === "sale_first") {
-      if (a.isOnSale && !b.isOnSale) return -1;
-      if (!a.isOnSale && b.isOnSale) return 1;
-    }
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
+  const where = { ...baseWhere, ...filtersWhere };
 
   const pageParam =
     typeof searchParams.page === "string" ? parseInt(searchParams.page) : 1;
   const currentPage = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
-  const totalPages = Math.ceil(
-    sortedProducts.length / PAGINATION.SHOP_PER_PAGE,
-  );
-  const paginatedProducts = sortedProducts.slice(
-    (currentPage - 1) * PAGINATION.SHOP_PER_PAGE,
-    currentPage * PAGINATION.SHOP_PER_PAGE,
-  );
 
-  return {
-    sortedProducts: paginatedProducts,
-    totalPages,
-    currentPage,
+  const needsJsSort = sortParam === "price_asc" || sortParam === "price_desc";
+
+  const includeClause = {
+    translations: { where: { language: locale } },
+    media: true,
+    variants: true,
   };
+
+  if (needsJsSort) {
+    const filteredProductsRaw = await prisma.product.findMany({
+      where,
+      include: includeClause,
+    });
+
+    const sortedProducts = filteredProductsRaw.sort((a, b) => {
+      const aTotalStock = a.variants.reduce((sum, v) => sum + v.stock, 0);
+      const bTotalStock = b.variants.reduce((sum, v) => sum + v.stock, 0);
+      if (aTotalStock > 0 && bTotalStock <= 0) return -1;
+      if (aTotalStock <= 0 && bTotalStock > 0) return 1;
+
+      const priceA =
+        a.isOnSale && a.salePrice ? Number(a.salePrice) : Number(a.price);
+      const priceB =
+        b.isOnSale && b.salePrice ? Number(b.salePrice) : Number(b.price);
+      return sortParam === "price_asc" ? priceA - priceB : priceB - priceA;
+    });
+
+    const totalPages = Math.ceil(sortedProducts.length / PAGINATION.SHOP_PER_PAGE);
+    const paginatedProducts = sortedProducts.slice(
+      (currentPage - 1) * PAGINATION.SHOP_PER_PAGE,
+      currentPage * PAGINATION.SHOP_PER_PAGE,
+    );
+
+    return { sortedProducts: paginatedProducts, totalPages, currentPage };
+  }
+
+  const orderBy: Prisma.ProductOrderByWithRelationInput[] =
+    sortParam === "sale_first"
+      ? [{ isOnSale: "desc" }, { createdAt: "desc" }]
+      : [{ createdAt: "desc" }];
+
+  const [total, paginatedProducts] = await Promise.all([
+    prisma.product.count({ where }),
+    prisma.product.findMany({
+      where,
+      orderBy,
+      skip: (currentPage - 1) * PAGINATION.SHOP_PER_PAGE,
+      take: PAGINATION.SHOP_PER_PAGE,
+      include: includeClause,
+    }),
+  ]);
+
+  const totalPages = Math.ceil(total / PAGINATION.SHOP_PER_PAGE);
+
+  return { sortedProducts: paginatedProducts, totalPages, currentPage };
 }
