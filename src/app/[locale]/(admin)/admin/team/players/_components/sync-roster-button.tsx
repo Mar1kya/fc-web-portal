@@ -6,15 +6,23 @@ import { Button } from "@/components/ui/button"
 import { RefreshCw, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { syncPlayersRoster } from "@/actions/team"
+import { SOFASCORE_TEAM_IDS } from "@/lib/constants"
+import { TeamContext } from "../../../../../../../../generated/prisma"
 
-export function SyncRosterButton() {
+interface SyncRosterButtonProps {
+    teamContext: TeamContext;
+}
+
+export function SyncRosterButton({ teamContext }: SyncRosterButtonProps) {
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
+
+    const isAvailable = Boolean(SOFASCORE_TEAM_IDS[teamContext]);
 
     const handleSync = () => {
         startTransition(async () => {
             try {
-                const result = await syncPlayersRoster();
+                const result = await syncPlayersRoster(teamContext);
 
                 if (result.success) {
                     const created = result.created ?? 0;
@@ -39,11 +47,20 @@ export function SyncRosterButton() {
         });
     };
 
+    if (!isAvailable) {
+        return (
+            <Button variant="outline" className="gap-2" disabled title="Sofascore ID для цієї команди не налаштовано">
+                <RefreshCw className="w-4 h-4" />
+                <span>Синхронізувати</span>
+            </Button>
+        );
+    }
+
     return (
-        <Button 
-            variant="outline" 
-            className="gap-2" 
-            onClick={handleSync} 
+        <Button
+            variant="outline"
+            className="gap-2"
+            onClick={handleSync}
             disabled={isPending}
         >
             {isPending ? (

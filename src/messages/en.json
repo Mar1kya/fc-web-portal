@@ -687,9 +687,12 @@
     },
     "TeamContext": {
       "MAIN_TEAM": "First Team",
+      "RESERVE": "Second Team",
+      "U21": "U-21",
       "U19": "U-19",
       "ACADEMY": "Academy",
-      "GENERAL": "Club"
+      "GENERAL": "Club",
+      "WOMEN": "Women's team"
     },
     "PlayerPosition": {
       "GOALKEEPER": "Goalkeepers",

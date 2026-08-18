@@ -687,9 +687,12 @@
     },
     "TeamContext": {
       "MAIN_TEAM": "Основна команда",
+      "RESERVE": "Друга команда",
+      "U21": "U-21",
       "U19": "U-19",
       "ACADEMY": "Академія",
-      "GENERAL": "Клуб"
+      "GENERAL": "Клуб",
+      "WOMEN": "Жіноча команда"
     },
     "PlayerPosition": {
       "GOALKEEPER": "Воротарі",

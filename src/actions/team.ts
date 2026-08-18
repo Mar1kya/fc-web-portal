@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
-import { LOCALES, TEAM_ID } from "@/lib/constants";
+import { LOCALES, SOFASCORE_TEAM_IDS, TEAM_ID } from "@/lib/constants";
 import { PlayerPosition, TeamContext } from "../../generated/prisma";
 import { createCoachSchema, createPlayerSchema } from "@/lib/schemas";
 import { generatePlayerSlug } from "@/lib/utils/slugify";
@@ -745,10 +745,21 @@ export async function updateCoach(
   }
 }
 
-export async function executeRosterSync() {
+export async function executeRosterSync(
+  teamContext: TeamContext = TeamContext.MAIN_TEAM,
+) {
+  const sofascoreTeamId = SOFASCORE_TEAM_IDS[teamContext];
+
+  if (!sofascoreTeamId) {
+    return {
+      success: false,
+      message: `Для команди "${teamContext}" не задано sofascoreId. Заповніть SOFASCORE_TEAM_IDS.`,
+    };
+  }
+
   try {
     const response = await fetch(
-      `https://sofascore.p.rapidapi.com/teams/get-squad?teamId=${TEAM_ID}`,
+      `https://sofascore.p.rapidapi.com/teams/get-squad?teamId=${sofascoreTeamId}`,
       {
         headers: {
           "x-rapidapi-host": "sofascore.p.rapidapi.com",
@@ -761,6 +772,7 @@ export async function executeRosterSync() {
     if (!response.ok) throw new Error("Помилка API при отриманні складу");
 
     const data = await response.json();
+    
     const playersData = data.players || [];
 
     if (playersData.length === 0) throw new Error("Гравців не знайдено");
@@ -830,7 +842,7 @@ export async function executeRosterSync() {
                 birthDate,
                 nationality,
                 avatar,
-                teamContext: TeamContext.MAIN_TEAM,
+                teamContext,
                 translations: {
                   create: [
                     { language: "uk", name: name },
@@ -871,12 +883,14 @@ export async function executeRosterSync() {
   }
 }
 
-export async function syncPlayersRoster() {
+export async function syncPlayersRoster(
+  teamContext: TeamContext = TeamContext.MAIN_TEAM,
+) {
   const session = await auth();
 
   if (!session?.user?.email || session.user.role !== "ADMIN") {
     return { success: false, message: "Немає прав для виконання цієї дії" };
   }
 
-  return await executeRosterSync();
+  return await executeRosterSync(teamContext);
 }

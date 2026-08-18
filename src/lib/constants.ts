@@ -1,4 +1,9 @@
-import { MatchStatus, OrderStatusEnum, PostType, TeamContext } from "../../generated/prisma";
+import {
+  MatchStatus,
+  OrderStatusEnum,
+  PostType,
+  TeamContext,
+} from "../../generated/prisma";
 
 export const MIN_PASSWORD_LENGTH = 8;
 export const MIN_NAME_LENGTH = 2;
@@ -9,9 +14,17 @@ export const PAGINATION = {
 };
 export const TARGET_TEAM_ORIGINAL_NAME = "Polissya Zhytomyr";
 export const TEAM_ID = "258536";
+export const SOFASCORE_TEAM_IDS: Partial<Record<TeamContext, string>> = {
+  [TeamContext.MAIN_TEAM]: "258536",
+  [TeamContext.RESERVE]: "1244265",
+  [TeamContext.U19]: "266098",
+  [TeamContext.U21]: "1256104",
+  [TeamContext.WOMEN]: "828928",
+};
 export const MAX_QTY_PER_ITEM = 10;
 export const LOCALES = ["uk", "en"];
-export const OUR_LOGO_URL = "https://img.sofascore.com/api/v1/team/258536/image";
+export const OUR_LOGO_URL =
+  "https://img.sofascore.com/api/v1/team/258536/image";
 
 export const postTypeTranslations: Record<PostType, string> = {
   NEWS: "Новина",
@@ -21,8 +34,11 @@ export const postTypeTranslations: Record<PostType, string> = {
 
 export const teamContextTranslations: Record<TeamContext, string> = {
   MAIN_TEAM: "Основна команда",
+  RESERVE: "Друга команда",
+  U21: "U-21",
   U19: "U-19",
   ACADEMY: "Академія",
+  WOMEN: "Жіноча команда",
   GENERAL: "Загальний склад",
 };
 export const postStatusOptions = [
@@ -106,34 +122,46 @@ export const STANDARD_SIZES = [
   "ONE SIZE",
 ];
 export const statusColors: Record<OrderStatusEnum, string> = {
-    PENDING: "bg-amber-500/10 text-amber-500 border-none",
-    PAID: "bg-emerald-600/10 text-emerald-600 border-none",
-    SHIPPED: "bg-blue-500/10 text-blue-500 border-none",
-    DELIVERED: "bg-emerald-600/10 text-emerald-600 border-none",
-    CANCELLED: "bg-destructive/10 text-destructive border-none",
+  PENDING: "bg-amber-500/10 text-amber-500 border-none",
+  PAID: "bg-emerald-600/10 text-emerald-600 border-none",
+  SHIPPED: "bg-blue-500/10 text-blue-500 border-none",
+  DELIVERED: "bg-emerald-600/10 text-emerald-600 border-none",
+  CANCELLED: "bg-destructive/10 text-destructive border-none",
 };
 
 export function getPaymentBadgeConfig(
   isPaid: boolean,
   status: OrderStatusEnum,
-  paymentMethod: "CARD" | "COD"
+  paymentMethod: "CARD" | "COD",
 ): { label: string; className: string } {
   if (isPaid) {
-    return { label: "Оплачено", className: "bg-emerald-600 hover:bg-emerald-600 text-white border-none" };
+    return {
+      label: "Оплачено",
+      className: "bg-emerald-600 hover:bg-emerald-600 text-white border-none",
+    };
   }
   if (status === OrderStatusEnum.CANCELLED) {
-    return { label: "Скасовано", className: "bg-destructive/10 text-destructive border-none" };
+    return {
+      label: "Скасовано",
+      className: "bg-destructive/10 text-destructive border-none",
+    };
   }
   if (paymentMethod === "CARD") {
-    return { label: "Не оплачено", className: "bg-amber-500/10 text-amber-500 border-none" };
+    return {
+      label: "Не оплачено",
+      className: "bg-amber-500/10 text-amber-500 border-none",
+    };
   }
-  return { label: "Оплата при отриманні", className: "bg-blue-500/10 text-blue-500 border-none" };
+  return {
+    label: "Оплата при отриманні",
+    className: "bg-blue-500/10 text-blue-500 border-none",
+  };
 }
- 
+
 export const matchStatusTranslations: Record<MatchStatus, string> = {
-    SCHEDULED: "Заплановано",
-    LIVE: "Наживо",
-    FINISHED: "Завершено",
-    POSTPONED: "Перенесено",
-    CANCELED: "Скасовано",
+  SCHEDULED: "Заплановано",
+  LIVE: "Наживо",
+  FINISHED: "Завершено",
+  POSTPONED: "Перенесено",
+  CANCELED: "Скасовано",
 };

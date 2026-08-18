@@ -30,7 +30,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         : availableTeams[0] || TeamContext.MAIN_TEAM;
 
     return (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight">Матч-центр</h2>
@@ -38,7 +38,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
                         Керуйте розкладом матчів. Основні ігри підтягуються з SofaScore автоматично.
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center  sm:justify-end flex-wrap gap-2">
                     <SyncScheduleButton />
                     <Button variant="outline" asChild>
                         <Link href="/admin/tournaments/matches/archive">
