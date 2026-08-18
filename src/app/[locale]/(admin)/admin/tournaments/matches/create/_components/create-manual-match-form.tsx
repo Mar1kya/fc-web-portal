@@ -25,7 +25,7 @@ type SeasonOption = SelectOption & {
 };
 
 type CreateManualMatchFormProps = {
-    seasons: SeasonOption[]; 
+    seasons: SeasonOption[];
     tournaments: SelectOption[];
     opponents: SelectOption[];
 }
@@ -178,6 +178,7 @@ export function CreateManualMatchForm({ seasons, tournaments, opponents }: Creat
                                 min={seasonMinDateValue}
                                 max={seasonMaxDateValue}
                                 disabled={isPending}
+                                className="w-full min-w-0"
                             />
                             {selectedSeason?.startDate && selectedSeason?.endDate && (
                                 <p className="text-xs text-muted-foreground">

@@ -5,6 +5,7 @@ import { getTranslation } from "@/lib/utils/get-translation";
 import { MatchStatus } from "../../../../../../generated/prisma";
 import { MatchDisplayData } from "./match-card";
 import TeamLogo from "./team-logo";
+import { getOurLogoUrl, getOurTeamName } from "@/lib/utils/team-display";
 
 type MatchListItemProps = {
     match: MatchDisplayData;
@@ -33,8 +34,8 @@ export default function MatchListItem({ match, locale }: MatchListItemProps) {
     const tStatus = useTranslations("MatchesPage.MatchList.Status");
     const translatedTournament = getTranslation(match.tournament, locale)?.name || "";
     const translatedOpponent = getTranslation(match.opponent, locale)?.name || "";
-    const ourTeamName = tMatchPage("ourTeamName");
-    const ourLogoUrl = "https://img.sofascore.com/api/v1/team/258536/image";
+    const ourTeamName = getOurTeamName(tMatchPage("ourTeamName"), match.teamContext, tMatchPage);
+    const ourLogoUrl = getOurLogoUrl(match.teamContext);
     const homeTeamName = match.isHomeGame ? ourTeamName : translatedOpponent;
     const awayTeamName = match.isHomeGame ? translatedOpponent : ourTeamName;
     const homeLogo = match.isHomeGame ? ourLogoUrl : (match.opponent.logoUrl || "");

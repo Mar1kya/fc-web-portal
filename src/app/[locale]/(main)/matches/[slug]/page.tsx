@@ -8,16 +8,17 @@ import MediaGallery from "@/components/shared/media-gallery";
 import MatchLineups from "./_components/match-lineups";
 import MatchVideos from "./_components/match-videos";
 import { getTranslation } from "@/lib/utils/get-translation";
+import { getOurTeamName } from "@/lib/utils/team-display";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const locale = await getLocale();
     const tMeta = await getTranslations("SingleMatchPage.Metadata");
-    const tHero = await getTranslations("SingleMatchPage.Hero"); 
+    const t = await getTranslations("MatchesPage");
 
     const match = await prisma.match.findUnique({
         where: { slug, deletedAt: null },
-        include: { 
+        include: {
             opponent: { include: { translations: true } },
             tournament: { include: { translations: true } }
         },
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const opponentTranslation = getTranslation(match.opponent, locale);
     const tournamentTranslation = match.tournament ? getTranslation(match.tournament, locale) : null;
     const opponentName = opponentTranslation?.name || match.opponent.slug;
-    const ourTeamName = tHero("ourTeamName");
+    const ourTeamName = getOurTeamName(t("ourTeamName"), match.teamContext, t);
     const tournamentName = tournamentTranslation?.name || (locale === "uk" ? "Матч" : "Match");
     const homeTeam = match.isHomeGame ? ourTeamName : opponentName;
     const awayTeam = match.isHomeGame ? opponentName : ourTeamName;
@@ -52,7 +53,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
                     alt: `${homeTeam} vs ${awayTeam}`,
                 }
             ],
-            type: "website", 
+            type: "website",
         },
     };
 }
@@ -72,7 +73,7 @@ export default async function SingleMatchPage({ params }: { params: Promise<{ sl
                 include: {
                     media: { where: { deletedAt: null } }
                 },
-                where: { deletedAt: null } 
+                where: { deletedAt: null }
             },
             relatedPosts: {
                 where: {
@@ -107,7 +108,7 @@ export default async function SingleMatchPage({ params }: { params: Promise<{ sl
             <MatchTabs
                 lineupsContent={
                     hasAnyLineups ? (
-                        <MatchLineups match={match} locale={locale} /> 
+                        <MatchLineups match={match} locale={locale} />
                     ) : (
                         <p className="text-muted-foreground text-center py-10">{tTabs("emptyLineups")}</p>
                     )
@@ -128,9 +129,9 @@ export default async function SingleMatchPage({ params }: { params: Promise<{ sl
                 }
                 videosContent={
                     hasVideos ? (
-                        <MatchVideos 
-                            highlightsUrl={match.highlightsUrl} 
-                            postMatchUrl={match.postMatchUrl} 
+                        <MatchVideos
+                            highlightsUrl={match.highlightsUrl}
+                            postMatchUrl={match.postMatchUrl}
                         />
                     ) : (
                         <p className="text-muted-foreground text-center py-10">{tTabs("emptyVideos")}</p>

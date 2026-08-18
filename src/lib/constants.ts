@@ -35,12 +35,22 @@ export const postTypeTranslations: Record<PostType, string> = {
 export const teamContextTranslations: Record<TeamContext, string> = {
   MAIN_TEAM: "Основна команда",
   RESERVE: "Друга команда",
-  U21: "U-21",
-  U19: "U-19",
+  U21: "U21",
+  U19: "U19",
   ACADEMY: "Академія",
   WOMEN: "Жіноча команда",
   GENERAL: "Загальний склад",
 };
+export const teamContextSuffixesUk: Record<TeamContext, string> = {
+  MAIN_TEAM: "",
+  RESERVE: "2",
+  U21: "U-21",
+  U19: "U-19",
+  ACADEMY: "Академія",
+  WOMEN: "Жінки",
+  GENERAL: "",
+};
+
 export const postStatusOptions = [
   { value: "PUBLISHED", label: "Опубліковано" },
   { value: "SCHEDULED", label: "Заплановано" },

@@ -3,6 +3,7 @@ import { CalendarDays, MapPin } from "lucide-react";
 import { MatchStatus, Prisma } from "../../../../../../../generated/prisma";
 import { getTranslation } from "@/lib/utils/get-translation";
 import TeamLogo from "./team-logo";
+import { getOurLogoUrl, getOurTeamName } from "@/lib/utils/team-display";
 
 const SoccerBallIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -31,10 +32,11 @@ type MatchHeroProps = {
 
 export default function MatchHero({ match, locale }: MatchHeroProps) {
     const t = useTranslations("SingleMatchPage.Hero");
+    const tMatch = useTranslations("MatchesPage");
     const translatedTournament = getTranslation(match.tournament, locale)?.name || "";
     const translatedOpponent = getTranslation(match.opponent, locale)?.name || "";
-    const ourTeamName = t("ourTeamName");
-    const ourLogoUrl = "https://img.sofascore.com/api/v1/team/258536/image";
+    const ourTeamName = getOurTeamName(tMatch("ourTeamName"), match.teamContext, tMatch);
+    const ourLogoUrl = getOurLogoUrl(match.teamContext);
     const homeTeamName = match.isHomeGame ? ourTeamName : translatedOpponent;
     const awayTeamName = match.isHomeGame ? translatedOpponent : ourTeamName;
     const homeLogo = match.isHomeGame ? ourLogoUrl : (match.opponent?.logoUrl || "");

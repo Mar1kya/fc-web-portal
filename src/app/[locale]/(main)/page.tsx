@@ -172,6 +172,7 @@ export default async function HomePage() {
         tournament: m.tournament,
         opponent: m.opponent,
         round: m.round,
+        teamContext: m.teamContext, 
       }
       : null;
 

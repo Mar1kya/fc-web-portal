@@ -39,7 +39,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
                     </p>
                 </div>
                 <div className="flex items-center justify-center  sm:justify-end flex-wrap gap-2">
-                    <SyncScheduleButton />
+                    <SyncScheduleButton teamContext={currentTeam}/>
                     <Button variant="outline" asChild>
                         <Link href="/admin/tournaments/matches/archive">
                             <Archive className="mr-2 h-4 w-4" />

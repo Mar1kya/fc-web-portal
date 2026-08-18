@@ -8,6 +8,7 @@ import { MatchActions } from "./match-actions";
 import { getTranslation } from "@/lib/utils/get-translation";
 import { Match, MatchStatus, Opponent, OpponentTranslation } from "../../../../../../../../generated/prisma";
 import { StandingsTeamLogo } from "../../standings/_components/tandings-team-logo";
+import { getOurLogoUrl, getOurTeamNameAdmin } from "@/lib/utils/team-display";
 
 type MatchWithRelations = Match & {
     opponent: Opponent & { translations: OpponentTranslation[] };
@@ -52,17 +53,19 @@ export const columns: ColumnDef<MatchWithRelations>[] = [
         id: "matchInfo",
         accessorFn: (row) => {
             const opponentName = getTranslation(row.opponent, "uk")?.name || "Суперник";
-            return `Смарагдова Банда ${opponentName}`;
+            const ourTeamName = getOurTeamNameAdmin("Смарагдова Банда", row.teamContext);
+            return `${ourTeamName} ${opponentName}`;
         },
         header: "Матч",
         cell: ({ row }) => {
             const match = row.original;
             const opponentName = getTranslation(match.opponent, "uk")?.name || "Суперник";
-            const ourLogoUrl = "https://img.sofascore.com/api/v1/team/258536/image";
+            const ourTeamName = getOurTeamNameAdmin("Смарагдова Банда", match.teamContext);
+            const ourLogoUrl = getOurLogoUrl(match.teamContext);
             const homeLogo = match.isHomeGame ? ourLogoUrl : match.opponent.logoUrl;
             const awayLogo = match.isHomeGame ? match.opponent.logoUrl : ourLogoUrl;
-            const homeName = match.isHomeGame ? "Смарагдова Банда" : opponentName;
-            const awayName = match.isHomeGame ? opponentName : "Смарагдова Банда";
+            const homeName = match.isHomeGame ? ourTeamName : opponentName;
+            const awayName = match.isHomeGame ? opponentName : ourTeamName;
             const showScore = match.status === "FINISHED" || match.status === "LIVE";
             const scoreText = showScore ? `${match.homeScore ?? 0} : ${match.awayScore ?? 0}` : "- : -";
 

@@ -4,8 +4,10 @@ import { ChevronRight, MapPin } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getTranslation } from "@/lib/utils/get-translation";
-import { MatchStatus } from "../../../../../../generated/prisma";
+import { MatchStatus, TeamContext } from "../../../../../../generated/prisma";
 import TeamLogo from "./team-logo";
+import { SOFASCORE_TEAM_IDS } from "@/lib/constants";
+import { getOurLogoUrl, getOurTeamName } from "@/lib/utils/team-display";
 
 type TranslatableTournament = {
     slug: string;
@@ -29,6 +31,7 @@ export type MatchDisplayData = {
     tournament: TranslatableTournament | null;
     opponent: TranslatableOpponent;
     round: number | null;
+    teamContext: TeamContext;
 };
 
 type MatchCardProps = {
@@ -56,8 +59,8 @@ export default function MatchCard({ match, title, locale, emptyText }: MatchCard
 
     const translatedTournament = getTranslation(match.tournament, locale)?.name || "";
     const translatedOpponent = getTranslation(match.opponent, locale)?.name || "";
-    const ourTeamName = t("ourTeamName");
-    const ourLogoUrl = "https://img.sofascore.com/api/v1/team/258536/image";
+    const ourTeamName = getOurTeamName(t("ourTeamName"), match.teamContext, t);
+    const ourLogoUrl = getOurLogoUrl(match.teamContext);
     const homeTeamName = match.isHomeGame ? ourTeamName : translatedOpponent;
     const awayTeamName = match.isHomeGame ? translatedOpponent : ourTeamName;
     const homeLogo = match.isHomeGame ? ourLogoUrl : (match.opponent.logoUrl || "");

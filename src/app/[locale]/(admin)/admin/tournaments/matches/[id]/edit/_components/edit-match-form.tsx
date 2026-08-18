@@ -289,7 +289,7 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                                         <Input type="number" min={0} value={awayScore} onChange={e => setAwayScore(e.target.value ? Number(e.target.value) : "")} disabled={isPending} />
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label>Дата та час <span className="text-red-500">*</span></Label>
                                         <Input
@@ -299,6 +299,7 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                                             min={seasonMinDateValue}
                                             max={seasonMaxDateValue}
                                             disabled={isPending}
+                                            className="w-full min-w-0"
                                         />
                                         {selectedSeason?.startDate && selectedSeason?.endDate && (
                                             <p className="text-xs text-muted-foreground">
