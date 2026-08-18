@@ -352,6 +352,15 @@
     "noPreviousMatch": "No matches played yet",
     "noUpcomingMatches": "No matches scheduled",
     "ourTeamName": "Emerald Gang",
+    "teamSuffixes": {
+      "MAIN_TEAM": "",
+      "RESERVE": "2",
+      "U21": "U21",
+      "U19": "U19",
+      "ACADEMY": "Academy",
+      "WOMEN": "Women",
+      "GENERAL": ""
+    },
     "noStadium": "Stadium not specified",
     "noMatches": "No matches found for this season.",
     "MatchList": {

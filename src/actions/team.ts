@@ -70,6 +70,10 @@ export type BoundCoachData = {
   nationality?: string;
 };
 
+export type SyncRosterResult =
+  | { success: true; created: number; updated: number }
+  | { success: false; message: string };
+
 const mapPosition = (positionCode: string): PlayerPosition => {
   switch (positionCode) {
     case "G":
@@ -747,7 +751,7 @@ export async function updateCoach(
 
 export async function executeRosterSync(
   teamContext: TeamContext = TeamContext.MAIN_TEAM,
-) {
+): Promise<SyncRosterResult> {
   const sofascoreTeamId = SOFASCORE_TEAM_IDS[teamContext];
 
   if (!sofascoreTeamId) {
@@ -772,7 +776,7 @@ export async function executeRosterSync(
     if (!response.ok) throw new Error("Помилка API при отриманні складу");
 
     const data = await response.json();
-    
+
     const playersData = data.players || [];
 
     if (playersData.length === 0) throw new Error("Гравців не знайдено");
@@ -885,7 +889,7 @@ export async function executeRosterSync(
 
 export async function syncPlayersRoster(
   teamContext: TeamContext = TeamContext.MAIN_TEAM,
-) {
+): Promise<SyncRosterResult> {
   const session = await auth();
 
   if (!session?.user?.email || session.user.role !== "ADMIN") {

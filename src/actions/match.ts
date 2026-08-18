@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { LOCALES, TEAM_ID } from "@/lib/constants";
+import { LOCALES, SOFASCORE_TEAM_IDS } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 import { processMatchSync } from "@/lib/services/match-details.service";
 import { MatchStatus, TeamContext } from "../../generated/prisma";
@@ -165,9 +165,9 @@ export async function hardDeleteMatch(id: string) {
     };
   }
 }
-async function fetchMatchesFromSofaScore(endpoint: string) {
+async function fetchMatchesFromSofaScore(endpoint: string, sofascoreTeamId: string) {
   const response = await fetch(
-    `https://sofascore.p.rapidapi.com/teams/${endpoint}?teamId=${TEAM_ID}`,
+    `https://sofascore.p.rapidapi.com/teams/${endpoint}?teamId=${sofascoreTeamId}`,
     {
       headers: {
         "x-rapidapi-host": "sofascore.p.rapidapi.com",
@@ -185,10 +185,16 @@ async function fetchMatchesFromSofaScore(endpoint: string) {
   return data.events || [];
 }
 
-export async function syncMatchScheduleAction() {
-  const session = await auth();
-  if (!session?.user?.email || session.user.role !== "ADMIN") {
-    return { success: false, error: "Немає прав доступу" };
+export async function executeMatchSync(
+  teamContext: TeamContext = TeamContext.MAIN_TEAM,
+) {
+  const sofascoreTeamId = SOFASCORE_TEAM_IDS[teamContext];
+
+  if (!sofascoreTeamId) {
+    return {
+      success: false,
+      error: `Для команди "${teamContext}" не задано sofascoreId у SOFASCORE_TEAM_IDS.`,
+    };
   }
 
   try {
@@ -200,8 +206,8 @@ export async function syncMatchScheduleAction() {
       return { success: false, error: "Не знайдено активного сезону в базі." };
     }
 
-    const pastMatches = await fetchMatchesFromSofaScore("get-last-matches");
-    const futureMatches = await fetchMatchesFromSofaScore("get-next-matches");
+    const pastMatches = await fetchMatchesFromSofaScore("get-last-matches", sofascoreTeamId);
+    const futureMatches = await fetchMatchesFromSofaScore("get-next-matches", sofascoreTeamId);
 
     const rawMatches = [...pastMatches, ...futureMatches];
     const uniqueMatchesMap = new Map();
@@ -211,25 +217,24 @@ export async function syncMatchScheduleAction() {
     const allMatches = Array.from(uniqueMatchesMap.values());
 
     if (allMatches.length === 0) {
-      throw new Error("Не знайдено матчів у відповіді API");
+      return { success: false, error: `Матчів не знайдено (teamId: ${sofascoreTeamId})` };
     }
 
     let createdCount = 0;
     let updatedCount = 0;
+    let skippedCount = 0;
 
     await prisma.$transaction(
       async (tx) => {
         for (const event of allMatches) {
           const matchDate = new Date(event.startTimestamp * 1000);
 
-          if (
-            matchDate < activeSeason.startDate ||
-            matchDate > activeSeason.endDate
-          ) {
+          if (matchDate < activeSeason.startDate || matchDate > activeSeason.endDate) {
+            skippedCount++;
             continue;
           }
 
-          const isHomeGame = Number(event.homeTeam.id) === Number(TEAM_ID);
+          const isHomeGame = Number(event.homeTeam.id) === Number(sofascoreTeamId);
           const opponentData = isHomeGame ? event.awayTeam : event.homeTeam;
 
           let tournament = await tx.tournament.findFirst({
@@ -248,14 +253,8 @@ export async function syncMatchScheduleAction() {
                 sofascoreId: event.tournament.uniqueTournament.id,
                 translations: {
                   create: [
-                    {
-                      language: "uk",
-                      name: event.tournament.uniqueTournament.name,
-                    },
-                    {
-                      language: "en",
-                      name: event.tournament.uniqueTournament.name,
-                    },
+                    { language: "uk", name: event.tournament.uniqueTournament.name },
+                    { language: "en", name: event.tournament.uniqueTournament.name },
                   ],
                 },
               },
@@ -275,6 +274,7 @@ export async function syncMatchScheduleAction() {
               ],
             },
           });
+
           if (!opponent) {
             opponent = await tx.opponent.create({
               data: {
@@ -289,15 +289,10 @@ export async function syncMatchScheduleAction() {
                 },
               },
             });
-          } else {
+          } else if (opponent.sofascoreId === null) {
             opponent = await tx.opponent.update({
               where: { id: opponent.id },
-              data: {
-                ...(opponent.sofascoreId === null && {
-                  sofascoreId: opponentData.id,
-                }),
-                logoUrl: `https://img.sofascore.com/api/v1/team/${opponentData.id}/image`,
-              },
+              data: { sofascoreId: opponentData.id },
             });
           }
 
@@ -338,7 +333,7 @@ export async function syncMatchScheduleAction() {
                 isHomeGame,
                 homeScore,
                 awayScore,
-                teamContext: TeamContext.MAIN_TEAM,
+                teamContext, 
                 seasonId: activeSeason.id,
                 tournamentId: tournament.id,
                 opponentId: opponent.id,
@@ -351,15 +346,33 @@ export async function syncMatchScheduleAction() {
       { maxWait: 10000, timeout: 30000 },
     );
 
-    revalidateMatchPaths();
-
-    return { success: true, created: createdCount, updated: updatedCount };
+    return {
+      success: true,
+      processed: allMatches.length,
+      skipped: skippedCount,
+      created: createdCount,
+      updated: updatedCount,
+    };
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Невідома помилка";
-    console.error("Sync Matches Action Error:", errorMessage);
+    const errorMessage = error instanceof Error ? error.message : "Невідома помилка";
+    console.error("Sync Matches Error:", errorMessage, "teamContext:", teamContext);
     return { success: false, error: errorMessage };
   }
+}
+
+export async function syncMatchScheduleAction(
+  teamContext: TeamContext = TeamContext.MAIN_TEAM,
+) {
+  const session = await auth();
+  if (!session?.user?.email || session.user.role !== "ADMIN") {
+    return { success: false, error: "Немає прав доступу" };
+  }
+
+  const result = await executeMatchSync(teamContext);
+  if (result.success) {
+    revalidateMatchPaths();
+  }
+  return result;
 }
 
 export async function createManualMatch(

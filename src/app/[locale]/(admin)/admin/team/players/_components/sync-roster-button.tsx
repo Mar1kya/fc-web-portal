@@ -9,7 +9,7 @@ import { syncPlayersRoster } from "@/actions/team"
 import { SOFASCORE_TEAM_IDS } from "@/lib/constants"
 import { TeamContext } from "../../../../../../../../generated/prisma"
 
-interface SyncRosterButtonProps {
+type SyncRosterButtonProps = {
     teamContext: TeamContext;
 }
 

@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Prisma } from "../../../../../../../generated/prisma";
 import { getTranslation } from "@/lib/utils/get-translation";
 import PlayerList, { PlayerItem } from "./player-list";
+import { getOurTeamName } from "@/lib/utils/team-display";
 
 type MatchWithDetails = Prisma.MatchGetPayload<{
     include: {
@@ -28,9 +29,9 @@ const positionOrder: Record<string, number> = {
 
 export default function MatchLineups({ match, locale }: { match: MatchWithDetails; locale: string }) {
     const t = useTranslations("SingleMatchPage.Lineups");
-    const tHero = useTranslations("SingleMatchPage.Hero");
+    const tMatch = useTranslations("MatchesPage");
     const translatedOpponent = getTranslation(match.opponent, locale)?.name || "";
-    const ourTeamName = tHero("ourTeamName");
+    const ourTeamName = getOurTeamName(tMatch("ourTeamName"), match.teamContext, tMatch);
     const homeTeamName = match.isHomeGame ? ourTeamName : translatedOpponent;
     const awayTeamName = match.isHomeGame ? translatedOpponent : ourTeamName;
     const homeCoach = match.homeCoachName;

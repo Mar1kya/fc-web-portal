@@ -1,48 +1,12 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { MatchStatus, TeamContext } from "../../../../../generated/prisma";
-import { TEAM_ID } from "@/lib/constants";
-
-const mapMatchStatus = (sofaStatus: string): MatchStatus => {
-  switch (sofaStatus) {
-    case "finished":
-      return MatchStatus.FINISHED;
-    case "notstarted":
-      return MatchStatus.SCHEDULED;
-    case "inprogress":
-      return MatchStatus.LIVE;
-    case "postponed":
-      return MatchStatus.POSTPONED;
-    case "canceled":
-      return MatchStatus.CANCELED;
-    default:
-      return MatchStatus.SCHEDULED;
-  }
-};
-
-async function fetchMatchesFromSofaScore(endpoint: string) {
-  const response = await fetch(
-    `https://sofascore.p.rapidapi.com/teams/${endpoint}?teamId=${TEAM_ID}`,
-    {
-      headers: {
-        "x-rapidapi-host": "sofascore.p.rapidapi.com",
-        "x-rapidapi-key": process.env.RAPIDAPI_KEY!,
-      },
-      cache: "no-store",
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(`API error fetching ${endpoint}: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  return data.events || [];
-}
+import {  TeamContext } from "../../../../../generated/prisma";
+import { SOFASCORE_TEAM_IDS} from "@/lib/constants";
+import { executeMatchSync } from "@/actions/match";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const key = searchParams.get("key");
+  const contextParam = searchParams.get("context");
   const authHeader = request.headers.get("authorization");
 
   const isVercelCron = authHeader === `Bearer ${process.env.CRON_SECRET}`;
@@ -52,187 +16,14 @@ export async function GET(request: Request) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  try {
-    const activeSeason = await prisma.season.findFirst({
-      where: { isActive: true },
-    });
+  const contexts = contextParam
+    ? [contextParam as TeamContext]
+    : (Object.keys(SOFASCORE_TEAM_IDS) as TeamContext[]);
 
-    if (!activeSeason) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "No active season found in the database. Please create one.",
-        },
-        { status: 400 },
-      );
-    }
+  const results = await Promise.all(
+    contexts.map(async (ctx) => ({ context: ctx, ...(await executeMatchSync(ctx)) })),
+  );
 
-    const pastMatches = await fetchMatchesFromSofaScore("get-last-matches");
-    const futureMatches = await fetchMatchesFromSofaScore("get-next-matches");
-
-    const rawMatches = [...pastMatches, ...futureMatches];
-    const uniqueMatchesMap = new Map();
-    for (const match of rawMatches) {
-      uniqueMatchesMap.set(match.id, match);
-    }
-    const allMatches = Array.from(uniqueMatchesMap.values());
-
-    if (allMatches.length === 0) {
-      throw new Error("No matches found in response");
-    }
-
-    let createdCount = 0;
-    let updatedCount = 0;
-    let skippedCount = 0;
-
-    await prisma.$transaction(
-      async (tx) => {
-        for (const event of allMatches) {
-          const matchDate = new Date(event.startTimestamp * 1000);
-
-          if (
-            matchDate < activeSeason.startDate ||
-            matchDate > activeSeason.endDate
-          ) {
-            skippedCount++;
-            continue;
-          }
-
-          const isHomeGame = Number(event.homeTeam.id) === Number(TEAM_ID);
-          const opponentData = isHomeGame ? event.awayTeam : event.homeTeam;
-
-          let tournament = await tx.tournament.findFirst({
-            where: {
-              OR: [
-                { sofascoreId: event.tournament.uniqueTournament.id },
-                { slug: event.tournament.slug },
-              ],
-            },
-          });
-
-          if (!tournament) {
-            tournament = await tx.tournament.create({
-              data: {
-                slug: event.tournament.slug,
-                sofascoreId: event.tournament.uniqueTournament.id,
-                translations: {
-                  create: [
-                    {
-                      language: "uk",
-                      name: event.tournament.uniqueTournament.name,
-                    },
-                    {
-                      language: "en",
-                      name: event.tournament.uniqueTournament.name,
-                    },
-                  ],
-                },
-              },
-            });
-          } else if (tournament.sofascoreId === null) {
-            tournament = await tx.tournament.update({
-              where: { id: tournament.id },
-              data: { sofascoreId: event.tournament.uniqueTournament.id },
-            });
-          }
-
-          let opponent = await tx.opponent.findFirst({
-            where: {
-              OR: [
-                { sofascoreId: opponentData.id },
-                { slug: opponentData.slug },
-              ],
-            },
-          });
-
-          if (!opponent) {
-            opponent = await tx.opponent.create({
-              data: {
-                slug: opponentData.slug,
-                sofascoreId: opponentData.id,
-                logoUrl: `https://img.sofascore.com/api/v1/team/${opponentData.id}/image`,
-                translations: {
-                  create: [
-                    { language: "uk", name: opponentData.name },
-                    { language: "en", name: opponentData.name },
-                  ],
-                },
-              },
-            });
-          } else if (opponent.sofascoreId === null) {
-            opponent = await tx.opponent.update({
-              where: { id: opponent.id },
-              data: { sofascoreId: opponentData.id },
-            });
-          }
-
-          const sofascoreId = event.id;
-          const matchStatus = mapMatchStatus(event.status.type);
-          const round = event.roundInfo?.round || null;
-          const homeScore = event.homeScore?.current ?? null;
-          const awayScore = event.awayScore?.current ?? null;
-          const uniqueMatchSlug = `${event.slug}-${sofascoreId}`;
-
-          const existingMatch = await tx.match.findUnique({
-            where: { sofascoreId },
-          });
-
-          if (existingMatch) {
-            await tx.match.update({
-              where: { id: existingMatch.id },
-              data: {
-                slug: uniqueMatchSlug,
-                date: matchDate,
-                startTimestamp: event.startTimestamp,
-                status: matchStatus,
-                round,
-                homeScore,
-                awayScore,
-              },
-            });
-            updatedCount++;
-          } else {
-            await tx.match.create({
-              data: {
-                slug: uniqueMatchSlug,
-                sofascoreId,
-                date: matchDate,
-                startTimestamp: event.startTimestamp,
-                status: matchStatus,
-                round,
-                isHomeGame,
-                homeScore,
-                awayScore,
-                teamContext: TeamContext.MAIN_TEAM,
-                seasonId: activeSeason.id,
-                tournamentId: tournament.id,
-                opponentId: opponent.id,
-              },
-            });
-            createdCount++;
-          }
-        }
-      },
-      {
-        maxWait: 10000,
-        timeout: 30000,
-      },
-    );
-
-    return NextResponse.json({
-      success: true,
-      processed: allMatches.length,
-      skipped: skippedCount,
-      created: createdCount,
-      updated: updatedCount,
-    });
-  } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error occurred";
-    console.error("Sync Matches Error:", errorMessage);
-    return NextResponse.json(
-      { success: false, error: errorMessage },
-      { status: 500 },
-    );
-  }
+  const hasFailure = results.some((r) => !r.success);
+  return NextResponse.json({ results }, { status: hasFailure ? 207 : 200 });
 }

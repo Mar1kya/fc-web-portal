@@ -352,6 +352,15 @@
     "noPreviousMatch": "Поки немає зіграних матчів",
     "noUpcomingMatches": "Матчі ще не заплановані",
     "ourTeamName": "Смарагдова Банда",
+    "teamSuffixes": {
+      "MAIN_TEAM": "",
+      "RESERVE": "2",
+      "U21": "U21",
+      "U19": "U19",
+      "ACADEMY": "Академія",
+      "WOMEN": "Жінки",
+      "GENERAL": ""
+    },
     "noStadium": "Стадіон не вказано",
     "noMatches": "Матчі для цього сезону не знайдено.",
     "MatchList": {
