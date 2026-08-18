@@ -44,7 +44,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
                             Архів
                         </Link>
                     </Button>
-                    <SyncRosterButton />
+                    <SyncRosterButton teamContext={currentTeam}/>
                     <Button asChild className="gap-2">
                         <Link href="/admin/team/players/create">
                             <Plus className="w-4 h-4" /> Додати гравця

@@ -102,8 +102,11 @@ enum PostType {
 
 enum TeamContext {
   MAIN_TEAM
+  RESERVE
+  U21
   U19
   ACADEMY
+  WOMEN
   GENERAL
 }
 
