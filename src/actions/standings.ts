@@ -19,7 +19,10 @@ export async function executeStandingsSync() {
     });
 
     if (tournaments.length === 0) {
-      return { success: true, message: "Немає турнірів для оновлення таблиць." };
+      return {
+        success: true,
+        message: "Немає турнірів для оновлення таблиць.",
+      };
     }
 
     let totalUpdated = 0;
@@ -45,11 +48,13 @@ export async function executeStandingsSync() {
                 "x-rapidapi-key": process.env.RAPIDAPI_KEY!,
               },
               cache: "no-store",
-            }
+            },
           );
 
           if (!response.ok) {
-            console.error(`Помилка API для турніру ${tournament.slug}: ${response.statusText}`);
+            console.error(
+              `Помилка API для турніру ${tournament.slug}: ${response.statusText}`,
+            );
             continue;
           }
 
@@ -74,13 +79,16 @@ export async function executeStandingsSync() {
             const dictEntry = dictionaryMap.get(teamId);
 
             if (dictEntry) {
-              const ukTranslation = dictEntry.translations.find((t) => t.language === "uk");
+              const ukTranslation = dictEntry.translations.find(
+                (t) => t.language === "uk",
+              );
               if (ukTranslation) localizedName = ukTranslation.name;
             } else {
               const newDictEntry = await tx.teamDictionary.create({
                 data: {
                   sofascoreId: teamId,
                   originalName: originalName,
+                  teamContext: tournament.teamContext,
                   translations: {
                     create: [
                       { language: "uk", name: originalName },
@@ -107,6 +115,7 @@ export async function executeStandingsSync() {
               goalsDiff: row.scoresFor - row.scoresAgainst,
               tournamentId: tournament.id,
               seasonId: activeSeason.id,
+              teamContext: tournament.teamContext,
             });
           }
 
@@ -114,23 +123,30 @@ export async function executeStandingsSync() {
           totalUpdated += rows.length;
         }
       },
-      { maxWait: 10000, timeout: 30000 }
+      { maxWait: 10000, timeout: 30000 },
     );
 
     if (totalUpdated > 0) {
       LOCALES.forEach((locale) => {
         revalidatePath(`/${locale}/standings`);
         revalidatePath(`/${locale}/admin/tournaments/standings`);
-        revalidatePath(`/${locale}/`); 
+        revalidatePath(`/${locale}/`);
       });
     }
 
-    return { success: true, updated: totalUpdated, message: `Оновлено ${totalUpdated} команд у таблицях!` };
+    return {
+      success: true,
+      updated: totalUpdated,
+      message: `Оновлено ${totalUpdated} команд у таблицях!`,
+    };
   } catch (error) {
     console.error("Sync Standings Error:", error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Невідома помилка при оновленні",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Невідома помилка при оновленні",
     };
   }
 }

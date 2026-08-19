@@ -178,7 +178,7 @@ export function CreateManualMatchForm({ seasons, tournaments, opponents }: Creat
                                 min={seasonMinDateValue}
                                 max={seasonMaxDateValue}
                                 disabled={isPending}
-                                className="w-full min-w-0"
+                                className="w-full min-w-0 max-w-full box-border"
                             />
                             {selectedSeason?.startDate && selectedSeason?.endDate && (
                                 <p className="text-xs text-muted-foreground">

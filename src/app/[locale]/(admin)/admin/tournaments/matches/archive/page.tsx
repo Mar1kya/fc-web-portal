@@ -17,7 +17,7 @@ export default async function MatchesArchivePage({ searchParams }: { searchParam
     const { team } = await searchParams;
 
     const existingTeamsObj = await prisma.match.findMany({
-        where: { deletedAt: { not: null } },
+        where: { deletedAt: null },
         distinct: ['teamContext'],
         select: { teamContext: true },
     });

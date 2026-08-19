@@ -4,13 +4,30 @@ import { Archive, Plus } from "lucide-react";
 import { Suspense } from "react";
 import AdminTableSkeleton from "../../_components/admin-table-skeleton";
 import OpponentsTableSection from "./_components/opponents-table-section";
+import { TeamContext } from "../../../../../../../generated/prisma";
+import { prisma } from "@/lib/prisma";
+import { TeamSwitcher } from "@/components/shared/team-switcher";
 
 export const metadata = {
     title: "Суперники",
     description: "Управління списком команд-суперників",
 };
 
-export default async function OpponentsPage() {
+export default async function OpponentsPage({ searchParams }: { searchParams: Promise<{ team?: string }> }) {
+    const { team } = await searchParams;
+
+    const existingTeamsObj = await prisma.match.findMany({
+        where: { deletedAt: null },
+        distinct: ['teamContext'],
+        select: { teamContext: true },
+    });
+
+    const availableTeams = existingTeamsObj.map(t => t.teamContext);
+
+    const currentTeam = team && availableTeams.includes(team as TeamContext)
+        ? (team as TeamContext)
+        : availableTeams[0] || TeamContext.MAIN_TEAM;
+
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -35,8 +52,13 @@ export default async function OpponentsPage() {
                     </Button>
                 </div>
             </div>
+            <TeamSwitcher
+                availableTeams={availableTeams}
+                currentTeam={currentTeam}
+                basePath="/admin/tournaments/opponents"
+            />
             <Suspense fallback={<AdminTableSkeleton />}>
-                <OpponentsTableSection />
+                <OpponentsTableSection currentTeam={currentTeam} />
             </Suspense>
         </div>
     );
