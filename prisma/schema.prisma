@@ -293,12 +293,14 @@ model Tournament {
   slug         String                  @unique
   sofascoreId  Int?                    @unique
   hasStandings Boolean                 @default(false)
+  teamContext  TeamContext             @default(MAIN_TEAM)
   translations TournamentTranslation[]
   matches      Match[]
   standings    Standing[]
   deletedAt    DateTime?
 
   @@index([deletedAt])
+  @@index([teamContext])
 }
 
 model TournamentTranslation {
@@ -340,11 +342,13 @@ model TeamDictionary {
   sofascoreId  Int                         @unique
   originalName String
   translations TeamDictionaryTranslation[]
+  teamContext  TeamContext                 @default(MAIN_TEAM)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
 
+  @@index([teamContext])
+}
 model TeamDictionaryTranslation {
   id               String         @id @default(cuid())
   teamDictionaryId String

@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { columns } from "./columns";
 import { DataTable } from "@/components/ui/data-table";
+import { TeamContext } from "../../../../../../../../generated/prisma";
 
-export default async function DictionaryTableSection() {
+export default async function DictionaryTableSection({ currentTeam }: { currentTeam: TeamContext }) {
     const dictionaryEntries = await prisma.teamDictionary.findMany({
+        where: { teamContext: currentTeam },
         include: {
             translations: true,
         },
