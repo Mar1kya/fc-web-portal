@@ -159,35 +159,20 @@ export function EditProductForm({ initialData, categories, players, colors }: Ed
     return (
         <form action={actionFn} className="space-y-6">
             <Tabs defaultValue="basic" className="w-full">
-                <TabsList className="flex flex-wrap w-full max-w-fit mb-6 justify-start h-auto gap-1">
-                    <TabsTrigger
-                        value="basic"
-                        className="data-[state=active]:bg-muted data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border rounded-md px-4 py-2"
-                    >
+                <TabsList className="flex flex-nowrap w-full overflow-x-auto no-scrollbar mb-6 justify-start h-auto gap-1 -mx-1 px-1">
+                    <TabsTrigger value="basic" className="shrink-0 data-[state=active]:bg-muted data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border rounded-md px-4 py-2">
                         Базова інформація
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="price"
-                        className="data-[state=active]:bg-muted data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border rounded-md px-4 py-2"
-                    >
+                    <TabsTrigger value="price" className="shrink-0 data-[state=active]:bg-muted data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border rounded-md px-4 py-2">
                         Ціни та Статус
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="attributes"
-                        className="data-[state=active]:bg-muted data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border rounded-md px-4 py-2"
-                    >
+                    <TabsTrigger value="attributes" className="shrink-0 data-[state=active]:bg-muted data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border rounded-md px-4 py-2">
                         Атрибути та Гравці
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="variants"
-                        className="data-[state=active]:bg-muted data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border rounded-md px-4 py-2"
-                    >
+                    <TabsTrigger value="variants" className="shrink-0 data-[state=active]:bg-muted data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border rounded-md px-4 py-2">
                         Розміри ({variants.length})
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="media"
-                        className="data-[state=active]:bg-muted data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border rounded-md px-4 py-2"
-                    >
+                    <TabsTrigger value="media" className="shrink-0 data-[state=active]:bg-muted data-[state=active]:shadow-none border border-transparent data-[state=active]:border-border rounded-md px-4 py-2">
                         Фотографії
                     </TabsTrigger>
                 </TabsList>

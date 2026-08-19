@@ -170,16 +170,19 @@ export function CreateManualMatchForm({ seasons, tournaments, opponents }: Creat
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="matchDate">Дата та час матчу <span className="text-red-500">*</span></Label>
-                            <Input
-                                id="matchDate"
-                                type="datetime-local"
-                                value={date}
-                                onChange={(e) => setDate(e.target.value)}
-                                min={seasonMinDateValue}
-                                max={seasonMaxDateValue}
-                                disabled={isPending}
-                                className="w-full min-w-0 max-w-full box-border"
-                            />
+                            <div className="overflow-hidden w-full">
+                                <Input
+                                    id="matchDate"
+                                    type="datetime-local"
+                                    value={date}
+                                    onChange={(e) => setDate(e.target.value)}
+                                    min={seasonMinDateValue}
+                                    max={seasonMaxDateValue}
+                                    disabled={isPending}
+                                    className="w-full origin-left"
+                                    style={{ transform: "scale(0.85)", transformOrigin: "left center" }}
+                                />
+                            </div>
                             {selectedSeason?.startDate && selectedSeason?.endDate && (
                                 <p className="text-xs text-muted-foreground">
                                     Сезон {selectedSeason.name}: {new Intl.DateTimeFormat("uk").format(new Date(selectedSeason.startDate))} — {new Intl.DateTimeFormat("uk").format(new Date(selectedSeason.endDate))}
