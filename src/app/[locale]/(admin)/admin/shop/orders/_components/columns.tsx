@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import { OrderStatusEnum, PaymentMethodEnum } from "../../../../../../../../generated/prisma";
 import { OrderActions } from "./order-actions";
+import { formatOrderDate, formatOrderTime } from "@/lib/utils/format-date";
 
 
 export type OrderItemPlain = {
@@ -214,19 +215,10 @@ export const columns: ColumnDef<OrderPlain>[] = [
             </Button>
         ),
         cell: ({ row }) => {
-            const date = new Date(row.original.createdAt);
             return (
                 <div className="flex flex-col gap-0.5 whitespace-nowrap">
-                    <span className="text-sm">
-                        {date.toLocaleDateString("uk-UA", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                        })}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                        {date.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}
-                    </span>
+                    <span className="text-sm">{formatOrderDate(row.original.createdAt)}</span>
+                    <span className="text-xs text-muted-foreground">{formatOrderTime(row.original.createdAt)}</span>
                 </div>
             );
         },

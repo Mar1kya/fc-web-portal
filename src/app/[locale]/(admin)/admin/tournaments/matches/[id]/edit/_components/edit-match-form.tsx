@@ -292,15 +292,18 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label>Дата та час <span className="text-red-500">*</span></Label>
-                                        <Input
-                                            type="datetime-local"
-                                            value={date}
-                                            onChange={e => setDate(e.target.value)}
-                                            min={seasonMinDateValue}
-                                            max={seasonMaxDateValue}
-                                            disabled={isPending}
-                                                className="w-full min-w-0 max-w-full box-border"
-                                        />
+                                        <div className="overflow-hidden w-full">
+                                            <Input
+                                                type="datetime-local"
+                                                value={date}
+                                                onChange={e => setDate(e.target.value)}
+                                                min={seasonMinDateValue}
+                                                max={seasonMaxDateValue}
+                                                disabled={isPending}
+                                                className="w-full origin-left"
+                                                style={{ transform: "scale(0.85)", transformOrigin: "left center" }}
+                                            />
+                                        </div>
                                         {selectedSeason?.startDate && selectedSeason?.endDate && (
                                             <p className="text-xs text-muted-foreground">
                                                 Сезон {selectedSeason.name}: {new Intl.DateTimeFormat("uk").format(new Date(selectedSeason.startDate))} — {new Intl.DateTimeFormat("uk").format(new Date(selectedSeason.endDate))}

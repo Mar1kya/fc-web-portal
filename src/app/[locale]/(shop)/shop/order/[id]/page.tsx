@@ -11,6 +11,7 @@ import OrderGuestBanner from "./_components/order-guest-banner";
 import OrderDetails from "./_components/order-details";
 import RetryPaymentButton from "./_components/retry-payment-button";
 import { getPaymentBadgeConfig, statusColors } from "@/lib/constants";
+import { formatOrderDateTime } from "@/lib/utils/format-date";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string; locale: string }> }) {
     const { id, locale } = await params;
@@ -101,9 +102,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                         {t("title")} #{order.id.slice(-6).toUpperCase()}
                     </h1>
                     <p className="text-muted-foreground text-sm mt-1">
-                        {t("placedAt")}: {new Date(order.createdAt).toLocaleDateString(locale, {
-                            day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit"
-                        })}
+                        {formatOrderDateTime(order.createdAt, locale)}
                     </p>
                 </div>
                 <div className="flex flex-col md:items-end gap-4 w-full md:w-auto">

@@ -8,6 +8,7 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 import { OrderStatusForm } from "./_components/order-status-form";
+import { formatOrderDateTime } from "@/lib/utils/format-date";
 
 export const metadata = {
     title: "Деталі замовлення",
@@ -47,13 +48,7 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
                     </div>
                     <p className="text-muted-foreground text-sm font-mono">{order.id}</p>
                     <p className="text-muted-foreground text-xs mt-0.5">
-                        {new Date(order.createdAt).toLocaleDateString("uk-UA", {
-                            day: "2-digit",
-                            month: "long",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                        })}
+                        {formatOrderDateTime(order.createdAt)}
                     </p>
                 </div>
                 <Button variant="outline" asChild>
