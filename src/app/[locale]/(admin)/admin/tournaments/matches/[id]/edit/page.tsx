@@ -28,7 +28,7 @@ export default async function EditMatchPage({ params }: { params: Promise<{ id: 
         notFound();
     }
 
-    const [seasonsData, tournamentsData, opponentsData, playersData] = await Promise.all([
+    const [seasonsData, tournamentsData, opponentsData, playersData, opponentMatches] = await Promise.all([
         prisma.season.findMany({
             where: { deletedAt: null },
             select: { id: true, name: true, startDate: true, endDate: true },
@@ -49,6 +49,11 @@ export default async function EditMatchPage({ params }: { params: Promise<{ id: 
             include: { translations: { where: { language: 'uk' } } },
             orderBy: { number: 'asc' }
         }),
+        prisma.match.findMany({
+            where: { deletedAt: null },
+            select: { opponentId: true, teamContext: true },
+            distinct: ['opponentId', 'teamContext'],
+        }),
     ]);
 
     const seasons = seasonsData.map(s => ({
@@ -59,11 +64,21 @@ export default async function EditMatchPage({ params }: { params: Promise<{ id: 
     }));
     const tournaments = tournamentsData.map(t => ({ id: t.id, name: t.translations[0]?.name || t.slug, hasStandings: t.hasStandings }));
     const opponents = opponentsData.map(o => ({ id: o.id, name: o.translations[0]?.name || o.slug }));
+
     const players = playersData.map(p => ({
         id: p.id,
         name: p.translations[0]?.name || p.slug,
-        number: p.number
+        number: p.number,
+        teamContext: p.teamContext
     }));
+
+    const opponentContextMap: Record<string, string[]> = {};
+    for (const m of opponentMatches) {
+        if (!opponentContextMap[m.opponentId]) {
+            opponentContextMap[m.opponentId] = [];
+        }
+        opponentContextMap[m.opponentId].push(m.teamContext);
+    }
 
     return (
         <div className="flex flex-col gap-6">
@@ -87,6 +102,7 @@ export default async function EditMatchPage({ params }: { params: Promise<{ id: 
                 tournaments={tournaments}
                 opponents={opponents}
                 players={players}
+                opponentContextMap={opponentContextMap}
             />
         </div>
     )

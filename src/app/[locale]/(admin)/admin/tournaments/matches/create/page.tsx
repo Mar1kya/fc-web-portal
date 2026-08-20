@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 }
 
 export default async function CreateManualMatchPage() {
-    const [seasonsData, tournamentsData, opponentsData] = await Promise.all([
+    const [seasonsData, tournamentsData, opponentsData, opponentMatches] = await Promise.all([
         prisma.season.findMany({
             where: { deletedAt: null },
             orderBy: { createdAt: 'desc' }
@@ -25,6 +25,11 @@ export default async function CreateManualMatchPage() {
             where: { deletedAt: null },
             include: { translations: { where: { language: 'uk' } } },
             orderBy: { slug: 'asc' }
+        }),
+        prisma.match.findMany({
+            where: { deletedAt: null },
+            select: { opponentId: true, teamContext: true },
+            distinct: ['opponentId', 'teamContext'],
         }),
     ]);
 
@@ -44,6 +49,13 @@ export default async function CreateManualMatchPage() {
         id: o.id,
         name: o.translations[0]?.name || o.slug
     }));
+    const opponentContextMap: Record<string, string[]> = {};
+    for (const m of opponentMatches) {
+        if (!opponentContextMap[m.opponentId]) {
+            opponentContextMap[m.opponentId] = [];
+        }
+        opponentContextMap[m.opponentId].push(m.teamContext);
+    }
 
     return (
         <div className="flex flex-col gap-6">
@@ -65,6 +77,7 @@ export default async function CreateManualMatchPage() {
                 seasons={seasons}
                 tournaments={tournaments}
                 opponents={opponents}
+                opponentContextMap={opponentContextMap}
             />
         </div>
     )

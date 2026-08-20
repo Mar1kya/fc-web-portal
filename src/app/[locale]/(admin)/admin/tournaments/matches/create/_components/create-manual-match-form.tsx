@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useActionState, useEffect } from "react"
+import { useState, useMemo, useActionState, useEffect } from "react"
 import { Link, useRouter } from "@/i18n/navigation"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
@@ -28,9 +28,10 @@ type CreateManualMatchFormProps = {
     seasons: SeasonOption[];
     tournaments: SelectOption[];
     opponents: SelectOption[];
+    opponentContextMap: Record<string, string[]>;
 }
 
-export function CreateManualMatchForm({ seasons, tournaments, opponents }: CreateManualMatchFormProps) {
+export function CreateManualMatchForm({ seasons, tournaments, opponents, opponentContextMap }: CreateManualMatchFormProps) {
     const router = useRouter();
     const [seasonId, setSeasonId] = useState<string>("");
     const [tournamentId, setTournamentId] = useState<string>("");
@@ -68,6 +69,17 @@ export function CreateManualMatchForm({ seasons, tournaments, opponents }: Creat
         (new Date(date) < new Date(selectedSeason.startDate) ||
             new Date(date) > new Date(new Date(selectedSeason.endDate).setHours(23, 59, 59, 999)))
     );
+
+    const filteredOpponents = useMemo(() => {
+        return opponents.filter(o => opponentContextMap[o.id]?.includes(teamContext));
+    }, [opponents, opponentContextMap, teamContext]);
+
+    const handleTeamContextChange = (val: TeamContext) => {
+        setTeamContext(val);
+        if (opponentId && !opponentContextMap[opponentId]?.includes(val)) {
+            setOpponentId("");
+        }
+    };
 
     const boundData: BoundMatchData = {
         seasonId,
@@ -140,24 +152,12 @@ export function CreateManualMatchForm({ seasons, tournaments, opponents }: Creat
                             {state?.errors?.tournamentId && <p className="text-red-500 text-sm">{state.errors.tournamentId[0]}</p>}
                         </div>
                         <div className="space-y-2">
-                            <Label>Суперник <span className="text-red-500">*</span></Label>
-                            <Select value={opponentId} onValueChange={setOpponentId} disabled={isPending}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Оберіть суперника" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {opponents.map((opponent) => (
-                                        <SelectItem key={opponent.id} value={opponent.id}>
-                                            {opponent.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {state?.errors?.opponentId && <p className="text-red-500 text-sm">{state.errors.opponentId[0]}</p>}
-                        </div>
-                        <div className="space-y-2">
                             <Label>Команда <span className="text-red-500">*</span></Label>
-                            <Select value={teamContext} onValueChange={(val) => setTeamContext(val as TeamContext)} disabled={isPending}>
+                            <Select
+                                value={teamContext}
+                                onValueChange={handleTeamContextChange}
+                                disabled={isPending}
+                            >
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
@@ -167,6 +167,36 @@ export function CreateManualMatchForm({ seasons, tournaments, opponents }: Creat
                                     ))}
                                 </SelectContent>
                             </Select>
+                            <p className="text-xs text-muted-foreground">
+                                Список суперників нижче залежить від обраної команди.
+                            </p>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Суперник <span className="text-red-500">*</span></Label>
+                            <Select value={opponentId} onValueChange={setOpponentId} disabled={isPending}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Оберіть суперника" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {filteredOpponents.length === 0 ? (
+                                        <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+                                            Немає суперників для цієї команди
+                                        </div>
+                                    ) : (
+                                        filteredOpponents.map((opponent) => (
+                                            <SelectItem key={opponent.id} value={opponent.id}>
+                                                {opponent.name}
+                                            </SelectItem>
+                                        ))
+                                    )}
+                                </SelectContent>
+                            </Select>
+                            {filteredOpponents.length === 0 && (
+                                <p className="text-xs text-amber-600">
+                                    Ще немає жодного суперника, який грав з цією командою. Спочатку додайте суперника в довіднику.
+                                </p>
+                            )}
+                            {state?.errors?.opponentId && <p className="text-red-500 text-sm">{state.errors.opponentId[0]}</p>}
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="matchDate">Дата та час матчу <span className="text-red-500">*</span></Label>

@@ -349,6 +349,7 @@ model TeamDictionary {
 
   @@index([teamContext])
 }
+
 model TeamDictionaryTranslation {
   id               String         @id @default(cuid())
   teamDictionaryId String
@@ -398,6 +399,7 @@ model Match {
   @@index([teamContext])
   @@index([seasonId, teamContext, deletedAt])
   @@index([teamContext, deletedAt, date])
+  @@index([opponentId, teamContext])
 }
 
 model MatchLineup {
