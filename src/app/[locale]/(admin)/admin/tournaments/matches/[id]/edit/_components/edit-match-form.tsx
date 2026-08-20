@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useActionState, useEffect } from "react"
+import { useState, useMemo, useActionState, useEffect } from "react"
 import { Link, useRouter } from "@/i18n/navigation"
 import { toast } from "sonner"
 import { Loader2, Plus, Trash2 } from "lucide-react"
@@ -17,7 +17,7 @@ import { EventType, Match, MatchEvent, MatchLineup, MatchStatus, TeamContext } f
 import { teamContextTranslations, matchStatusTranslations } from "@/lib/constants"
 import { BoundMatchUpdateData, updateMatch } from "@/actions/match"
 
-type SelectOption = { id: string; name: string; number?: number; hasStandings?: boolean }
+type SelectOption = { id: string; name: string; number?: number; hasStandings?: boolean; teamContext?: TeamContext }
 
 type SeasonOption = SelectOption & {
     startDate: Date | null;
@@ -35,6 +35,7 @@ type EditMatchFormProps = {
     tournaments: SelectOption[];
     opponents: SelectOption[];
     players: SelectOption[];
+    opponentContextMap: Record<string, string[]>;
 }
 
 const eventTypeTranslations: Record<EventType, string> = {
@@ -55,7 +56,7 @@ type MatchFormEvent = {
     goalModifier: 'NONE' | 'PENALTY' | 'OWN_GOAL';
 };
 
-export function EditMatchForm({ initialData, seasons, tournaments, opponents, players }: EditMatchFormProps) {
+export function EditMatchForm({ initialData, seasons, tournaments, opponents, players, opponentContextMap }: EditMatchFormProps) {
     const router = useRouter();
     const [seasonId, setSeasonId] = useState(initialData.seasonId || "");
     const [tournamentId, setTournamentId] = useState(initialData.tournamentId || "");
@@ -73,6 +74,14 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
     const [awayCoachName, setAwayCoachName] = useState(initialData.awayCoachName || "");
     const [highlightsUrl, setHighlightsUrl] = useState(initialData.highlightsUrl || "");
     const [postMatchUrl, setPostMatchUrl] = useState(initialData.postMatchUrl || "");
+
+    const filteredOpponents = useMemo(() => {
+        return opponents.filter(o => opponentContextMap[o.id]?.includes(teamContext));
+    }, [opponents, opponentContextMap, teamContext]);
+
+    const filteredPlayers = useMemo(() => {
+        return players.filter(p => p.teamContext === teamContext);
+    }, [players, teamContext]);
 
     const [lineup, setLineup] = useState<{ playerId: string; isStarter: boolean; inSquad: boolean }[]>(
         initialData.lineup.map(l => ({
@@ -157,6 +166,34 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
         setEvents(prev => prev.filter((_, i) => i !== index));
     };
 
+    const handleTeamContextChange = (val: TeamContext) => {
+        const hasLineupOrEvents = lineup.some(l => l.inSquad) || events.length > 0;
+
+        if (hasLineupOrEvents) {
+            const confirmed = window.confirm(
+                "Зміна команди очистить обраний склад та гравців у подіях, прив'язаних до попередньої команди. Продовжити?"
+            );
+            if (!confirmed) return;
+        }
+
+        setTeamContext(val);
+
+        if (opponentId && !opponentContextMap[opponentId]?.includes(val)) {
+            setOpponentId("");
+        }
+
+        setLineup(prev => prev.filter(l =>
+            players.find(p => p.id === l.playerId)?.teamContext === val
+        ));
+
+        setEvents(prev => prev.map(e => {
+            if (!e.isOpponent && e.playerId && players.find(p => p.id === e.playerId)?.teamContext !== val) {
+                return { ...e, playerId: null };
+            }
+            return e;
+        }));
+    };
+
     const handleHomeGameToggle = (checked: boolean) => {
         setIsHomeGame(checked);
         const tempCoach = homeCoachName;
@@ -208,7 +245,7 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                         !e.isOpponent
                 ),
             })),
-        events: events.map(({ id, goalModifier, ...rest }) => {
+        events: events.map(({ id: _id, goalModifier, ...rest }) => {
             let finalCustomName = rest.customPlayerName || "";
 
             if (rest.type === EventType.GOAL) {
@@ -343,7 +380,7 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                                     </div>
                                     <div className="space-y-2">
                                         <Label>Команда <span className="text-red-500">*</span></Label>
-                                        <Select value={teamContext} onValueChange={(val) => setTeamContext(val as TeamContext)} disabled={isPending}>
+                                        <Select value={teamContext} onValueChange={handleTeamContextChange} disabled={isPending}>
                                             <SelectTrigger><SelectValue /></SelectTrigger>
                                             <SelectContent>
                                                 {Object.entries(teamContextTranslations).map(([key, label]) => (
@@ -366,11 +403,22 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                                 <div className="space-y-2">
                                     <Label>Суперник <span className="text-red-500">*</span></Label>
                                     <Select value={opponentId} onValueChange={setOpponentId} disabled={isPending}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectTrigger><SelectValue placeholder="Оберіть суперника" /></SelectTrigger>
                                         <SelectContent>
-                                            {opponents.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
+                                            {filteredOpponents.length === 0 ? (
+                                                <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+                                                    Немає суперників для цієї команди
+                                                </div>
+                                            ) : (
+                                                filteredOpponents.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)
+                                            )}
                                         </SelectContent>
                                     </Select>
+                                    {filteredOpponents.length === 0 && (
+                                        <p className="text-xs text-amber-600">
+                                            Ще немає жодного суперника, який грав з цією командою. Спочатку додайте суперника в довіднику.
+                                        </p>
+                                    )}
                                     {state?.errors?.opponentId && <p className="text-red-500 text-xs">{state.errors.opponentId[0]}</p>}
                                 </div>
                                 <div className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-muted/10">
@@ -433,28 +481,34 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <ScrollArea className="h-125 pr-4 rounded-md">
-                                <div className="p-2 space-y-1">
-                                    {players.map((player) => {
-                                        const playerState = lineup.find(l => l.playerId === player.id) || { inSquad: false, isStarter: false };
-                                        return (
-                                            <div key={player.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-colors gap-3">
-                                                <span className="font-medium">{player.number ? `${player.number}. ` : ''}{player.name}</span>
-                                                <div className="flex gap-6">
-                                                    <div className="flex items-center space-x-2">
-                                                        <Checkbox id={`played-${player.id}`} checked={playerState.inSquad} onCheckedChange={() => togglePlayer(player.id, 'inSquad')} disabled={isPending} />
-                                                        <Label htmlFor={`played-${player.id}`} className="cursor-pointer font-normal">В заявці</Label>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2 w-24">
-                                                        <Checkbox id={`starter-${player.id}`} checked={playerState.isStarter} onCheckedChange={() => togglePlayer(player.id, 'isStarter')} disabled={!playerState.inSquad || isPending} />
-                                                        <Label htmlFor={`starter-${player.id}`} className={`cursor-pointer font-normal ${!playerState.inSquad ? 'opacity-50' : ''}`}>Основа</Label>
+                            {filteredPlayers.length === 0 ? (
+                                <div className="text-center p-8 text-muted-foreground border-2 border-dashed rounded-lg bg-muted/10">
+                                    Немає гравців для цієї команди в довіднику. Спочатку додайте гравця з відповідною командою.
+                                </div>
+                            ) : (
+                                <ScrollArea className="h-125 pr-4 rounded-md">
+                                    <div className="p-2 space-y-1">
+                                        {filteredPlayers.map((player) => {
+                                            const playerState = lineup.find(l => l.playerId === player.id) || { inSquad: false, isStarter: false };
+                                            return (
+                                                <div key={player.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-colors gap-3">
+                                                    <span className="font-medium">{player.number ? `${player.number}. ` : ''}{player.name}</span>
+                                                    <div className="flex gap-6">
+                                                        <div className="flex items-center space-x-2">
+                                                            <Checkbox id={`played-${player.id}`} checked={playerState.inSquad} onCheckedChange={() => togglePlayer(player.id, 'inSquad')} disabled={isPending} />
+                                                            <Label htmlFor={`played-${player.id}`} className="cursor-pointer font-normal">В заявці</Label>
+                                                        </div>
+                                                        <div className="flex items-center space-x-2 w-24">
+                                                            <Checkbox id={`starter-${player.id}`} checked={playerState.isStarter} onCheckedChange={() => togglePlayer(player.id, 'isStarter')} disabled={!playerState.inSquad || isPending} />
+                                                            <Label htmlFor={`starter-${player.id}`} className={`cursor-pointer font-normal ${!playerState.inSquad ? 'opacity-50' : ''}`}>Основа</Label>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </ScrollArea>
+                                            );
+                                        })}
+                                    </div>
+                                </ScrollArea>
+                            )}
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -500,7 +554,6 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                                                     disabled={isPending}
                                                 />
                                             </div>
-
                                             <div className="md:col-span-3 space-y-2">
                                                 <Label>Тип <span className="text-red-500">*</span></Label>
                                                 <Select
@@ -533,16 +586,21 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                                                 }} disabled={isPending} />
                                                 <Label className="cursor-pointer">Суперник?</Label>
                                             </div>
-
                                             <div className="md:col-span-5 space-y-2 pr-0 md:pr-8">
-                                                <Label>{ev.isOpponent ? "Ім'я суперника" : "Гравець Emerald Gang"}</Label>
+                                                <Label>{ev.isOpponent ? "Ім'я суперника" : "Гравець"}</Label>
                                                 {ev.isOpponent ? (
                                                     <Input placeholder="Введіть ім'я..." value={ev.customPlayerName || ""} onChange={(e) => updateEvent(idx, 'customPlayerName', e.target.value)} disabled={isPending} />
                                                 ) : (
                                                     <Select value={ev.playerId || ""} onValueChange={(val) => updateEvent(idx, 'playerId', val)} disabled={isPending}>
                                                         <SelectTrigger><SelectValue placeholder="Оберіть гравця" /></SelectTrigger>
                                                         <SelectContent>
-                                                            {players.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                                                            {filteredPlayers.length === 0 ? (
+                                                                <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+                                                                    Немає гравців для цієї команди
+                                                                </div>
+                                                            ) : (
+                                                                filteredPlayers.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)
+                                                            )}
                                                         </SelectContent>
                                                     </Select>
                                                 )}
