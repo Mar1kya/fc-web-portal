@@ -31,8 +31,8 @@ export default async function EditNewsPage({ params }: { params: Promise<{ id: s
             include: { translations: true },
         }),
         prisma.match.findMany({
+            where: { deletedAt: null },
             orderBy: { date: "desc" },
-            take: 20,
             include: { opponent: { include: { translations: true } } },
         }),
     ]);

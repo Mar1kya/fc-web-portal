@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useActionState, useEffect } from "react"
+import { useState, useMemo, useActionState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -62,6 +62,37 @@ export function EditNewsForm({ post, players, coaches, matches }: EditNewsFormPr
     const [selectedPlayers, setSelectedPlayers] = useState<string[]>(post.mentionedPlayers.map(p => p.id));
     const [selectedCoaches, setSelectedCoaches] = useState<string[]>(post.mentionedCoaches.map(c => c.id));
     const [selectedMatches, setSelectedMatches] = useState<string[]>(post.relatedMatches.map(m => m.id));
+
+    const filteredPlayers = useMemo(() => {
+        if (teamContext === "GENERAL") return players;
+        return players.filter(p => p.teamContext === teamContext);
+    }, [players, teamContext]);
+
+    const filteredCoaches = useMemo(() => {
+        if (teamContext === "GENERAL") return coaches;
+        return coaches.filter(c => c.teamContext === teamContext);
+    }, [coaches, teamContext]);
+
+    const filteredMatches = useMemo(() => {
+        if (teamContext === "GENERAL") return matches;
+        return matches.filter(m => m.teamContext === teamContext);
+    }, [matches, teamContext]);
+
+    const handleTeamContextChange = (val: TeamContext) => {
+        setTeamContext(val);
+
+        if (val === "GENERAL") return;
+
+        setSelectedPlayers(prev => prev.filter(id =>
+            players.find(p => p.id === id)?.teamContext === val
+        ));
+        setSelectedCoaches(prev => prev.filter(id =>
+            coaches.find(c => c.id === id)?.teamContext === val
+        ));
+        setSelectedMatches(prev => prev.filter(id =>
+            matches.find(m => m.id === id)?.teamContext === val
+        ));
+    };
 
     const boundData: BoundPostData = {
         titleUk, descriptionUk, contentUk,
@@ -284,7 +315,7 @@ export function EditNewsForm({ post, players, coaches, matches }: EditNewsFormPr
                             </div>
                             <div className="space-y-2">
                                 <Label>Команда</Label>
-                                <Select value={teamContext} onValueChange={(val) => setTeamContext(val as TeamContext)} disabled={isPending}>
+                                <Select value={teamContext} onValueChange={handleTeamContextChange} disabled={isPending}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Оберіть команду" />
                                     </SelectTrigger>
@@ -294,6 +325,9 @@ export function EditNewsForm({ post, players, coaches, matches }: EditNewsFormPr
                                         ))}
                                     </SelectContent>
                                 </Select>
+                                <p className="text-xs text-muted-foreground">
+                                    Списки гравців, тренерів та матчів праворуч фільтруються за обраною командою.
+                                </p>
                             </div>
                         </CardContent>
                     </Card>
@@ -310,28 +344,34 @@ export function EditNewsForm({ post, players, coaches, matches }: EditNewsFormPr
                             <Label className="text-base">Згадані гравці ({selectedPlayers.length})</Label>
                             <ScrollArea className="h-87.5 rounded-md border p-3 bg-muted/10">
                                 <div className="space-y-3">
-                                    {players.map(player => {
-                                        const translation = getTranslation(player, "uk");
-                                        return (
-                                            <div key={player.id} className="flex items-center space-x-3">
-                                                <Checkbox
-                                                    id={`player-${player.id}`}
-                                                    checked={selectedPlayers.includes(player.id)}
-                                                    onCheckedChange={(checked) => handleToggle(player.id, setSelectedPlayers, checked === true)}
-                                                />
-                                                <Label
-                                                    htmlFor={`player-${player.id}`}
-                                                    className="text-sm font-medium cursor-pointer leading-none flex-1"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        handleToggle(player.id, setSelectedPlayers);
-                                                    }}
-                                                >
-                                                    {translation?.name || "Без імені"} <span className="text-muted-foreground ml-1">#{player.number}</span>
-                                                </Label>
-                                            </div>
-                                        )
-                                    })}
+                                    {filteredPlayers.length === 0 ? (
+                                        <p className="text-sm text-muted-foreground text-center py-4">
+                                            Немає гравців для цієї команди
+                                        </p>
+                                    ) : (
+                                        filteredPlayers.map(player => {
+                                            const translation = getTranslation(player, "uk");
+                                            return (
+                                                <div key={player.id} className="flex items-center space-x-3">
+                                                    <Checkbox
+                                                        id={`player-${player.id}`}
+                                                        checked={selectedPlayers.includes(player.id)}
+                                                        onCheckedChange={(checked) => handleToggle(player.id, setSelectedPlayers, checked === true)}
+                                                    />
+                                                    <Label
+                                                        htmlFor={`player-${player.id}`}
+                                                        className="text-sm font-medium cursor-pointer leading-none flex-1"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            handleToggle(player.id, setSelectedPlayers);
+                                                        }}
+                                                    >
+                                                        {translation?.name || "Без імені"} <span className="text-muted-foreground ml-1">#{player.number}</span>
+                                                    </Label>
+                                                </div>
+                                            )
+                                        })
+                                    )}
                                 </div>
                             </ScrollArea>
                         </div>
@@ -339,28 +379,34 @@ export function EditNewsForm({ post, players, coaches, matches }: EditNewsFormPr
                             <Label className="text-base">Згадані тренери ({selectedCoaches.length})</Label>
                             <ScrollArea className="h-50 rounded-md border p-3 bg-muted/10">
                                 <div className="space-y-3">
-                                    {coaches.map(coach => {
-                                        const translation = getTranslation(coach, "uk");
-                                        return (
-                                            <div key={coach.id} className="flex items-center space-x-3">
-                                                <Checkbox
-                                                    id={`coach-${coach.id}`}
-                                                    checked={selectedCoaches.includes(coach.id)}
-                                                    onCheckedChange={(checked) => handleToggle(coach.id, setSelectedCoaches, checked === true)}
-                                                />
-                                                <Label
-                                                    htmlFor={`coach-${coach.id}`}
-                                                    className="text-sm font-medium cursor-pointer leading-none flex-1"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        handleToggle(coach.id, setSelectedCoaches);
-                                                    }}
-                                                >
-                                                    {translation?.name || "Без імені"} <span className="text-muted-foreground ml-1 text-xs">({translation?.role})</span>
-                                                </Label>
-                                            </div>
-                                        )
-                                    })}
+                                    {filteredCoaches.length === 0 ? (
+                                        <p className="text-sm text-muted-foreground text-center py-4">
+                                            Немає тренерів для цієї команди
+                                        </p>
+                                    ) : (
+                                        filteredCoaches.map(coach => {
+                                            const translation = getTranslation(coach, "uk");
+                                            return (
+                                                <div key={coach.id} className="flex items-center space-x-3">
+                                                    <Checkbox
+                                                        id={`coach-${coach.id}`}
+                                                        checked={selectedCoaches.includes(coach.id)}
+                                                        onCheckedChange={(checked) => handleToggle(coach.id, setSelectedCoaches, checked === true)}
+                                                    />
+                                                    <Label
+                                                        htmlFor={`coach-${coach.id}`}
+                                                        className="text-sm font-medium cursor-pointer leading-none flex-1"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            handleToggle(coach.id, setSelectedCoaches);
+                                                        }}
+                                                    >
+                                                        {translation?.name || "Без імені"} <span className="text-muted-foreground ml-1 text-xs">({translation?.role})</span>
+                                                    </Label>
+                                                </div>
+                                            )
+                                        })
+                                    )}
                                 </div>
                             </ScrollArea>
                         </div>
@@ -368,29 +414,35 @@ export function EditNewsForm({ post, players, coaches, matches }: EditNewsFormPr
                             <Label className="text-base">{"Пов'язані матчі"} ({selectedMatches.length})</Label>
                             <ScrollArea className="h-62.5 rounded-md border p-3 bg-muted/10">
                                 <div className="space-y-3">
-                                    {matches.map(match => {
-                                        const opponentName = getTranslation(match.opponent, "uk")?.name || "Суперник";
-                                        const matchDate = new Date(match.date).toLocaleDateString("uk-UA");
-                                        return (
-                                            <div key={match.id} className="flex items-center space-x-3">
-                                                <Checkbox
-                                                    id={`match-${match.id}`}
-                                                    checked={selectedMatches.includes(match.id)}
-                                                    onCheckedChange={(checked) => handleToggle(match.id, setSelectedMatches, checked === true)}
-                                                />
-                                                <Label
-                                                    htmlFor={`match-${match.id}`}
-                                                    className="text-sm font-medium cursor-pointer leading-none flex-1"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        handleToggle(match.id, setSelectedMatches);
-                                                    }}
-                                                >
-                                                    vs {opponentName} <span className="text-muted-foreground ml-1 text-xs">({matchDate})</span>
-                                                </Label>
-                                            </div>
-                                        )
-                                    })}
+                                    {filteredMatches.length === 0 ? (
+                                        <p className="text-sm text-muted-foreground text-center py-4">
+                                            Немає матчів для цієї команди
+                                        </p>
+                                    ) : (
+                                        filteredMatches.map(match => {
+                                            const opponentName = getTranslation(match.opponent, "uk")?.name || "Суперник";
+                                            const matchDate = new Date(match.date).toLocaleDateString("uk-UA");
+                                            return (
+                                                <div key={match.id} className="flex items-center space-x-3">
+                                                    <Checkbox
+                                                        id={`match-${match.id}`}
+                                                        checked={selectedMatches.includes(match.id)}
+                                                        onCheckedChange={(checked) => handleToggle(match.id, setSelectedMatches, checked === true)}
+                                                    />
+                                                    <Label
+                                                        htmlFor={`match-${match.id}`}
+                                                        className="text-sm font-medium cursor-pointer leading-none flex-1"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            handleToggle(match.id, setSelectedMatches);
+                                                        }}
+                                                    >
+                                                        vs {opponentName} <span className="text-muted-foreground ml-1 text-xs">({matchDate})</span>
+                                                    </Label>
+                                                </div>
+                                            )
+                                        })
+                                    )}
                                 </div>
                             </ScrollArea>
                         </div>
