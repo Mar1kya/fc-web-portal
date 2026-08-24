@@ -77,7 +77,7 @@ export default function PlayerJerseyGallery({ player, activeProductImage, active
                             alt={activeProductTitle}
                             fill
                             className={cn(
-                                "object-cover object-top transition-opacity duration-300",
+                                "object-cover object-top transition-transform duration-700",
                                 isOutOfStock && "grayscale brightness-[0.6] opacity-90",
                                 isProductImageLoading ? "opacity-0" : "opacity-100 group-hover:scale-105"
                             )}

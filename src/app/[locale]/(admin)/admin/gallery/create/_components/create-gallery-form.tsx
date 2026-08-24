@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useActionState, useEffect } from "react"
+import { useState, useMemo, useActionState, useEffect } from "react"
 import { Link, useRouter } from "@/i18n/navigation"
 import { toast } from "sonner"
 import { Loader2, Star, Trash2, ImageIcon } from "lucide-react"
@@ -14,13 +14,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { UploadDropzone } from "@/lib/uploadthing"
 import { Badge } from "@/components/ui/badge"
 import { BoundGalleryData, createGallery } from "@/actions/gallery"
+import { teamContextTranslations } from "@/lib/constants"
+import { TeamContext } from "../../../../../../../../generated/prisma"
 
-type MatchOption = { id: string; label: string };
+type MatchOption = { id: string; label: string; teamContext: TeamContext };
 
 export function CreateGalleryForm({ matches }: { matches: MatchOption[] }) {
     const router = useRouter();
     const [titleUk, setTitleUk] = useState("");
     const [titleEn, setTitleEn] = useState("");
+    const [teamContext, setTeamContext] = useState<TeamContext>(TeamContext.MAIN_TEAM);
     const [matchId, setMatchId] = useState<string>("none");
     const [publishedAt, setPublishedAt] = useState<string>(() => {
         const now = new Date();
@@ -33,6 +36,21 @@ export function CreateGalleryForm({ matches }: { matches: MatchOption[] }) {
 
     const [mediaUrls, setMediaUrls] = useState<string[]>([]);
     const [coverUrl, setCoverUrl] = useState<string>("");
+
+    const filteredMatches = useMemo(() => {
+        return matches.filter(m => m.teamContext === teamContext);
+    }, [matches, teamContext]);
+
+    const handleTeamContextChange = (val: TeamContext) => {
+        setTeamContext(val);
+        if (matchId !== "none") {
+            const stillValid = filteredMatches.some(m => m.id === matchId) &&
+                matches.find(m => m.id === matchId)?.teamContext === val;
+            if (!stillValid) {
+                setMatchId("none");
+            }
+        }
+    };
 
     const boundData: BoundGalleryData = {
         title_uk: titleUk,
@@ -98,14 +116,40 @@ export function CreateGalleryForm({ matches }: { matches: MatchOption[] }) {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
+                            <Label>Команда</Label>
+                            <Select
+                                value={teamContext}
+                                onValueChange={handleTeamContextChange}
+                                disabled={isPending}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Object.entries(teamContextTranslations).map(([key, label]) => (
+                                        <SelectItem key={key} value={key}>{label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">
+                                Список матчів нижче залежить від обраної команди.
+                            </p>
+                        </div>
+                        <div className="space-y-2">
                             <Label>Прив&apos;язка до матчу (Опціонально)</Label>
                             <Select value={matchId} onValueChange={setMatchId} disabled={isPending}>
                                 <SelectTrigger><SelectValue placeholder="Оберіть матч" /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="none">Без прив&apos;язки</SelectItem>
-                                    {matches.map(m => (
-                                        <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>
-                                    ))}
+                                    {filteredMatches.length === 0 ? (
+                                        <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+                                            Немає матчів поточного сезону для цієї команди
+                                        </div>
+                                    ) : (
+                                        filteredMatches.map(m => (
+                                            <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>
+                                        ))
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>

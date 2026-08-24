@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useActionState, useEffect } from "react"
+import { useState, useMemo, useActionState, useEffect } from "react"
 import { Link, useRouter } from "@/i18n/navigation"
 import { toast } from "sonner"
 import { Loader2, Plus, Trash2 } from "lucide-react"
@@ -17,10 +17,10 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { BoundProductData, updateProduct } from "@/actions/product"
 import { UploadDropzone } from "@/lib/uploadthing"
 import Image from "next/image"
-import { STANDARD_SIZES } from "@/lib/constants"
-import { Demographic } from "../../../../../../../../../../generated/prisma"
+import { STANDARD_SIZES, teamContextTranslations } from "@/lib/constants"
+import { Demographic, TeamContext } from "../../../../../../../../../../generated/prisma"
 
-type SelectOption = { id: string; name: string; number?: number | null }
+type SelectOption = { id: string; name: string; number?: number | null; teamContext: TeamContext }
 
 type ColorOption = { id: string; name: string; hex: string }
 
@@ -41,12 +41,12 @@ type ProductWithDetails = {
     translations: { language: string; name: string; description: string }[]
     media: { url: string }[]
     variants: { size: string; stock: number; sku: string | null }[]
-    relatedPlayers: { id: string }[]
+    relatedPlayers: { id: string; teamContext: TeamContext }[]
 }
 
 type EditProductFormProps = {
     initialData: ProductWithDetails
-    categories: SelectOption[]
+    categories: { id: string; name: string }[]
     players: SelectOption[]
     colors: ColorOption[]
 }
@@ -82,6 +82,20 @@ export function EditProductForm({ initialData, categories, players, colors }: Ed
     const [selectedPlayers, setSelectedPlayers] = useState<string[]>(
         initialData.relatedPlayers.map((p) => p.id)
     )
+
+    const initialTeamContext = useMemo(() => {
+        return initialData.relatedPlayers[0]?.teamContext ?? TeamContext.MAIN_TEAM;
+    }, [initialData.relatedPlayers]);
+
+    const [playerTeamContext, setPlayerTeamContext] = useState<TeamContext>(initialTeamContext);
+
+    const filteredPlayers = useMemo(() => {
+        return players.filter(p => p.teamContext === playerTeamContext);
+    }, [players, playerTeamContext]);
+
+    const handlePlayerTeamContextChange = (val: TeamContext) => {
+        setPlayerTeamContext(val);
+    };
 
     const [variants, setVariants] = useState<VariantItem[]>(() =>
         initialData.variants.map((v) => ({
@@ -420,31 +434,62 @@ export function EditProductForm({ initialData, categories, players, colors }: Ed
                         <CardHeader className="pb-4">
                             <CardTitle className="text-lg">Прив&apos;язка до гравців</CardTitle>
                             <CardDescription>
-                                Відмітьте гравців, щоб цей товар показувався на їхній сторінці.
+                                Оберіть команду, а потім відмітьте гравців, щоб цей товар показувався на їхній сторінці.
                             </CardDescription>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2 max-w-xs">
+                                <Label>Команда</Label>
+                                <Select
+                                    value={playerTeamContext}
+                                    onValueChange={handlePlayerTeamContextChange}
+                                    disabled={isPending}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.entries(teamContextTranslations).map(([key, label]) => (
+                                            <SelectItem key={key} value={key}>{label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <p className="text-xs text-muted-foreground">
+                                    Список гравців нижче залежить від обраної команди. Вибрані гравці з інших команд залишаються прив&apos;язаними.
+                                </p>
+                            </div>
                             <ScrollArea className="h-64 pr-4 rounded-md border p-2">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-                                    {players.map((player) => (
-                                        <div
-                                            key={player.id}
-                                            className="flex items-center space-x-2 p-2 hover:bg-muted/50 rounded border border-transparent hover:border-border transition-colors"
-                                        >
-                                            <Checkbox
-                                                id={`player-${player.id}`}
-                                                checked={selectedPlayers.includes(player.id)}
-                                                onCheckedChange={() => togglePlayer(player.id)}
-                                                disabled={isPending}
-                                            />
-                                            <Label htmlFor={`player-${player.id}`} className="flex-1 cursor-pointer">
-                                                {player.number ? `${player.number}. ` : ""}
-                                                {player.name}
-                                            </Label>
-                                        </div>
-                                    ))}
-                                </div>
+                                {filteredPlayers.length === 0 ? (
+                                    <div className="px-2 py-8 text-sm text-muted-foreground text-center">
+                                        Немає гравців для цієї команди
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                                        {filteredPlayers.map((player) => (
+                                            <div
+                                                key={player.id}
+                                                className="flex items-center space-x-2 p-2 hover:bg-muted/50 rounded border border-transparent hover:border-border transition-colors"
+                                            >
+                                                <Checkbox
+                                                    id={`player-${player.id}`}
+                                                    checked={selectedPlayers.includes(player.id)}
+                                                    onCheckedChange={() => togglePlayer(player.id)}
+                                                    disabled={isPending}
+                                                />
+                                                <Label htmlFor={`player-${player.id}`} className="flex-1 cursor-pointer">
+                                                    {player.number ? `${player.number}. ` : ""}
+                                                    {player.name}
+                                                </Label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </ScrollArea>
+                            {selectedPlayers.length > 0 && (
+                                <p className="text-xs text-muted-foreground">
+                                    Всього прив&apos;язано гравців: {selectedPlayers.length}
+                                </p>
+                            )}
                         </CardContent>
                     </Card>
                 </TabsContent>

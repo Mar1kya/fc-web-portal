@@ -41,7 +41,8 @@ export default async function CreateProductPage() {
         return {
             id: p.id,
             name: playerName,
-            number: p.number
+            number: p.number,
+            teamContext: p.teamContext,
         };
     });
 
