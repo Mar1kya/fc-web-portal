@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useActionState, useEffect } from "react"
+import { useState, useMemo, useActionState, useEffect } from "react"
 import { Link, useRouter } from "@/i18n/navigation"
 import { toast } from "sonner"
 import { Loader2, Star, Trash2, ImageIcon } from "lucide-react"
@@ -14,9 +14,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { UploadDropzone } from "@/lib/uploadthing"
 import { Badge } from "@/components/ui/badge"
 import { updateGallery, BoundGalleryData } from "@/actions/gallery"
-import { Gallery, GalleryTranslation, Media } from "../../../../../../../../../generated/prisma"
+import { Gallery, GalleryTranslation, Media, TeamContext } from "../../../../../../../../../generated/prisma"
+import { teamContextTranslations } from "@/lib/constants"
 
-type MatchOption = { id: string; label: string };
+type MatchOption = { id: string; label: string; teamContext: TeamContext };
 
 type EditGalleryFormProps = {
     gallery: Gallery & { translations: GalleryTranslation[]; media: Media[] };
@@ -33,9 +34,35 @@ export function EditGalleryForm({ gallery, matches }: EditGalleryFormProps) {
     const [titleUk, setTitleUk] = useState(initialTitleUk);
     const [titleEn, setTitleEn] = useState(initialTitleEn);
     const [matchId, setMatchId] = useState<string>(gallery.matchId || "none");
+
+    // Ініціалізуємо команду за поточним прив'язаним матчем, якщо він є,
+    // інакше падаємо назад на MAIN_TEAM за замовчуванням.
+    const initialTeamContext = useMemo(() => {
+        if (gallery.matchId) {
+            const currentMatch = matches.find(m => m.id === gallery.matchId);
+            if (currentMatch) return currentMatch.teamContext;
+        }
+        return TeamContext.MAIN_TEAM;
+    }, [gallery.matchId, matches]);
+
+    const [teamContext, setTeamContext] = useState<TeamContext>(initialTeamContext);
     const [publishedAt, setPublishedAt] = useState<string>(initialDate);
     const [mediaUrls, setMediaUrls] = useState<string[]>(gallery.media.map(m => m.url));
     const [coverUrl, setCoverUrl] = useState<string>(gallery.coverUrl);
+
+    const filteredMatches = useMemo(() => {
+        return matches.filter(m => m.teamContext === teamContext);
+    }, [matches, teamContext]);
+
+    const handleTeamContextChange = (val: TeamContext) => {
+        setTeamContext(val);
+        if (matchId !== "none") {
+            const currentMatch = matches.find(m => m.id === matchId);
+            if (!currentMatch || currentMatch.teamContext !== val) {
+                setMatchId("none");
+            }
+        }
+    };
 
     const boundData: BoundGalleryData = {
         title_uk: titleUk,
@@ -100,14 +127,40 @@ export function EditGalleryForm({ gallery, matches }: EditGalleryFormProps) {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
+                            <Label>Команда</Label>
+                            <Select
+                                value={teamContext}
+                                onValueChange={handleTeamContextChange}
+                                disabled={isPending}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Object.entries(teamContextTranslations).map(([key, label]) => (
+                                        <SelectItem key={key} value={key}>{label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">
+                                Список матчів нижче залежить від обраної команди.
+                            </p>
+                        </div>
+                        <div className="space-y-2">
                             <Label>Прив&apos;язка до матчу (Опціонально)</Label>
                             <Select value={matchId} onValueChange={setMatchId} disabled={isPending}>
                                 <SelectTrigger><SelectValue placeholder="Оберіть матч" /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="none">Без прив&apos;язки</SelectItem>
-                                    {matches.map(m => (
-                                        <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>
-                                    ))}
+                                    {filteredMatches.length === 0 ? (
+                                        <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+                                            Немає матчів для цієї команди
+                                        </div>
+                                    ) : (
+                                        filteredMatches.map(m => (
+                                            <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>
+                                        ))
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -183,7 +236,7 @@ export function EditGalleryForm({ gallery, matches }: EditGalleryFormProps) {
                                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                                                     {!isCover && (
                                                         <Button type="button" size="sm" variant="secondary" onClick={() => setCoverUrl(url)} className="h-7 text-[10px] px-2 bg-black/70 hover:bg-emerald-500 hover:text-white text-white border-0 backdrop-blur-sm shadow-sm">
-                                                            <Star className="w-3 h-3 mr-1" /> На обкладиннику
+                                                            <Star className="w-3 h-3 mr-1" /> На обкладинку
                                                         </Button>
                                                     )}
                                                     <Button type="button" size="icon" variant="destructive" onClick={() => removeImage(url)} className="h-7 w-7 opacity-90 hover:opacity-100 shadow-sm">

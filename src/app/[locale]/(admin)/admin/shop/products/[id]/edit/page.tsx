@@ -23,7 +23,7 @@ export default async function EditProductPage({
             translations: true,
             media: { orderBy: { id: "asc" } },
             variants: { orderBy: { position: "asc" } },
-            relatedPlayers: { select: { id: true } },
+            relatedPlayers: { select: { id: true, teamContext: true } },
         },
     })
 
@@ -58,6 +58,7 @@ export default async function EditProductPage({
         id: p.id,
         name: p.translations[0]?.name ?? p.slug,
         number: p.number,
+        teamContext: p.teamContext,
     }))
 
     const colors = colorsData.map((c) => ({

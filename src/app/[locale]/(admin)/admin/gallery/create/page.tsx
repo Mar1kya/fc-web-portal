@@ -12,7 +12,10 @@ export const metadata: Metadata = {
 
 export default async function CreateGalleryPage() {
     const matchesData = await prisma.match.findMany({
-        where: { deletedAt: null },
+        where: {
+            deletedAt: null,
+            season: { isActive: true },
+        },
         orderBy: { date: 'desc' },
         include: {
             opponent: { include: { translations: { where: { language: 'uk' } } } }
@@ -24,7 +27,8 @@ export default async function CreateGalleryPage() {
         const dateStr = new Date(m.date).toLocaleDateString("uk-UA");
         return {
             id: m.id,
-            label: `${dateStr} | Emerald Gang vs ${opponentName}`
+            label: `${dateStr} | vs ${opponentName}`,
+            teamContext: m.teamContext,
         };
     });
 

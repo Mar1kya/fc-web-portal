@@ -28,19 +28,22 @@ export default async function Header() {
     const activeTeamsDb = await prisma.player.groupBy({
         by: ['teamContext'],
     });
-    const activeTeamContexts = activeTeamsDb.length > 0
-        ? activeTeamsDb.map(t => t.teamContext)
-        : [TeamContext.MAIN_TEAM];
+    const activeTeamContextsSet = new Set(
+        activeTeamsDb.length > 0
+            ? activeTeamsDb.map(t => t.teamContext)
+            : [TeamContext.MAIN_TEAM]
+    );
+    const activeTeamContexts = Object.values(TeamContext).filter(c => activeTeamContextsSet.has(c));
 
     const matchesContextsDb = await prisma.match.groupBy({
         by: ['teamContext'],
     });
     const contextsWithMatches = matchesContextsDb.map(m => m.teamContext);
 
-    const standingsContextsDb = await prisma.standing.findMany({
-        distinct: ['teamContext', 'tournamentId'],
+    const standingsDb = await prisma.standing.findMany({
+        distinct: ['tournamentId'],
+        where: { tournament: { isNot: null } },
         select: {
-            teamContext: true,
             tournament: {
                 include: { translations: true }
             }
@@ -49,14 +52,14 @@ export default async function Header() {
 
     const activeMatchContextsSet = new Set([
         ...contextsWithMatches,
-        ...standingsContextsDb.map(s => s.teamContext)
+        ...standingsDb.map(s => s.tournament!.teamContext)
     ]);
 
     const orderedMatchContexts = Object.values(TeamContext).filter(c => activeMatchContextsSet.has(c));
 
     const dynamicMatchesMenu = orderedMatchContexts.map(context => {
-        const standingsForContext = standingsContextsDb
-            .filter(s => s.teamContext === context && s.tournament)
+        const standingsForContext = standingsDb
+            .filter(s => s.tournament!.teamContext === context)
             .map(s => {
                 const translatedTourName = getTranslation(s.tournament!, locale)?.name || s.tournament!.slug;
                 return {

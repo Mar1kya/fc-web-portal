@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useActionState, useEffect } from "react"
+import { useState, useMemo, useActionState, useEffect } from "react"
 import { Link, useRouter } from "@/i18n/navigation"
 import { toast } from "sonner"
 import { Loader2, Plus, Trash2 } from "lucide-react"
@@ -14,18 +14,18 @@ import { Switch } from "@/components/ui/switch"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import { Demographic } from "../../../../../../../../../generated/prisma"
+import { Demographic, TeamContext } from "../../../../../../../../../generated/prisma"
 import { BoundProductData, createProduct } from "@/actions/product"
 import { UploadDropzone } from "@/lib/uploadthing"
 import Image from "next/image";
-import { STANDARD_SIZES } from "@/lib/constants"
+import { STANDARD_SIZES, teamContextTranslations } from "@/lib/constants"
 
-type SelectOption = { id: string; name: string; number?: number | null };
+type SelectOption = { id: string; name: string; number?: number | null; teamContext: TeamContext };
 
 type ColorOption = { id: string; name: string; hex: string }
 
 type CreateProductFormProps = {
-    categories: SelectOption[];
+    categories: { id: string; name: string }[];
     players: SelectOption[];
     colors: ColorOption[];
 }
@@ -54,7 +54,16 @@ export function CreateProductForm({ categories, players, colors }: CreateProduct
     const [apparelType, setApparelType] = useState("");
     const [seasonYear, setSeasonYear] = useState("");
     const [matchType, setMatchType] = useState("");
+    const [playerTeamContext, setPlayerTeamContext] = useState<TeamContext>(TeamContext.MAIN_TEAM);
     const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
+
+    const filteredPlayers = useMemo(() => {
+        return players.filter(p => p.teamContext === playerTeamContext);
+    }, [players, playerTeamContext]);
+
+    const handlePlayerTeamContextChange = (val: TeamContext) => {
+        setPlayerTeamContext(val);
+    };
 
     const togglePlayer = (playerId: string) => {
         setSelectedPlayers(prev =>
@@ -315,26 +324,57 @@ export function CreateProductForm({ categories, players, colors }: CreateProduct
                     <Card className="shadow-none border-border/50 w-full">
                         <CardHeader className="pb-4">
                             <CardTitle className="text-lg">Прив&apos;язка до гравців</CardTitle>
-                            <CardDescription>Відмітьте гравців, щоб цей товар показувався на їхній сторінці.</CardDescription>
+                            <CardDescription>Оберіть команду, а потім відмітьте гравців, щоб цей товар показувався на їхній сторінці.</CardDescription>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2 max-w-xs">
+                                <Label>Команда</Label>
+                                <Select
+                                    value={playerTeamContext}
+                                    onValueChange={handlePlayerTeamContextChange}
+                                    disabled={isPending}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.entries(teamContextTranslations).map(([key, label]) => (
+                                            <SelectItem key={key} value={key}>{label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <p className="text-xs text-muted-foreground">
+                                    Список гравців нижче залежить від обраної команди. Вибрані гравці з інших команд залишаються прив&apos;язаними.
+                                </p>
+                            </div>
                             <ScrollArea className="h-64 pr-4 rounded-md border p-2">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-                                    {players.map((player) => (
-                                        <div key={player.id} className="flex items-center space-x-2 p-2 hover:bg-muted/50 rounded border border-transparent hover:border-border transition-colors">
-                                            <Checkbox
-                                                id={`player-${player.id}`}
-                                                checked={selectedPlayers.includes(player.id)}
-                                                onCheckedChange={() => togglePlayer(player.id)}
-                                                disabled={isPending}
-                                            />
-                                            <Label htmlFor={`player-${player.id}`} className="flex-1 cursor-pointer">
-                                                {player.number ? `${player.number}. ` : ''}{player.name}
-                                            </Label>
-                                        </div>
-                                    ))}
-                                </div>
+                                {filteredPlayers.length === 0 ? (
+                                    <div className="px-2 py-8 text-sm text-muted-foreground text-center">
+                                        Немає гравців для цієї команди
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                                        {filteredPlayers.map((player) => (
+                                            <div key={player.id} className="flex items-center space-x-2 p-2 hover:bg-muted/50 rounded border border-transparent hover:border-border transition-colors">
+                                                <Checkbox
+                                                    id={`player-${player.id}`}
+                                                    checked={selectedPlayers.includes(player.id)}
+                                                    onCheckedChange={() => togglePlayer(player.id)}
+                                                    disabled={isPending}
+                                                />
+                                                <Label htmlFor={`player-${player.id}`} className="flex-1 cursor-pointer">
+                                                    {player.number ? `${player.number}. ` : ''}{player.name}
+                                                </Label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </ScrollArea>
+                            {selectedPlayers.length > 0 && (
+                                <p className="text-xs text-muted-foreground">
+                                    Всього прив&apos;язано гравців: {selectedPlayers.length}
+                                </p>
+                            )}
                         </CardContent>
                     </Card>
                 </TabsContent>
