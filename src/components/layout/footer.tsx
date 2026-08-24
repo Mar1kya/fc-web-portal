@@ -7,6 +7,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { TeamContext } from "../../../generated/prisma";
 import { prisma } from "@/lib/prisma";
 import { getTranslation } from "@/lib/utils/get-translation";
+import React from "react";
 
 const socialMediaLinks = [
     { icon: Facebook, link: "#", title: "Facebook" },
@@ -22,31 +23,43 @@ export default async function Footer() {
     const activeTeamsDb = await prisma.player.groupBy({
         by: ['teamContext'],
     });
-    const activeTeamContexts = activeTeamsDb.length > 0
-        ? activeTeamsDb.map(t => t.teamContext)
-        : [TeamContext.MAIN_TEAM];
+    const activeTeamContextsSet = new Set(
+        activeTeamsDb.length > 0
+            ? activeTeamsDb.map(t => t.teamContext)
+            : [TeamContext.MAIN_TEAM]
+    );
 
     const matchesContextsDb = await prisma.match.groupBy({
         by: ['teamContext'],
     });
-    const contextsWithMatches = matchesContextsDb.map(m => m.teamContext);
+    const matchContextsSet = new Set(matchesContextsDb.map(m => m.teamContext));
 
-    const standingsContextsDb = await prisma.standing.findMany({
-        distinct: ['teamContext', 'tournamentId'],
+    const standingsDb = await prisma.standing.findMany({
+        distinct: ['tournamentId'],
+        where: { tournament: { isNot: null } },
         select: {
-            teamContext: true,
             tournament: {
                 include: { translations: true }
             }
         }
     });
 
-    const activeMatchContextsSet = new Set([
-        ...contextsWithMatches,
-        ...standingsContextsDb.map(s => s.teamContext)
-    ]);
+    const standingContextsSet = new Set(
+        standingsDb.map(s => s.tournament!.teamContext)
+    );
 
-    const orderedMatchContexts = Object.values(TeamContext).filter(c => activeMatchContextsSet.has(c));
+    const coachesDb = await prisma.coach.groupBy({
+        by: ['teamContext'],
+    });
+    const coachContextsSet = new Set(coachesDb.map(c => c.teamContext));
+
+    const allRelevantContexts = new Set([
+        ...activeTeamContextsSet,
+        ...matchContextsSet,
+        ...standingContextsSet,
+        ...coachContextsSet,
+    ]);
+    const orderedContexts = Object.values(TeamContext).filter(c => allRelevantContexts.has(c));
 
     return (
         <footer className="pb-8 2xl:border-t px-2">
@@ -100,42 +113,49 @@ export default async function Footer() {
                                 {t("team")}
                             </h3>
                             <ul className="space-y-3">
-                                {activeTeamContexts.map((teamContext) => (
-                                    <li key={`footer-team-${teamContext}`}>
-                                        <Link href={`/team?context=${teamContext}`} className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
-                                            {tEnums(`TeamContext.${teamContext}`)}
-                                        </Link>
-                                    </li>
-                                ))}
-                                {orderedMatchContexts.map((context) => (
-                                    <li key={`footer-matches-${context}`}>
-                                        <Link href={`/matches?context=${context}`} className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
-                                            {t("matches")} {tEnums(`TeamContext.${context}`)}
-                                        </Link>
-                                    </li>
-                                ))}
-                                {orderedMatchContexts.map(context => {
-                                    const standings = standingsContextsDb
-                                        .filter(s => s.teamContext === context && s.tournament)
-                                        .map(s => {
-                                            const translatedTourName = getTranslation(s.tournament!, locale)?.name || s.tournament!.slug;
-                                            return (
-                                                <li key={`footer-standing-${context}-${s.tournament!.id}`}>
-                                                    <Link href={`/standings/${s.tournament!.slug}`} className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
-                                                        {t("standingsTablePrefix")} {translatedTourName}
+                                {orderedContexts.map((context) => {
+                                    const contextLabel = tEnums(`TeamContext.${context}`);
+                                    const tournamentStandings = standingsDb
+                                        .filter(s => s.tournament!.teamContext === context)
+                                        .map(s => ({
+                                            slug: s.tournament!.slug,
+                                            name: getTranslation(s.tournament!, locale)?.name || s.tournament!.slug,
+                                            id: s.tournament!.id,
+                                        }));
+
+                                    return (
+                                        <React.Fragment key={`footer-context-${context}`}>
+                                            {activeTeamContextsSet.has(context) && (
+                                                <li>
+                                                    <Link href={`/team?context=${context}`} className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
+                                                        {contextLabel}
                                                     </Link>
                                                 </li>
-                                            );
-                                        });
-                                    return standings;
+                                            )}
+                                            {coachContextsSet.has(context) && (
+                                                <li>
+                                                    <Link href={`/team?context=${context}&pos=COACH`} className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
+                                                        {t("coaches")} {contextLabel}
+                                                    </Link>
+                                                </li>
+                                            )}
+                                            {tournamentStandings.map((tour) => (
+                                                <li key={`footer-standing-${tour.id}`}>
+                                                    <Link href={`/standings/${tour.slug}`} className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
+                                                        {t("standingsTablePrefix")} {tour.name}
+                                                    </Link>
+                                                </li>
+                                            ))}
+                                            {matchContextsSet.has(context) && (
+                                                <li>
+                                                    <Link href={`/matches?context=${context}`} className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
+                                                        {t("matches")} {contextLabel}
+                                                    </Link>
+                                                </li>
+                                            )}
+                                        </React.Fragment>
+                                    );
                                 })}
-                                {activeTeamContexts.map((context) => (
-                                    <li key={`footer-coach-${context}`}>
-                                        <Link href={`/team?context=${context}&pos=COACH`} className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
-                                            {t("coaches")} {tEnums(`TeamContext.${context}`)}
-                                        </Link>
-                                    </li>
-                                ))}
                             </ul>
                         </div>
                     </div>
@@ -162,7 +182,7 @@ export default async function Footer() {
                                             </a>
                                         </div>
                                     </li>
-                                    <li className="flex items-center justify-start gap-3 text-sm text-muted-foreground">
+                                   <li className="flex items-center justify-start gap-3 text-sm text-muted-foreground">
                                         <MapPin className="size-4 shrink-0 text-emerald-600" />
                                         <a
                                             href="https://maps.google.com/?q=Житомир,Україна"

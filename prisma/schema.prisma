@@ -330,8 +330,7 @@ model Standing {
   tournament   Tournament? @relation(fields: [tournamentId], references: [id])
   seasonId     String?
   season       Season?     @relation(fields: [seasonId], references: [id])
-  teamContext  TeamContext @default(MAIN_TEAM)
-
+  
   updatedAt DateTime @updatedAt
 
   @@index([seasonId, tournamentId, rank])
