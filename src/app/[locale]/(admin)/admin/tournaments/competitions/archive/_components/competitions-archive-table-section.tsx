@@ -7,8 +7,10 @@ export default async function CompetitionsArchiveTableSection() {
         where: {
             deletedAt: { not: null }
         },
-        include: { translations: { where: { language: "uk" } } },
-        orderBy: {
+        include: {
+            translations: { where: { language: "uk" } },
+            tournamentSeasons: true, 
+        }, orderBy: {
             deletedAt: "desc"
         }
     });

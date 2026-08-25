@@ -28,6 +28,7 @@ export default async function EditTournamentPage({ params }: { params: Promise<{
         where: { id },
         include: {
             translations: true,
+            tournamentSeasons: true,
         },
     })
 

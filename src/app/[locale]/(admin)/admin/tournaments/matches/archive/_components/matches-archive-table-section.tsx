@@ -3,11 +3,17 @@ import { DataTable } from "@/components/ui/data-table";
 import { archiveColumns } from "./archive-columns";
 import { TeamContext } from "../../../../../../../../../generated/prisma";
 
-export default async function MatchesArchiveTableSection({ currentTeam }: { currentTeam: TeamContext }) {
+type MatchesArchiveTableSectionProps = {
+    currentTeam: TeamContext;
+    seasonId?: string;
+};
+
+export default async function MatchesArchiveTableSection({ currentTeam, seasonId }: MatchesArchiveTableSectionProps) {
     const archivedMatches = await prisma.match.findMany({
         where: {
             deletedAt: { not: null },
             teamContext: currentTeam,
+            ...(seasonId ? { seasonId } : {}),
         },
         include: {
             opponent: {
