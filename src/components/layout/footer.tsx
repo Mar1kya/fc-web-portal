@@ -35,17 +35,20 @@ export default async function Footer() {
     const matchContextsSet = new Set(matchesContextsDb.map(m => m.teamContext));
 
     const standingsDb = await prisma.standing.findMany({
-        distinct: ['tournamentId'],
-        where: { tournament: { isNot: null } },
+        distinct: ['tournamentSeasonId'],
         select: {
-            tournament: {
-                include: { translations: true }
+            tournamentSeason: {
+                select: {
+                    tournament: {
+                        include: { translations: true }
+                    }
+                }
             }
         }
     });
 
     const standingContextsSet = new Set(
-        standingsDb.map(s => s.tournament!.teamContext)
+        standingsDb.map(s => s.tournamentSeason.tournament.teamContext)
     );
 
     const coachesDb = await prisma.coach.groupBy({
@@ -116,11 +119,11 @@ export default async function Footer() {
                                 {orderedContexts.map((context) => {
                                     const contextLabel = tEnums(`TeamContext.${context}`);
                                     const tournamentStandings = standingsDb
-                                        .filter(s => s.tournament!.teamContext === context)
+                                        .filter(s => s.tournamentSeason.tournament.teamContext === context)
                                         .map(s => ({
-                                            slug: s.tournament!.slug,
-                                            name: getTranslation(s.tournament!, locale)?.name || s.tournament!.slug,
-                                            id: s.tournament!.id,
+                                            slug: s.tournamentSeason.tournament.slug,
+                                            name: getTranslation(s.tournamentSeason.tournament, locale)?.name || s.tournamentSeason.tournament.slug,
+                                            id: s.tournamentSeason.tournament.id,
                                         }));
 
                                     return (
@@ -184,8 +187,8 @@ export default async function Footer() {
                                     </li>
                                    <li className="flex items-center justify-start gap-3 text-sm text-muted-foreground">
                                         <MapPin className="size-4 shrink-0 text-emerald-600" />
-                                        <a
-                                            href="https://maps.google.com/?q=Житомир,Україна"
+                                        
+                                            <a href="https://maps.google.com/?q=Житомир,Україна"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="hover:text-emerald-600 hover:underline underline-offset-4 transition-colors"

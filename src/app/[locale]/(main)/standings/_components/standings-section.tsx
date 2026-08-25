@@ -11,8 +11,10 @@ export default async function StandingsSection({
     const [standings, dictionaries] = await Promise.all([
         prisma.standing.findMany({
             where: {
-                tournamentId: tournamentId,
-                seasonId: seasonId,
+                tournamentSeason: {
+                    tournamentId,
+                    seasonId,
+                },
             },
             orderBy: { rank: "asc" },
         }),

@@ -1,33 +1,48 @@
-import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Archive, Plus } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 import { TeamContext } from "../../../../../../../generated/prisma";
 import { SyncScheduleButton } from "./_components/sync-schedule-button";
 import { TeamSwitcher } from "@/components/shared/team-switcher";
 import { Suspense } from "react";
 import MatchesTableSection from "./_components/matches-table-section";
 import AdminTableSkeleton from "../../_components/admin-table-skeleton";
+import { SeasonFilter } from "./_components/season-filter";
 
 export const metadata = {
     title: "Матчі",
     description: "Управління розкладом та результатами матчів",
 };
 
-export default async function MatchesPage({ searchParams }: { searchParams: Promise<{ team?: string }> }) {
-    const { team } = await searchParams;
+const EXCLUDED_TEAM_CONTEXTS: TeamContext[] = [TeamContext.GENERAL, TeamContext.ACADEMY];
 
-    const existingTeamsObj = await prisma.match.findMany({
-        where: { deletedAt: null },
-        distinct: ['teamContext'],
-        select: { teamContext: true },
-    });
+export default async function MatchesPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ team?: string; season?: string }>;
+}) {
+    const { team, season } = await searchParams;
 
-    const availableTeams = existingTeamsObj.map(t => t.teamContext);
+    const availableTeams = Object.values(TeamContext).filter(
+        (context) => !EXCLUDED_TEAM_CONTEXTS.includes(context)
+    );
 
     const currentTeam = team && availableTeams.includes(team as TeamContext)
         ? (team as TeamContext)
         : availableTeams[0] || TeamContext.MAIN_TEAM;
+
+    const seasons = await prisma.season.findMany({
+        where: { deletedAt: null },
+        orderBy: { startDate: "desc" },
+        select: { id: true, name: true, isActive: true },
+    });
+
+    const activeSeason = seasons.find((s) => s.isActive) ?? seasons[0] ?? null;
+
+    const currentSeasonId = season && seasons.some((s) => s.id === season)
+        ? season
+        : activeSeason?.id;
 
     return (
         <div className="flex flex-col gap-4">
@@ -54,13 +69,19 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
                     </Button>
                 </div>
             </div>
-            <TeamSwitcher
-                availableTeams={availableTeams}
-                currentTeam={currentTeam}
-                basePath="/admin/tournaments/matches"
-            />
-            <Suspense key={currentTeam} fallback={<AdminTableSkeleton />}>
-                <MatchesTableSection currentTeam={currentTeam} />
+            <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+                <TeamSwitcher
+                    availableTeams={availableTeams}
+                    currentTeam={currentTeam}
+                    basePath="/admin/tournaments/matches"
+                />
+                <SeasonFilter
+                    seasons={seasons}
+                    currentSeasonId={currentSeasonId}
+                />
+            </div>
+            <Suspense key={`${currentTeam}-${currentSeasonId}`} fallback={<AdminTableSkeleton />}>
+                <MatchesTableSection currentTeam={currentTeam} seasonId={currentSeasonId} />
             </Suspense>
         </div>
     );

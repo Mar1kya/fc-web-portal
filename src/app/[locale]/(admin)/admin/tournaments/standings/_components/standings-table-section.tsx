@@ -5,8 +5,10 @@ import { columns } from "./columns";
 export default async function StandingsTableSection({ seasonId, tournamentId }: { seasonId: string; tournamentId: string }) {
     const standings = await prisma.standing.findMany({
         where: {
-            seasonId,
-            tournamentId,
+            tournamentSeason: {
+                seasonId,
+                tournamentId,
+            },
         },
         orderBy: {
             rank: "asc"

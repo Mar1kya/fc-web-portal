@@ -139,15 +139,22 @@ export default async function HomePage() {
       where: {
         deletedAt: null,
         hasStandings: true,
-        standings: {
-          some: activeSeason ? { seasonId: activeSeason.id } : {},
+        tournamentSeasons: {
+          some: {
+            ...(activeSeason ? { seasonId: activeSeason.id } : {}),
+            standings: { some: {} },
+          },
         },
       },
       include: {
         translations: { where: { language: locale } },
-        standings: {
+        tournamentSeasons: {
           where: activeSeason ? { seasonId: activeSeason.id } : {},
-          orderBy: { rank: "asc" },
+          include: {
+            standings: {
+              orderBy: { rank: "asc" },
+            },
+          },
         },
       },
     }),
@@ -172,11 +179,16 @@ export default async function HomePage() {
         tournament: m.tournament,
         opponent: m.opponent,
         round: m.round,
-        teamContext: m.teamContext, 
+        teamContext: m.teamContext,
       }
       : null;
 
-  const hasStandings = tournamentsWithStandings.some((t) => t.standings.length > 0);
+  const tournamentsStandingsFlat = tournamentsWithStandings.map((tournament) => ({
+    ...tournament,
+    standings: tournament.tournamentSeasons.flatMap((ts) => ts.standings),
+  }));
+
+  const hasStandings = tournamentsStandingsFlat.some((t) => t.standings.length > 0);
 
   return (
     <div className="flex flex-col gap-4">
@@ -231,7 +243,7 @@ export default async function HomePage() {
               </h2>
             </div>
             <div className="flex flex-col gap-8 w-full">
-              {tournamentsWithStandings
+              {tournamentsStandingsFlat
                 .filter((tournament) => tournament.standings.length > 0)
                 .map((tournament) => (
                   <HomeStandings

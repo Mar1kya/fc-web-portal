@@ -1,23 +1,27 @@
 import { prisma } from "@/lib/prisma";
-import { DataTable } from "@/components/ui/data-table";
-import { columns } from "./columns";
+import { CompetitionsDataTable } from "./competitions-data-table";
 
 export default async function CompetitionsTableSection() {
+    const activeSeason = await prisma.season.findFirst({
+        where: { isActive: true },
+    });
+
     const tournaments = await prisma.tournament.findMany({
-        where: {
-            deletedAt: null,
+        where: { deletedAt: null },
+        include: {
+            translations: { where: { language: "uk" } },
+            tournamentSeasons: {
+                where: activeSeason ? { seasonId: activeSeason.id } : { seasonId: "" },
+            },
         },
-        include: { translations: { where: { language: "uk" } } },
-        orderBy: {
-            hasStandings: "desc",
-        },
+        orderBy: { hasStandings: "desc" },
     });
 
     return (
-        <DataTable
-            columns={columns}
+        <CompetitionsDataTable
             data={tournaments}
-            searchPlaceholder="Пошук за назвою..."
+            activeSeasonId={activeSeason?.id ?? null}
+            activeSeasonName={activeSeason?.name ?? null}
         />
     );
 }

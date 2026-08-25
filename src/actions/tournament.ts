@@ -14,6 +14,7 @@ export type TournamentFormState = {
     name_en?: string[];
     sofascoreId?: string[];
     hasStandings?: string[];
+    teamContext?: string[];
   };
   message?: string | null;
   success?: boolean;
@@ -80,6 +81,7 @@ export async function createTournament(
         slug,
         sofascoreId: data.sofascoreId,
         hasStandings: data.hasStandings,
+        teamContext: data.teamContext,
         translations: {
           create: [
             { language: "uk", name: data.name_uk },
@@ -147,6 +149,7 @@ export async function updateTournament(
         slug: newSlug,
         sofascoreId: data.sofascoreId,
         hasStandings: data.hasStandings,
+        teamContext: data.teamContext,
         translations: {
           upsert: [
             {
@@ -265,5 +268,36 @@ export async function toggleTournamentStandings(
     return { success: true, message: "Статус турнірної таблиці оновлено" };
   } catch {
     return { success: false, message: "Помилка оновлення" };
+  }
+}
+
+export async function upsertTournamentSeason(
+  tournamentId: string,
+  seasonId: string,
+  sofascoreSeasonId: number,
+) {
+  const session = await auth();
+  if (!session?.user?.email || session.user.role !== "ADMIN") {
+    return { success: false, message: "Немає прав" };
+  }
+
+  if (!Number.isFinite(sofascoreSeasonId) || sofascoreSeasonId <= 0) {
+    return { success: false, message: "Некоректний SofaScore Season ID" };
+  }
+
+  try {
+    await prisma.tournamentSeason.upsert({
+      where: {
+        tournamentId_seasonId: { tournamentId, seasonId },
+      },
+      update: { sofascoreSeasonId },
+      create: { tournamentId, seasonId, sofascoreSeasonId },
+    });
+
+    revalidateTournamentPaths();
+    return { success: true, message: "Сезон турніру збережено. Тепер можна синхронізувати таблицю." };
+  } catch (error) {
+    console.error("Error upserting tournament season:", error);
+    return { success: false, message: "Помилка при збереженні сезону турніру" };
   }
 }

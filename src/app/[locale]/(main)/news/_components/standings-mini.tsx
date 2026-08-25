@@ -28,17 +28,23 @@ export default async function StandingsMini() {
 
     const allStandings = await prisma.standing.findMany({
         where: {
-            season: { isActive: true },
-            tournament: { slug: "upl" }
+            tournamentSeason: {
+                season: { isActive: true },
+                tournament: { slug: "upl" },
+            },
         },
         orderBy: { rank: "asc" },
         include: {
-            tournament: {
+            tournamentSeason: {
                 include: {
-                    translations: true,
+                    tournament: {
+                        include: {
+                            translations: true,
+                        },
+                    },
+                    season: true,
                 },
             },
-            season: true,
         },
     });
 
@@ -67,9 +73,9 @@ export default async function StandingsMini() {
     }
     const displayStandings = allStandings.slice(startIndex, startIndex + 5);
     const firstRow = allStandings[0];
-    const translatedTournament = getTranslation(firstRow.tournament, locale);
+    const translatedTournament = getTranslation(firstRow.tournamentSeason.tournament, locale);
     const tournamentName = translatedTournament?.name || t("title");
-    const seasonName = firstRow.season?.name || "";
+    const seasonName = firstRow.tournamentSeason.season?.name || "";
 
     return (
         <Card className="shadow-sm">

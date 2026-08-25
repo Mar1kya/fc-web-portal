@@ -3,19 +3,35 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { LOCALES } from "@/lib/constants";
+import { TeamContext } from "../../generated/prisma";
+import { resolveAndSaveTournamentSeason } from "@/lib/services/sofascore-standings.service";
 
-export async function executeStandingsSync() {
+export async function executeStandingsSync(
+  teamContext?: TeamContext,
+  tournamentId?: string,
+  seasonId?: string,
+) {
   try {
-    const activeSeason = await prisma.season.findFirst({
-      where: { isActive: true },
-    });
+    const activeSeason = seasonId
+      ? await prisma.season.findUnique({ where: { id: seasonId } })
+      : await prisma.season.findFirst({ where: { isActive: true } });
 
-    if (!activeSeason || !activeSeason.sofascoreId) {
-      throw new Error("Не знайдено активного сезону або його SofaScore ID.");
+    if (!activeSeason) {
+      throw new Error("Не знайдено сезону для синхронізації.");
     }
 
     const tournaments = await prisma.tournament.findMany({
-      where: { hasStandings: true },
+      where: {
+        hasStandings: true,
+        deletedAt: null,
+        ...(tournamentId ? { id: tournamentId } : {}),
+        ...(teamContext ? { teamContext } : {}),
+      },
+      include: {
+        tournamentSeasons: {
+          where: { seasonId: activeSeason.id },
+        },
+      },
     });
 
     if (tournaments.length === 0) {
@@ -26,48 +42,82 @@ export async function executeStandingsSync() {
     }
 
     let totalUpdated = 0;
+    const skippedTournaments: string[] = [];
 
-    await prisma.$transaction(
-      async (tx) => {
-        const existingDictionary = await tx.teamDictionary.findMany({
-          include: { translations: true },
-        });
-        const dictionaryMap = new Map<number, (typeof existingDictionary)[0]>();
-        existingDictionary.forEach((item) => {
-          dictionaryMap.set(item.sofascoreId, item);
-        });
+    for (const tournament of tournaments) {
+      if (!tournament.sofascoreId) continue;
 
-        for (const tournament of tournaments) {
-          if (!tournament.sofascoreId) continue;
+      let tournamentSeason = tournament.tournamentSeasons[0];
 
-          const response = await fetch(
-            `https://sofascore.p.rapidapi.com/tournaments/get-standings?tournamentId=${tournament.sofascoreId}&seasonId=${activeSeason.sofascoreId}&type=total`,
-            {
-              headers: {
-                "x-rapidapi-host": "sofascore.p.rapidapi.com",
-                "x-rapidapi-key": process.env.RAPIDAPI_KEY!,
-              },
-              cache: "no-store",
-            },
+      if (!tournamentSeason) {
+        console.log(
+          `[standings] Немає TournamentSeason для ${tournament.slug} у сезоні ${activeSeason.name}. Резолвлю автоматично...`,
+        );
+        const saved = await resolveAndSaveTournamentSeason(
+          tournament,
+          activeSeason,
+        );
+
+        if (!saved) {
+          console.error(
+            `[standings] Не вдалося автоматично резолвити сезон для ${tournament.slug}. Пропускаю.`,
           );
+          skippedTournaments.push(tournament.slug);
+          continue;
+        }
+        tournamentSeason = saved;
+      }
 
-          if (!response.ok) {
-            console.error(
-              `Помилка API для турніру ${tournament.slug}: ${response.statusText}`,
-            );
-            continue;
-          }
+      const response = await fetch(
+        `https://sofascore.p.rapidapi.com/tournaments/get-standings?tournamentId=${tournament.sofascoreId}&seasonId=${tournamentSeason.sofascoreSeasonId}&type=total`,
+        {
+          headers: {
+            "x-rapidapi-host": "sofascore.p.rapidapi.com",
+            "x-rapidapi-key": process.env.RAPIDAPI_KEY!,
+          },
+          cache: "no-store",
+        },
+      );
 
-          const data = await response.json();
-          const rows = data.standings?.[0]?.rows;
+      if (!response.ok) {
+        console.error(
+          `[standings] HTTP ${response.status} для турніру ${tournament.slug} (sofascoreSeasonId=${tournamentSeason.sofascoreSeasonId})`,
+        );
+        skippedTournaments.push(tournament.slug);
+        continue;
+      }
 
-          if (!rows) continue;
+      const data = await response.json();
+      const rows = data.standings?.[0]?.rows;
+
+      if (!rows) {
+        console.error(
+          `[standings] Невалідний body для турніру ${tournament.slug}: ${JSON.stringify(data).slice(0, 300)}`,
+        );
+        skippedTournaments.push(tournament.slug);
+        continue;
+      }
+
+      const tournamentSeasonId = tournamentSeason.id;
+
+      await prisma.$transaction(
+        async (tx) => {
+          const teamIds = rows.map((r: { team: { id: number } }) => r.team.id);
+
+          const existingDictionary = await tx.teamDictionary.findMany({
+            where: { sofascoreId: { in: teamIds } },
+            include: { translations: true },
+          });
+          const dictionaryMap = new Map<
+            number,
+            (typeof existingDictionary)[0]
+          >();
+          existingDictionary.forEach((item) => {
+            dictionaryMap.set(item.sofascoreId, item);
+          });
 
           await tx.standing.deleteMany({
-            where: {
-              tournamentId: tournament.id,
-              seasonId: activeSeason.id,
-            },
+            where: { tournamentSeasonId },
           });
 
           const insertData = [];
@@ -87,7 +137,7 @@ export async function executeStandingsSync() {
               const newDictEntry = await tx.teamDictionary.create({
                 data: {
                   sofascoreId: teamId,
-                  originalName: originalName,
+                  originalName,
                   teamContext: tournament.teamContext,
                   translations: {
                     create: [
@@ -113,22 +163,20 @@ export async function executeStandingsSync() {
               goalsFor: row.scoresFor,
               goalsAgainst: row.scoresAgainst,
               goalsDiff: row.scoresFor - row.scoresAgainst,
-              tournamentId: tournament.id,
-              seasonId: activeSeason.id,
-              teamContext: tournament.teamContext,
+              tournamentSeasonId,
             });
           }
 
           await tx.standing.createMany({ data: insertData });
           totalUpdated += rows.length;
-        }
-      },
-      { maxWait: 10000, timeout: 30000 },
-    );
+        },
+        { maxWait: 10000, timeout: 30000 },
+      );
+    }
 
     if (totalUpdated > 0) {
       LOCALES.forEach((locale) => {
-        revalidatePath(`/${locale}/standings`);
+        revalidatePath(`/${locale}/standings`, "layout");
         revalidatePath(`/${locale}/admin/tournaments/standings`);
         revalidatePath(`/${locale}/`);
       });
@@ -137,7 +185,10 @@ export async function executeStandingsSync() {
     return {
       success: true,
       updated: totalUpdated,
-      message: `Оновлено ${totalUpdated} команд у таблицях!`,
+      message:
+        skippedTournaments.length > 0
+          ? `Оновлено ${totalUpdated} команд. Пропущено: ${skippedTournaments.join(", ")} (див. логи сервера).`
+          : `Оновлено ${totalUpdated} команд у таблицях!`,
     };
   } catch (error) {
     console.error("Sync Standings Error:", error);
@@ -147,6 +198,73 @@ export async function executeStandingsSync() {
         error instanceof Error
           ? error.message
           : "Невідома помилка при оновленні",
+    };
+  }
+}
+
+export async function executeTournamentSeasonsBootstrap(seasonId?: string) {
+  try {
+    const season = seasonId
+      ? await prisma.season.findUnique({ where: { id: seasonId } })
+      : await prisma.season.findFirst({ where: { isActive: true } });
+
+    if (!season) {
+      return { success: false, message: "Сезон не знайдено." };
+    }
+
+    const tournaments = await prisma.tournament.findMany({
+      where: {
+        hasStandings: true,
+        sofascoreId: { not: null },
+        deletedAt: null,
+      },
+    });
+
+    if (tournaments.length === 0) {
+      return {
+        success: true,
+        message: "Немає турнірів для резолву.",
+        results: [],
+      };
+    }
+
+    const results: {
+      slug: string;
+      success: boolean;
+      sofascoreSeasonId?: number;
+    }[] = [];
+
+    for (const tournament of tournaments) {
+      const saved = await resolveAndSaveTournamentSeason(tournament, season);
+
+      results.push(
+        saved
+          ? {
+              slug: tournament.slug,
+              success: true,
+              sofascoreSeasonId: saved.sofascoreSeasonId,
+            }
+          : { slug: tournament.slug, success: false },
+      );
+    }
+
+    const failed = results.filter((r) => !r.success);
+
+    return {
+      success: true,
+      message:
+        failed.length > 0
+          ? `Резолвлено ${results.length - failed.length}/${results.length}. Не вдалося: ${failed
+              .map((f) => f.slug)
+              .join(", ")} (див. логи сервера).`
+          : `Успішно резолвлено всі ${results.length} турнірів для сезону ${season.name}.`,
+      results,
+    };
+  } catch (error) {
+    console.error("Tournament Seasons Bootstrap Error:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Невідома помилка",
     };
   }
 }

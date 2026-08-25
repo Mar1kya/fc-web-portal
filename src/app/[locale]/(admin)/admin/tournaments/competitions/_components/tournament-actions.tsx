@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
-import { Archive, Edit, MoreHorizontal, Loader2 } from "lucide-react"
+import { Archive, Edit, MoreHorizontal, Loader2, CalendarCog } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -27,11 +27,22 @@ import { Link } from "@/i18n/navigation"
 import { TournamentWithRelations } from "./columns"
 import { softDeleteTournament } from "@/actions/tournament"
 import { getTranslation } from "@/lib/utils/get-translation"
+import { ManageSeasonDialog } from "./manage-season-dialog"
 
-export function TournamentActions({ tournament }: { tournament: TournamentWithRelations }) {
+type TournamentActionsProps = {
+    tournament: TournamentWithRelations;
+    activeSeasonId: string | null;
+    activeSeasonName: string | null;
+};
+
+export function TournamentActions({ tournament, activeSeasonId, activeSeasonName }: TournamentActionsProps) {
     const [isPending, startTransition] = useTransition();
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const name = getTranslation(tournament, "uk")?.name || tournament.slug;
+
+    const currentSofascoreSeasonId =
+        tournament.tournamentSeasons?.find((ts) => ts.seasonId === activeSeasonId)
+            ?.sofascoreSeasonId ?? null;
 
     const handleArchive = () => {
         startTransition(async () => {
@@ -67,6 +78,16 @@ export function TournamentActions({ tournament }: { tournament: TournamentWithRe
                             Редагувати
                         </Link>
                     </DropdownMenuItem>
+                    {tournament.hasStandings && tournament.sofascoreId ? (
+                        
+                            <ManageSeasonDialog
+                                tournamentId={tournament.id}
+                                tournamentName={name}
+                                activeSeasonId={activeSeasonId}
+                                activeSeasonName={activeSeasonName}
+                                currentSofascoreSeasonId={currentSofascoreSeasonId}
+                            />
+                    ) : null}
                     <DropdownMenuSeparator />
                     <AlertDialogTrigger asChild>
                         <DropdownMenuItem

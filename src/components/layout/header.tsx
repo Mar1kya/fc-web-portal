@@ -41,30 +41,34 @@ export default async function Header() {
     const contextsWithMatches = matchesContextsDb.map(m => m.teamContext);
 
     const standingsDb = await prisma.standing.findMany({
-        distinct: ['tournamentId'],
-        where: { tournament: { isNot: null } },
+        distinct: ['tournamentSeasonId'],
         select: {
-            tournament: {
-                include: { translations: true }
+            tournamentSeason: {
+                select: {
+                    tournament: {
+                        include: { translations: true }
+                    }
+                }
             }
         }
     });
 
     const activeMatchContextsSet = new Set([
         ...contextsWithMatches,
-        ...standingsDb.map(s => s.tournament!.teamContext)
+        ...standingsDb.map(s => s.tournamentSeason.tournament.teamContext)
     ]);
 
     const orderedMatchContexts = Object.values(TeamContext).filter(c => activeMatchContextsSet.has(c));
 
     const dynamicMatchesMenu = orderedMatchContexts.map(context => {
         const standingsForContext = standingsDb
-            .filter(s => s.tournament!.teamContext === context)
+            .filter(s => s.tournamentSeason.tournament.teamContext === context)
             .map(s => {
-                const translatedTourName = getTranslation(s.tournament!, locale)?.name || s.tournament!.slug;
+                const tournament = s.tournamentSeason.tournament;
+                const translatedTourName = getTranslation(tournament, locale)?.name || tournament.slug;
                 return {
                     name: translatedTourName,
-                    link: `/standings/${s.tournament!.slug}`
+                    link: `/standings/${tournament.slug}`
                 }
             });
 

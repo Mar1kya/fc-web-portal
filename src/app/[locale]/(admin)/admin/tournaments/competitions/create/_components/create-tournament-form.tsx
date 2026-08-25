@@ -11,7 +11,11 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { BoundTournamentData, createTournament } from "@/actions/tournament"
+import { TeamContext } from "../../../../../../../../../generated/prisma"
+import { teamContextTranslations } from "@/lib/constants"
+
 
 export function CreateTournamentForm() {
     const router = useRouter();
@@ -19,12 +23,14 @@ export function CreateTournamentForm() {
     const [nameEn, setNameEn] = useState("");
     const [sofascoreId, setSofascoreId] = useState("");
     const [hasStandings, setHasStandings] = useState(false);
+    const [teamContext, setTeamContext] = useState<TeamContext>(TeamContext.MAIN_TEAM);
 
     const boundData: BoundTournamentData = {
         name_uk: nameUk,
         name_en: nameEn,
         sofascoreId: sofascoreId ? Number(sofascoreId) : null,
         hasStandings,
+        teamContext,
     };
 
     const createTournamentWithData = createTournament.bind(null, boundData);
@@ -89,6 +95,29 @@ export function CreateTournamentForm() {
                         <CardDescription>Технічні параметри турніру</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="teamContext">Контекст команди <span className="text-red-500">*</span></Label>
+                            <Select
+                                value={teamContext}
+                                onValueChange={(value) => setTeamContext(value as TeamContext)}
+                                disabled={isPending}
+                            >
+                                <SelectTrigger id="teamContext" className="w-full">
+                                    <SelectValue placeholder="Оберіть команду" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Object.values(TeamContext).map((context) => (
+                                        <SelectItem key={context} value={context}>
+                                            {teamContextTranslations[context]}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">
+                                До якої команди клубу належить цей турнір.
+                            </p>
+                            {state?.errors?.teamContext && <p className="text-red-500 text-sm">{state.errors.teamContext[0]}</p>}
+                        </div>
                         <div className="space-y-2">
                             <Label htmlFor="sofascoreId">SofaScore ID (Опціонально)</Label>
                             <Input

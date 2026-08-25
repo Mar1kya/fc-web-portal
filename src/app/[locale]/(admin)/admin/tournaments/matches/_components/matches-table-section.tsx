@@ -24,11 +24,17 @@ const filterConfigs = [
     }
 ];
 
-export default async function MatchesTableSection({ currentTeam }: { currentTeam: TeamContext }) {
+type MatchesTableSectionProps = {
+    currentTeam: TeamContext;
+    seasonId?: string;
+};
+
+export default async function MatchesTableSection({ currentTeam, seasonId }: MatchesTableSectionProps) {
     const matches = await prisma.match.findMany({
         where: {
             deletedAt: null,
             teamContext: currentTeam,
+            ...(seasonId ? { seasonId } : {}),
         },
         include: {
             opponent: {
