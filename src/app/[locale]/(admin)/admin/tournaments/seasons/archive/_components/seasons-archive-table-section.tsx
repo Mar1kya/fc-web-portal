@@ -5,7 +5,7 @@ import { archiveColumns } from "./archive-columns";
 export default async function SeasonsArchiveTableSection() {
     const archivedSeasons = await prisma.season.findMany({
         where: {
-            deletedAt: null
+            deletedAt: { not: null }
         },
         orderBy: {
             startDate: "desc"

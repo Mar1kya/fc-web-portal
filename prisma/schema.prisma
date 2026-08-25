@@ -289,15 +289,15 @@ model OpponentTranslation {
 }
 
 model Tournament {
-  id           String                  @id @default(cuid())
-  slug         String                  @unique
-  sofascoreId  Int?                    @unique
-  hasStandings Boolean                 @default(false)
-  teamContext  TeamContext             @default(MAIN_TEAM)
-  translations TournamentTranslation[]
-  matches      Match[]
-  standings    Standing[]
-  deletedAt    DateTime?
+  id                String                  @id @default(cuid())
+  slug              String                  @unique
+  sofascoreId       Int?                    @unique
+  hasStandings      Boolean                 @default(false)
+  teamContext       TeamContext             @default(MAIN_TEAM)
+  translations      TournamentTranslation[]
+  tournamentSeasons TournamentSeason[]
+  matches           Match[]
+  deletedAt         DateTime?
 
   @@index([deletedAt])
   @@index([teamContext])
@@ -313,27 +313,41 @@ model TournamentTranslation {
   @@unique([tournamentId, language])
 }
 
-model Standing {
-  id           String      @id @default(cuid())
-  rank         Int
-  teamName     String
-  teamLogo     String?
-  points       Int
-  played       Int
-  win          Int
-  draw         Int
-  lose         Int
-  goalsFor     Int         @default(0)
-  goalsAgainst Int         @default(0)
-  goalsDiff    Int
-  tournamentId String?
-  tournament   Tournament? @relation(fields: [tournamentId], references: [id])
-  seasonId     String?
-  season       Season?     @relation(fields: [seasonId], references: [id])
-  
+model TournamentSeason {
+  id                String     @id @default(cuid())
+  tournamentId      String
+  tournament        Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  seasonId          String
+  season            Season     @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  sofascoreSeasonId Int
+  standings         Standing[]
+
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([seasonId, tournamentId, rank])
+  @@unique([tournamentId, seasonId])
+  @@index([sofascoreSeasonId])
+}
+
+model Standing {
+  id                 String           @id @default(cuid())
+  rank               Int
+  teamName           String
+  teamLogo           String?
+  points             Int
+  played             Int
+  win                Int
+  draw               Int
+  lose               Int
+  goalsFor           Int              @default(0)
+  goalsAgainst       Int              @default(0)
+  goalsDiff          Int
+  tournamentSeasonId String
+  tournamentSeason   TournamentSeason @relation(fields: [tournamentSeasonId], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt
+
+  @@index([tournamentSeasonId, rank])
 }
 
 model TeamDictionary {
@@ -620,11 +634,11 @@ model Season {
   endDate     DateTime
   isActive    Boolean    @default(false)
   matches     Match[]
-  standings   Standing[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  deletedAt         DateTime?
+  tournamentSeasons TournamentSeason[]
 
   @@index([deletedAt])
 }

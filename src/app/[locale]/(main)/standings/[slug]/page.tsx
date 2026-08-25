@@ -15,7 +15,7 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
     const tMeta = await getTranslations("StandingsPage.Metadata");
 
     const tournament = await prisma.tournament.findUnique({
-        where: { slug },
+        where: { slug, deletedAt: null },
         include: { translations: true },
     });
 
@@ -28,7 +28,7 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
     const translatedTournamentName = getTranslation(tournament, locale)?.name || tournament.slug;
     const availableSeasons = await prisma.season.findMany({
         where: {
-            standings: { some: { tournamentId: tournament.id } },
+            tournamentSeasons: { some: { tournamentId: tournament.id } },
         },
         orderBy: { startDate: "desc" },
     });
@@ -82,7 +82,7 @@ export default async function FullStandingsPage({ params, searchParams }: { para
     const t = await getTranslations("StandingsPage");
 
     const tournament = await prisma.tournament.findUnique({
-        where: { slug },
+        where: { deletedAt: null, slug },
         include: { translations: true },
     });
 
@@ -90,7 +90,8 @@ export default async function FullStandingsPage({ params, searchParams }: { para
 
     const availableSeasons = await prisma.season.findMany({
         where: {
-            standings: { some: { tournamentId: tournament.id } },
+            deletedAt: null,
+            tournamentSeasons: { some: { tournamentId: tournament.id } },
         },
         orderBy: { startDate: "desc" },
     });
@@ -119,13 +120,13 @@ export default async function FullStandingsPage({ params, searchParams }: { para
                     currentSeasonSlug={currentSeason.slug}
                 />
             </div>
-            <Suspense 
-                key={currentSeason.id} 
-                fallback={<StandingsTableSkeleton />} 
+            <Suspense
+                key={currentSeason.id}
+                fallback={<StandingsTableSkeleton />}
             >
-                <StandingsSection 
-                    tournamentId={tournament.id} 
-                    seasonId={currentSeason.id} 
+                <StandingsSection
+                    tournamentId={tournament.id}
+                    seasonId={currentSeason.id}
                 />
             </Suspense>
         </>

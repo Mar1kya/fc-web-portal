@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Archive, Plus } from "lucide-react";
@@ -14,16 +13,14 @@ export const metadata = {
     description: "Управління розкладом та результатами матчів",
 };
 
+const EXCLUDED_TEAM_CONTEXTS: TeamContext[] = [TeamContext.GENERAL, TeamContext.ACADEMY];
+
 export default async function MatchesPage({ searchParams }: { searchParams: Promise<{ team?: string }> }) {
     const { team } = await searchParams;
 
-    const existingTeamsObj = await prisma.match.findMany({
-        where: { deletedAt: null },
-        distinct: ['teamContext'],
-        select: { teamContext: true },
-    });
-
-    const availableTeams = existingTeamsObj.map(t => t.teamContext);
+    const availableTeams = Object.values(TeamContext).filter(
+        (context) => !EXCLUDED_TEAM_CONTEXTS.includes(context)
+    );
 
     const currentTeam = team && availableTeams.includes(team as TeamContext)
         ? (team as TeamContext)

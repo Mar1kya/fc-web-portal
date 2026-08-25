@@ -415,7 +415,7 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                                         </SelectContent>
                                     </Select>
                                     {filteredOpponents.length === 0 && (
-                                        <p className="text-xs text-amber-600">
+                                        <p className="text-xs text-red-500">
                                             Ще немає жодного суперника, який грав з цією командою. Спочатку додайте суперника в довіднику.
                                         </p>
                                     )}
