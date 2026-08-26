@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import {
   AnalyticsPeriod,
@@ -6,7 +7,7 @@ import {
 } from "./period";
 
 export type SalesTimeSeriesPoint = {
-  bucket: string; 
+  bucket: string;
   revenue: number;
   orderCount: number;
   aov: number;
@@ -41,7 +42,7 @@ export type PaymentConversionStats = {
 export type CustomizationStats = {
   customizedCount: number;
   totalItemCount: number;
-  customizedShare: number; 
+  customizedShare: number;
 };
 
 function periodWhereClauseSql(period: AnalyticsPeriod): {
@@ -54,7 +55,6 @@ function periodWhereClauseSql(period: AnalyticsPeriod): {
     startDate,
   };
 }
-
 
 export async function getSalesTimeSeries(
   period: AnalyticsPeriod
@@ -92,7 +92,6 @@ export async function getSalesTimeSeries(
     };
   });
 }
-
 
 export async function getTopProducts(
   period: AnalyticsPeriod,
@@ -141,7 +140,6 @@ export async function getTopProducts(
     revenue: Number(r.revenue),
   }));
 }
-
 
 export async function getSizeBreakdown(
   period: AnalyticsPeriod
@@ -244,7 +242,6 @@ export async function getCategoryBreakdown(
   }));
 }
 
-
 export async function getPaymentConversion(
   period: AnalyticsPeriod
 ): Promise<PaymentConversionStats> {
@@ -277,7 +274,6 @@ export async function getPaymentConversion(
 
   return { paidCount, cancelledCount, pendingUnpaidCount, totalCount };
 }
-
 
 export async function getCustomizationStats(
   period: AnalyticsPeriod
@@ -317,7 +313,9 @@ export type ShopAnalytics = {
   customizationStats: CustomizationStats;
 };
 
-export async function getShopAnalytics(
+export const SHOP_ANALYTICS_CACHE_TAG = "shop-analytics";
+
+async function computeShopAnalytics(
   period: AnalyticsPeriod
 ): Promise<ShopAnalytics> {
   const [
@@ -344,4 +342,19 @@ export async function getShopAnalytics(
     paymentConversion,
     customizationStats,
   };
+}
+
+export async function getShopAnalytics(
+  period: AnalyticsPeriod
+): Promise<ShopAnalytics> {
+  const cached = unstable_cache(
+    () => computeShopAnalytics(period),
+    ["shop-analytics", period],
+    {
+      revalidate: 120,
+      tags: [SHOP_ANALYTICS_CACHE_TAG],
+    }
+  );
+
+  return cached();
 }
