@@ -15,7 +15,7 @@ export const metadata = {
     description: "Управління розкладом та результатами матчів",
 };
 
-const EXCLUDED_TEAM_CONTEXTS: TeamContext[] = [TeamContext.GENERAL, TeamContext.ACADEMY];
+const EXCLUDED_TEAM_CONTEXTS: TeamContext[] = [TeamContext.GENERAL];
 
 export default async function MatchesPage({
     searchParams,
@@ -54,7 +54,7 @@ export default async function MatchesPage({
                     </p>
                 </div>
                 <div className="flex items-center justify-center  sm:justify-end flex-wrap gap-2">
-                    <SyncScheduleButton teamContext={currentTeam}/>
+                    <SyncScheduleButton teamContext={currentTeam} />
                     <Button variant="outline" asChild>
                         <Link href="/admin/tournaments/matches/archive">
                             <Archive className="mr-2 h-4 w-4" />

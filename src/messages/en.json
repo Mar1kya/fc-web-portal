@@ -235,7 +235,7 @@
     "Metadata": {
       "title": "News",
       "titleWithDate": "{title} on {date}",
-      "description": "Read the latest news, exclusive interviews, and official statements from the football club. Follow the life of the main team and the Academy.",
+      "description": "Read the latest news, exclusive interviews, and official statements from the football club. Follow the life of the main team.",
       "dynamicDescription": "Browse {category} from Emerald Gang football club. Latest updates, results, and events."
     },
     "StandingsMini": {
@@ -357,7 +357,6 @@
       "RESERVE": "2",
       "U21": "U21",
       "U19": "U19",
-      "ACADEMY": "Academy",
       "WOMEN": "Women",
       "GENERAL": ""
     },
@@ -699,7 +698,6 @@
       "RESERVE": "Second Team",
       "U21": "U-21",
       "U19": "U-19",
-      "ACADEMY": "Academy",
       "GENERAL": "Club",
       "WOMEN": "Women's team"
     },

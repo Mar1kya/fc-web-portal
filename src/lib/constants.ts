@@ -38,7 +38,6 @@ export const teamContextTranslations: Record<TeamContext, string> = {
   RESERVE: "Друга команда",
   U21: "U21",
   U19: "U19",
-  ACADEMY: "Академія",
   WOMEN: "Жіноча команда",
   GENERAL: "Загальний склад",
 };
@@ -47,7 +46,6 @@ export const teamContextSuffixesUk: Record<TeamContext, string> = {
   RESERVE: "2",
   U21: "U-21",
   U19: "U-19",
-  ACADEMY: "Академія",
   WOMEN: "Жінки",
   GENERAL: "",
 };

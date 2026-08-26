@@ -105,7 +105,6 @@ enum TeamContext {
   RESERVE
   U21
   U19
-  ACADEMY
   WOMEN
   GENERAL
 }
