@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ShoppingBag, Banknote, CalendarDays, Newspaper } from "lucide-react"
-import { formatPrice } from "@/lib/utils" 
-import { Prisma } from "../../../../../../generated/prisma";
+import { formatPrice } from "@/lib/utils"
+import { Prisma, TeamContext } from "../../../../../../generated/prisma";
+import { getOurTeamNameAdmin } from "@/lib/utils/team-display";
 
 type NextMatchWithOpponent = Prisma.MatchGetPayload<{
     include: { opponent: { include: { translations: true } } }
@@ -10,19 +11,22 @@ type NextMatchWithOpponent = Prisma.MatchGetPayload<{
 type KPICardsProps = {
     pendingOrders: number;
     revenue: number;
-    nextMatch: NextMatchWithOpponent | null; 
+    nextMatch: NextMatchWithOpponent | null;
     newsCount: number;
+    teamContext: TeamContext;
 }
 
-export function KPICards({ pendingOrders, revenue, nextMatch, newsCount }: KPICardsProps) {
-    const nextMatchOpponent = nextMatch?.opponent?.translations?.find(t => t.language === 'uk')?.name 
-    || nextMatch?.opponent?.translations?.[0]?.name 
-    || nextMatch?.opponent?.slug;
-    
-    const matchTitle = nextMatch 
-        ? `Смарагдова Банда vs ${nextMatchOpponent}` 
+export function KPICards({ pendingOrders, revenue, nextMatch, newsCount, teamContext }: KPICardsProps) {
+    const nextMatchOpponent = nextMatch?.opponent?.translations?.find(t => t.language === 'uk')?.name
+        || nextMatch?.opponent?.translations?.[0]?.name
+        || nextMatch?.opponent?.slug;
+
+    const ourTeamName = getOurTeamNameAdmin("Смарагдова Банда", teamContext);
+
+    const matchTitle = nextMatch
+        ? `${ourTeamName} vs ${nextMatchOpponent}`
         : "Немає розкладу";
-    
+
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
