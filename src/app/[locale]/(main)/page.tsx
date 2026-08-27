@@ -9,6 +9,8 @@ import NewsCard from "./news/_components/news-card";
 import ProductCard from "../(shop)/shop/_components/product-card";
 import { Metadata } from "next";
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("HomePage.Metadata");
 
