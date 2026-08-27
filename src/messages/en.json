@@ -301,7 +301,11 @@
     "goals": "Goals",
     "assists": "Assists",
     "cleanSheets": "Clean Sheets",
-    "conceded": "Conceded"
+    "conceded": "Conceded",
+    "contextStats": {
+      "title": "Stats by team",
+      "note": "This breakdown is calculated only from matches tracked in the system since live tracking was introduced, and does not include historical/imported totals shown above."
+    }
   },
   "PlayerProfile": {
     "Metadata": {

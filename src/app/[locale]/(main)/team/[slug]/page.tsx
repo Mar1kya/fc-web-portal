@@ -8,6 +8,7 @@ import sanitizeHtml from 'sanitize-html';
 import NewsGrid from "@/components/shared/news-grid";
 import MediaGallery from "@/components/shared/media-gallery";
 import PlayerQuickStats from "./_components/player-quick-stats";
+import PlayerContextStats from "./_components/player-context-stats";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -83,9 +84,10 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
                 include: {
                     match: {
                         select: {
-                            id: true,           
-                            isHomeGame: true, 
-                            events: {          
+                            id: true,
+                            isHomeGame: true,
+                            teamContext: true,
+                            events: {
                                 where: {
                                     isOpponent: true,
                                     type: "GOAL",
@@ -104,9 +106,15 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
             events: {
                 where: {
                     match: { deletedAt: null, status: "FINISHED" }
-                }
+                },
+                include: {
+                    match: {
+                        select: { teamContext: true },
+                    },
+                },
             },
-        }});
+        }
+    });
 
     if (!player) {
         notFound();
@@ -128,6 +136,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
         <>
             <PlayerHero player={player} />
             <PlayerQuickStats player={player} />
+            <PlayerContextStats player={player} />
             <ProfileTabs
                 bioContent={
                     cleanBio ? (
