@@ -1,9 +1,10 @@
 import { getTranslation } from "@/lib/utils/get-translation";
-import { TARGET_TEAM_ORIGINAL_NAME } from "@/lib/constants";
+import { SOFASCORE_TEAM_IDS, TARGET_TEAM_ORIGINAL_NAME } from "@/lib/constants";
 import { getLocale, getTranslations } from "next-intl/server";
 import StandingsTableClient, { ProcessedStandingItem } from "./standings-table-client";
 
 type DictionaryEntry = {
+    sofascoreId: number;
     originalName: string;
     translations: {
         language: string;
@@ -29,6 +30,10 @@ type StandingsTableProps = {
     standings: StandingItem[];
     dictionaries: DictionaryEntry[];
 };
+
+const OUR_TEAM_SOFASCORE_IDS = new Set(
+    Object.values(SOFASCORE_TEAM_IDS).map(Number)
+);
 
 export default async function StandingsTable({ standings, dictionaries }: StandingsTableProps) {
     const t = await getTranslations("StandingsPage");
@@ -57,7 +62,12 @@ export default async function StandingsTable({ standings, dictionaries }: Standi
         );
 
         const translatedTeamName = getTranslation(dictEntry, locale)?.name || team.teamName;
-        const isTargetTeam = dictEntry?.originalName === TARGET_TEAM_ORIGINAL_NAME;
+
+        const isTargetTeam = dictEntry
+            ? OUR_TEAM_SOFASCORE_IDS.has(dictEntry.sofascoreId) ||
+              dictEntry.originalName === TARGET_TEAM_ORIGINAL_NAME
+            : false;
+
         const goalDifference = team.goalsFor - team.goalsAgainst;
 
         return {
