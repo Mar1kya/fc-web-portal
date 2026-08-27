@@ -1,5 +1,5 @@
 import { getTranslation } from "@/lib/utils/get-translation";
-import { TARGET_TEAM_ORIGINAL_NAME } from "@/lib/constants";
+import { SOFASCORE_TEAM_IDS, TARGET_TEAM_ORIGINAL_NAME } from "@/lib/constants";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ChevronRight } from "lucide-react";
@@ -11,6 +11,7 @@ const CONTEXT_ROWS = 2;
 const TOTAL_ROWS_TO_SHOW = CONTEXT_ROWS * 2 + 1;
 
 type DictionaryEntry = {
+    sofascoreId: number;
     originalName: string;
     translations: { language: string; name: string }[];
 };
@@ -40,6 +41,10 @@ type HomeStandingsProps = {
     tournament: TournamentData;
     dictionaries: DictionaryEntry[];
 };
+
+const OUR_TEAM_SOFASCORE_IDS = new Set(
+    Object.values(SOFASCORE_TEAM_IDS).map(Number)
+);
 
 export default async function HomeStandings({
     tournament,
@@ -76,9 +81,10 @@ export default async function HomeStandings({
         const translatedTeamName =
             getTranslation(dictEntry, locale)?.name || team.teamName;
 
-        const isTargetTeam =
-            dictEntry?.originalName === TARGET_TEAM_ORIGINAL_NAME ||
-            team.teamName === TARGET_TEAM_ORIGINAL_NAME;
+        const isTargetTeam = dictEntry
+            ? OUR_TEAM_SOFASCORE_IDS.has(dictEntry.sofascoreId) ||
+              dictEntry.originalName === TARGET_TEAM_ORIGINAL_NAME
+            : team.teamName === TARGET_TEAM_ORIGINAL_NAME;
 
         return {
             ...team,
