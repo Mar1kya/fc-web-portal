@@ -174,3 +174,12 @@ export const matchStatusTranslations: Record<MatchStatus, string> = {
   POSTPONED: "Перенесено",
   CANCELED: "Скасовано",
 };
+export const TEAM_CONTEXT_PRIORITY: Record<TeamContext, number> = {
+  [TeamContext.MAIN_TEAM]: 0,
+  [TeamContext.RESERVE]: 1,
+  [TeamContext.U21]: 2,
+  [TeamContext.U19]: 3,
+  [TeamContext.WOMEN]: 0,
+  [TeamContext.GENERAL]: 0,
+};
+ 
