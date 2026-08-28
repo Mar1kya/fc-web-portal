@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
-import { LOCALES, SOFASCORE_TEAM_IDS, TEAM_ID } from "@/lib/constants";
+import { LOCALES, SOFASCORE_TEAM_IDS, TEAM_CONTEXT_PRIORITY, TEAM_ID } from "@/lib/constants";
 import { PlayerPosition, TeamContext } from "../../generated/prisma";
 import { createCoachSchema, createPlayerSchema } from "@/lib/schemas";
 import { generatePlayerSlug } from "@/lib/utils/slugify";
@@ -71,7 +71,7 @@ export type BoundCoachData = {
 };
 
 export type SyncRosterResult =
-  | { success: true; created: number; updated: number }
+  | { success: true; created: number; updated: number; removed: number }
   | { success: false; message: string };
 
 const mapPosition = (positionCode: string): PlayerPosition => {
@@ -753,14 +753,14 @@ export async function executeRosterSync(
   teamContext: TeamContext = TeamContext.MAIN_TEAM,
 ): Promise<SyncRosterResult> {
   const sofascoreTeamId = SOFASCORE_TEAM_IDS[teamContext];
-
+ 
   if (!sofascoreTeamId) {
     return {
       success: false,
       message: `Для команди "${teamContext}" не задано sofascoreId. Заповніть SOFASCORE_TEAM_IDS.`,
     };
   }
-
+ 
   try {
     const response = await fetch(
       `https://sofascore.p.rapidapi.com/teams/get-squad?teamId=${sofascoreTeamId}`,
@@ -772,20 +772,24 @@ export async function executeRosterSync(
         cache: "no-store",
       },
     );
-
+ 
     if (!response.ok) throw new Error("Помилка API при отриманні складу");
-
+ 
     const data = await response.json();
-
+ 
     const playersData = data.players || [];
-
+ 
     if (playersData.length === 0) throw new Error("Гравців не знайдено");
-
+ 
     let createdCount = 0;
     let updatedCount = 0;
-
+    let removedCount = 0;
+ 
     const affectedSlugs: string[] = [];
-
+    const currentSquadSofaIds = new Set<number>(
+      playersData.map((item: { player: { id: number } }) => item.player.id),
+    );
+ 
     await prisma.$transaction(
       async (tx) => {
         for (const item of playersData) {
@@ -800,26 +804,34 @@ export async function executeRosterSync(
             : null;
           const nationality = playerData.country?.alpha3 || null;
           const avatar = `https://img.sofascore.com/api/v1/player/${sofascoreId}/image`;
-
+ 
           const slug = generatePlayerSlug(name, number);
-
+ 
           const existingPlayer = await tx.player.findUnique({
             where: { sofascoreId },
           });
-
+ 
           if (existingPlayer) {
             const newAvatar = !existingPlayer.isManualAvatar
               ? avatar
               : existingPlayer.avatar;
-
+ 
+            const isBeingRestored = existingPlayer.deletedAt !== null;
+            const shouldUpgradeTeamContext =
+              existingPlayer.teamContext !== teamContext &&
+              TEAM_CONTEXT_PRIORITY[teamContext] <
+                TEAM_CONTEXT_PRIORITY[existingPlayer.teamContext];
+ 
             const hasChanges =
               existingPlayer.number !== number ||
               existingPlayer.position !== position ||
               existingPlayer.height !== height ||
               existingPlayer.nationality !== nationality ||
               existingPlayer.avatar !== newAvatar ||
-              existingPlayer.birthDate?.getTime() !== birthDate?.getTime();
-
+              existingPlayer.birthDate?.getTime() !== birthDate?.getTime() ||
+              shouldUpgradeTeamContext ||
+              isBeingRestored;
+ 
             if (hasChanges) {
               await tx.player.update({
                 where: { id: existingPlayer.id },
@@ -829,6 +841,8 @@ export async function executeRosterSync(
                   height,
                   birthDate,
                   nationality,
+                  ...(shouldUpgradeTeamContext ? { teamContext } : {}),
+                  deletedAt: null,
                   ...(!existingPlayer.isManualAvatar ? { avatar } : {}),
                 },
               });
@@ -859,10 +873,29 @@ export async function executeRosterSync(
             affectedSlugs.push(slug);
           }
         }
+ 
+        const playersNoLongerInSquad = await tx.player.findMany({
+          where: {
+            teamContext,
+            deletedAt: null,
+            sofascoreId: { not: null },
+            NOT: { sofascoreId: { in: Array.from(currentSquadSofaIds) } },
+          },
+          select: { id: true, slug: true },
+        });
+ 
+        if (playersNoLongerInSquad.length > 0) {
+          await tx.player.updateMany({
+            where: { id: { in: playersNoLongerInSquad.map((p) => p.id) } },
+            data: { deletedAt: new Date() },
+          });
+          removedCount = playersNoLongerInSquad.length;
+          affectedSlugs.push(...playersNoLongerInSquad.map((p) => p.slug));
+        }
       },
       { maxWait: 10000, timeout: 30000 },
     );
-
+ 
     if (affectedSlugs.length > 0) {
       LOCALES.forEach((locale) => {
         revalidatePath(`/${locale}/admin/team`);
@@ -876,8 +909,13 @@ export async function executeRosterSync(
         });
       });
     }
-
-    return { success: true, created: createdCount, updated: updatedCount };
+ 
+    return {
+      success: true,
+      created: createdCount,
+      updated: updatedCount,
+      removed: removedCount,
+    };
   } catch (error) {
     console.error("Sync Roster Error:", error);
     return {
@@ -886,15 +924,15 @@ export async function executeRosterSync(
     };
   }
 }
-
+ 
 export async function syncPlayersRoster(
   teamContext: TeamContext = TeamContext.MAIN_TEAM,
 ): Promise<SyncRosterResult> {
   const session = await auth();
-
+ 
   if (!session?.user?.email || session.user.role !== "ADMIN") {
     return { success: false, message: "Немає прав для виконання цієї дії" };
   }
-
+ 
   return await executeRosterSync(teamContext);
 }

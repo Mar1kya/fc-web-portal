@@ -18,7 +18,7 @@ export default async function PlayersArchivePage({ searchParams }: { searchParam
     const { team } = await searchParams;
 
     const existingTeamsObj = await prisma.player.findMany({
-        where: { deletedAt: null },
+        where: { deletedAt: { not: null } },
         distinct: ['teamContext'],
         select: { teamContext: true },
     });

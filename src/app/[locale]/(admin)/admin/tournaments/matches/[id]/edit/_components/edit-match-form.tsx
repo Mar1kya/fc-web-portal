@@ -79,9 +79,31 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
         return opponents.filter(o => opponentContextMap[o.id]?.includes(teamContext));
     }, [opponents, opponentContextMap, teamContext]);
 
-    const filteredPlayers = useMemo(() => {
-        return players.filter(p => p.teamContext === teamContext);
-    }, [players, teamContext]);
+    const [lineupTeamFilter, setLineupTeamFilter] = useState<TeamContext>(() => {
+        const firstLineupPlayerId = initialData.lineup[0]?.playerId;
+        const actualTeam = players.find(p => p.id === firstLineupPlayerId)?.teamContext;
+        return actualTeam ?? initialData.teamContext;
+    });
+    const [eventsTeamFilter, setEventsTeamFilter] = useState<TeamContext>(() => {
+        const firstMismatchedEvent = initialData.events.find(e => {
+            if (e.isOpponent || !e.playerId) return false;
+            const actualTeam = players.find(p => p.id === e.playerId)?.teamContext;
+            return actualTeam && actualTeam !== initialData.teamContext;
+        });
+        if (firstMismatchedEvent?.playerId) {
+            const actualTeam = players.find(p => p.id === firstMismatchedEvent.playerId)?.teamContext;
+            if (actualTeam) return actualTeam;
+        }
+        return initialData.teamContext;
+    });
+
+    const lineupFilteredPlayers = useMemo(() => {
+        return players.filter(p => p.teamContext === lineupTeamFilter);
+    }, [players, lineupTeamFilter]);
+
+    const eventsFilteredPlayers = useMemo(() => {
+        return players.filter(p => p.teamContext === eventsTeamFilter);
+    }, [players, eventsTeamFilter]);
 
     const [lineup, setLineup] = useState<{ playerId: string; isStarter: boolean; inSquad: boolean }[]>(
         initialData.lineup.map(l => ({
@@ -167,31 +189,11 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
     };
 
     const handleTeamContextChange = (val: TeamContext) => {
-        const hasLineupOrEvents = lineup.some(l => l.inSquad) || events.length > 0;
-
-        if (hasLineupOrEvents) {
-            const confirmed = window.confirm(
-                "Зміна команди очистить обраний склад та гравців у подіях, прив'язаних до попередньої команди. Продовжити?"
-            );
-            if (!confirmed) return;
-        }
-
         setTeamContext(val);
 
         if (opponentId && !opponentContextMap[opponentId]?.includes(val)) {
             setOpponentId("");
         }
-
-        setLineup(prev => prev.filter(l =>
-            players.find(p => p.id === l.playerId)?.teamContext === val
-        ));
-
-        setEvents(prev => prev.map(e => {
-            if (!e.isOpponent && e.playerId && players.find(p => p.id === e.playerId)?.teamContext !== val) {
-                return { ...e, playerId: null };
-            }
-            return e;
-        }));
     };
 
     const handleHomeGameToggle = (checked: boolean) => {
@@ -466,29 +468,42 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                 </TabsContent>
                 <TabsContent value="lineup" className="outline-none">
                     <Card className="shadow-none border-border/50">
-                        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between pb-4">
+                        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 gap-4">
                             <div>
                                 <CardTitle className="text-lg">Склад Emerald Gang</CardTitle>
                                 <CardDescription>Відмітьте гравців, які були в заявці та виходили в основі.</CardDescription>
                             </div>
-                            <div className="flex items-center gap-4 text-sm font-medium mt-2 sm:mt-0">
-                                <div className="bg-muted px-3 py-1.5 rounded-md">
-                                    В заявці: <span className="text-primary">{squadCount}</span>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                                <div className="w-full sm:w-48 space-y-1">
+                                    <Label className="text-xs text-muted-foreground">Команда для списку гравців</Label>
+                                    <Select value={lineupTeamFilter} onValueChange={(val) => setLineupTeamFilter(val as TeamContext)} disabled={isPending}>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            {Object.entries(teamContextTranslations).map(([key, label]) => (
+                                                <SelectItem key={key} value={key}>{label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
-                                <div className={`px-3 py-1.5 rounded-md transition-colors ${startersCount !== 11 ? 'bg-destructive/10 text-destructive' : 'bg-muted'}`}>
-                                    Основа: <span>{startersCount} / 11</span>
+                                <div className="flex items-center gap-4 text-sm font-medium">
+                                    <div className="bg-muted px-3 py-1.5 rounded-md">
+                                        В заявці: <span className="text-primary">{squadCount}</span>
+                                    </div>
+                                    <div className={`px-3 py-1.5 rounded-md transition-colors ${startersCount !== 11 ? 'bg-destructive/10 text-destructive' : 'bg-muted'}`}>
+                                        Основа: <span>{startersCount} / 11</span>
+                                    </div>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent>
-                            {filteredPlayers.length === 0 ? (
+                            {lineupFilteredPlayers.length === 0 ? (
                                 <div className="text-center p-8 text-muted-foreground border-2 border-dashed rounded-lg bg-muted/10">
                                     Немає гравців для цієї команди в довіднику. Спочатку додайте гравця з відповідною командою.
                                 </div>
                             ) : (
                                 <ScrollArea className="h-125 pr-4 rounded-md">
                                     <div className="p-2 space-y-1">
-                                        {filteredPlayers.map((player) => {
+                                        {lineupFilteredPlayers.map((player) => {
                                             const playerState = lineup.find(l => l.playerId === player.id) || { inSquad: false, isStarter: false };
                                             return (
                                                 <div key={player.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-colors gap-3">
@@ -519,9 +534,22 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                                 <CardTitle className="text-lg">Події матчу</CardTitle>
                                 <CardDescription>Голи, картки, заміни (до 120 хв з урахуванням екстра-таймів).</CardDescription>
                             </div>
-                            <Button type="button" onClick={addEvent} variant="secondary" size="sm" disabled={isPending}>
-                                <Plus className="w-4 h-4 mr-2" /> Додати подію
-                            </Button>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                                <div className="w-full sm:w-48 space-y-1">
+                                    <Label className="text-xs text-muted-foreground">Команда для списку гравців</Label>
+                                    <Select value={eventsTeamFilter} onValueChange={(val) => setEventsTeamFilter(val as TeamContext)} disabled={isPending}>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            {Object.entries(teamContextTranslations).map(([key, label]) => (
+                                                <SelectItem key={key} value={key}>{label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <Button type="button" onClick={addEvent} variant="secondary" size="sm" disabled={isPending}>
+                                    <Plus className="w-4 h-4 mr-2" /> Додати подію
+                                </Button>
+                            </div>
                         </CardHeader>
                         <CardContent>
                             {events.length === 0 ? (
@@ -594,12 +622,12 @@ export function EditMatchForm({ initialData, seasons, tournaments, opponents, pl
                                                     <Select value={ev.playerId || ""} onValueChange={(val) => updateEvent(idx, 'playerId', val)} disabled={isPending}>
                                                         <SelectTrigger><SelectValue placeholder="Оберіть гравця" /></SelectTrigger>
                                                         <SelectContent>
-                                                            {filteredPlayers.length === 0 ? (
+                                                            {eventsFilteredPlayers.length === 0 ? (
                                                                 <div className="px-2 py-4 text-sm text-muted-foreground text-center">
                                                                     Немає гравців для цієї команди
                                                                 </div>
                                                             ) : (
-                                                                filteredPlayers.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)
+                                                                eventsFilteredPlayers.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)
                                                             )}
                                                         </SelectContent>
                                                     </Select>

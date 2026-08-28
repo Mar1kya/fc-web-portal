@@ -1,5 +1,13 @@
 import { prisma } from "@/lib/prisma";
-import { Prisma, EventType } from "../../../generated/prisma";
+import { Prisma, EventType, PlayerPosition, TeamContext } from "../../../generated/prisma";
+import { generatePlayerSlug } from "@/lib/utils/slugify";
+import {
+  mapSofaPosition,
+  sofaAvatarUrl,
+  sofaBirthDate,
+  sofaJerseyNumberToInt,
+  SofaRawPlayer,
+} from "@/lib/utils/sofascore";
 
 type SofaPlayerItem = {
   substitute: boolean;
@@ -41,6 +49,135 @@ async function fetchSofaMatchDetails(
   return response.json();
 }
 
+async function fetchSofaPlayerProfile(
+  playerId: number,
+): Promise<SofaRawPlayer | null> {
+  try {
+    const response = await fetch(
+      `https://sofascore.p.rapidapi.com/players/get-info?playerId=${playerId}`,
+      {
+        headers: {
+          "x-rapidapi-host": "sofascore.p.rapidapi.com",
+          "x-rapidapi-key": process.env.RAPIDAPI_KEY!,
+        },
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    const p = data?.player;
+    if (!p) return null;
+
+    return {
+      id: p.id,
+      name: p.name,
+      position: p.position ?? null,
+      jerseyNumber: p.jerseyNumber ?? null,
+      height: p.height ?? null,
+      dateOfBirthTimestamp: p.dateOfBirthTimestamp ?? null,
+      country: p.country ?? null,
+    };
+  } catch (err) {
+    console.error(`Не вдалося отримати профіль гравця ${playerId}:`, err);
+    return null;
+  }
+}
+
+function slugifyPlayerName(name: string, number: number): string {
+  return generatePlayerSlug(name, number);
+}
+
+async function generateUniquePlayerSlug(
+  tx: Prisma.TransactionClient,
+  name: string,
+  number: number,
+): Promise<string> {
+  const base = slugifyPlayerName(name, number);
+  let candidate = base;
+  let attempt = 1;
+
+  while (true) {
+    const existing = await tx.player.findUnique({
+      where: { slug: candidate },
+      select: { id: true },
+    });
+    if (!existing) return candidate;
+    attempt += 1;
+    candidate = `${base}-${attempt}`;
+  }
+}
+
+async function ensurePlayerExists(
+  tx: Prisma.TransactionClient,
+  sofaPlayer: SofaRawPlayer,
+  matchTeamContext: TeamContext,
+): Promise<string | null> {
+  const existing = await tx.player.findUnique({
+    where: { sofascoreId: sofaPlayer.id },
+    select: { id: true, number: true, position: true, isManualAvatar: true, avatar: true },
+  });
+
+  const jerseyNumber = sofaJerseyNumberToInt(sofaPlayer.jerseyNumber);
+  const position = sofaPlayer.position
+    ? mapSofaPosition(sofaPlayer.position)
+    : null;
+
+  if (existing) {
+    const patch: Prisma.PlayerUpdateInput = {};
+
+    if (jerseyNumber !== null && jerseyNumber !== existing.number) {
+      patch.number = jerseyNumber;
+    }
+    if (position !== null && position !== existing.position) {
+      patch.position = position;
+    }
+
+    if (Object.keys(patch).length > 0) {
+      await tx.player.update({ where: { id: existing.id }, data: patch });
+    }
+
+    return existing.id;
+  }
+
+  let enriched = sofaPlayer;
+  if (jerseyNumber === null || !sofaPlayer.position) {
+    const fetched = await fetchSofaPlayerProfile(sofaPlayer.id);
+    if (fetched) enriched = { ...fetched, name: sofaPlayer.name || fetched.name };
+  }
+
+  const finalNumber = sofaJerseyNumberToInt(enriched.jerseyNumber) ?? 0;
+  const finalPosition = mapSofaPosition(enriched.position);
+  const slug = await generateUniquePlayerSlug(tx, enriched.name, finalNumber);
+
+  try {
+    const created = await tx.player.create({
+      data: {
+        slug,
+        sofascoreId: sofaPlayer.id,
+        number: finalNumber,
+        position: finalPosition,
+        teamContext: matchTeamContext,
+        height: enriched.height ?? null,
+        birthDate: sofaBirthDate(enriched.dateOfBirthTimestamp),
+        nationality: enriched.country?.alpha3 ?? null,
+        avatar: sofaAvatarUrl(sofaPlayer.id),
+        translations: {
+          create: [{ language: "uk", name: sofaPlayer.name }],
+        },
+      },
+      select: { id: true },
+    });
+    return created.id;
+  } catch (err) {
+    console.error(
+      `Не вдалося автостворити гравця ${sofaPlayer.name} (${sofaPlayer.id}):`,
+      err,
+    );
+    return null;
+  }
+}
+
 export async function processMatchSync(matchDbId: string) {
   try {
     const match = await prisma.match.findUnique({
@@ -77,45 +214,58 @@ export async function processMatchSync(matchDbId: string) {
       eventDetails?.awayScore?.display ??
       null;
 
-    const allSofaIdsToFetch = new Set<number>();
     const incidents: SofaIncidentItem[] = incidentsData.incidents || [];
     const isOurHomeGame = match.isHomeGame;
 
     let ourTeamLineupRaw = null;
     let opponentLineupRaw = null;
 
+    const ourSofaPlayersById = new Map<number, SofaRawPlayer>();
+
     if (lineupsData.home && lineupsData.away) {
       ourTeamLineupRaw = isOurHomeGame ? lineupsData.home : lineupsData.away;
       opponentLineupRaw = isOurHomeGame ? lineupsData.away : lineupsData.home;
 
       (ourTeamLineupRaw.players as SofaPlayerItem[]).forEach((p) => {
-        allSofaIdsToFetch.add(p.player.id);
+        ourSofaPlayersById.set(p.player.id, p.player);
       });
     }
 
     incidents.forEach((inc) => {
-      if (inc.playerIn?.id) allSofaIdsToFetch.add(inc.playerIn.id);
-      if (inc.playerOut?.id) allSofaIdsToFetch.add(inc.playerOut.id);
-      if (inc.player?.id) allSofaIdsToFetch.add(inc.player.id);
-      if (inc.assist1?.id) allSofaIdsToFetch.add(inc.assist1.id);
-    });
+      const isOpponentIncident = inc.isHome !== match.isHomeGame;
+      if (isOpponentIncident) return;
 
-    const playersInDb = await prisma.player.findMany({
-      where: { sofascoreId: { in: Array.from(allSofaIdsToFetch) } },
-      select: { id: true, sofascoreId: true },
-    });
+      const addIfMissing = (player: { id: number; name: string } | undefined) => {
+        if (!player) return;
+        if (ourSofaPlayersById.has(player.id)) return; 
+        ourSofaPlayersById.set(player.id, {
+          id: player.id,
+          name: player.name,
+          position: null,
+          jerseyNumber: null,
+        });
+      };
 
-    const playerMap = new Map<number, string>();
-    playersInDb.forEach((p) => {
-      if (p.sofascoreId !== null) {
-        playerMap.set(p.sofascoreId, p.id);
-      }
+      addIfMissing(inc.playerIn);
+      addIfMissing(inc.playerOut);
+      addIfMissing(inc.player);
+      addIfMissing(inc.assist1);
     });
 
     await prisma.$transaction(
       async (tx) => {
         await tx.matchEvent.deleteMany({ where: { matchId: matchDbId } });
         await tx.matchLineup.deleteMany({ where: { matchId: matchDbId } });
+
+        const playerMap = new Map<number, string>();
+        for (const sofaPlayer of ourSofaPlayersById.values()) {
+          const dbId = await ensurePlayerExists(
+            tx,
+            sofaPlayer,
+            match.teamContext,
+          );
+          if (dbId) playerMap.set(sofaPlayer.id, dbId);
+        }
 
         let opponentPlayersJSON: {
           name: string;
@@ -138,10 +288,17 @@ export async function processMatchSync(matchDbId: string) {
             const playerDbId = playerMap.get(item.player.id);
 
             if (playerDbId) {
-              await tx.matchLineup.create({
-                data: {
+              await tx.matchLineup.upsert({
+                where: {
+                  matchId_playerId: { matchId: matchDbId, playerId: playerDbId },
+                },
+                create: {
                   matchId: matchDbId,
                   playerId: playerDbId,
+                  isStarter: !item.substitute,
+                  played: !item.substitute,
+                },
+                update: {
                   isStarter: !item.substitute,
                   played: !item.substitute,
                 },
@@ -274,7 +431,7 @@ export async function processMatchSync(matchDbId: string) {
       },
       {
         maxWait: 5000,
-        timeout: 15000,
+        timeout: 20000,
       },
     );
     return { success: true };
@@ -302,8 +459,7 @@ async function processEvent(
       minute,
       isOpponent,
       playerId: playerIdDb,
-      customPlayerName:
-        !playerIdDb || customName.includes("(") ? customName : null,
+      customPlayerName: playerIdDb ? null : customName,
     },
   });
 }
