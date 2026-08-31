@@ -308,3 +308,19 @@ export const productSchema = z.object({
       },
     ),
 });
+
+export const colorSchema = z.object({
+  name_uk: z.string().min(1, "Введіть назву українською"),
+  name_en: z.string().min(1, "Введіть назву англійською"),
+  hexCode: z
+    .string()
+    .regex(
+      /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/,
+      "Некоректний HEX-код (напр. #FF0000)",
+    ),
+});
+
+export const apparelTypeSchema = z.object({
+  name_uk: z.string().min(1, "Введіть назву українською"),
+  name_en: z.string().min(1, "Введіть назву англійською"),
+});

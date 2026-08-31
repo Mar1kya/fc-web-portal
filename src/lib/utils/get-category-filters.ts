@@ -14,7 +14,7 @@ type FilterableProduct = {
   isOnSale: boolean;
   demographic: Demographic;
   color: { slug: string } | null;
-  apparelType: string | null;
+  apparelType: { slug: string } | null;
   variants: { size: string; stock: number }[];
 };
 const sortSizes = (sizes: string[]) => {
@@ -69,7 +69,7 @@ export async function getCategoryFilters({
       isOnSale: true,
       demographic: true,
       color: { select: { slug: true } },
-      apparelType: true,
+      apparelType: { select: { slug: true } },
       variants: { select: { size: true, stock: true } },
     },
   });
@@ -100,7 +100,7 @@ export async function getCategoryFilters({
       new Set(inStockProducts.map((p) => p.color?.slug).filter(Boolean)),
     ) as string[],
     apparelTypes: Array.from(
-      new Set(inStockProducts.map((p) => p.apparelType).filter(Boolean)),
+      new Set(inStockProducts.map((p) => p.apparelType?.slug).filter(Boolean)),
     ) as string[],
     sizes: sortSizes(rawAvailableSizes),
     absoluteMinPrice,
@@ -129,7 +129,8 @@ export async function getCategoryFilters({
     if (
       skipCategory !== "color" &&
       activeColors.length > 0 &&
-      (!product.color || !activeColors.includes(product.color.slug.toLowerCase()))
+      (!product.color ||
+        !activeColors.includes(product.color.slug.toLowerCase()))
     )
       return false;
 
@@ -137,7 +138,7 @@ export async function getCategoryFilters({
       skipCategory !== "apparelType" &&
       activeApparelTypes.length > 0 &&
       (!product.apparelType ||
-        !activeApparelTypes.includes(product.apparelType))
+        !activeApparelTypes.includes(product.apparelType.slug))
     )
       return false;
 
@@ -178,11 +179,11 @@ export async function getCategoryFilters({
           .filter(Boolean),
       ),
     ) as string[],
-    apparelTypes: Array.from(
+       apparelTypes: Array.from(
       new Set(
         inStockProducts
           .filter((p) => passesFilters(p, "apparelType"))
-          .map((p) => p.apparelType)
+          .map((p) => p.apparelType?.slug)
           .filter(Boolean),
       ),
     ) as string[],

@@ -131,10 +131,10 @@ export const columns: ColumnDef<ProductPlain>[] = [
         cell: ({ row }) => {
             const { isFeatured, isOnSale, isArchived } = row.original;
             return (
-                <div className="flex gap-1 flex-wrap w-22.5">
+                <div className="flex gap-1 text-xs flex-wrap w-22.5">
                     {isArchived && <Badge variant={"outline"}>Архівний</Badge>}
-                    {isFeatured && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-emerald-500 hover:bg-emerald-600">Топ продажу</Badge>}
-                    {isOnSale && <Badge className="bg-red-500 hover:bg-red-600 text-[10px] px-1.5 py-0 text-white">Акція</Badge>}
+                    {isFeatured && <Badge variant="secondary" className="px-1.5 py-0 bg-emerald-500 hover:bg-emerald-600">Топ продажу</Badge>}
+                    {isOnSale && <Badge className="bg-red-500 hover:bg-red-600  px-1.5 py-0 text-white">Акція</Badge>}
                     {!isFeatured && !isOnSale && <span className="text-muted-foreground text-xs">-</span>}
                 </div>
             );

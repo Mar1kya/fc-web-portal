@@ -495,7 +495,8 @@ model Product {
   demographic    Demographic          @default(UNISEX)
   colorId        String?
   color          Color?               @relation(fields: [colorId], references: [id])
-  apparelType    String?
+  apparelTypeId  String?
+  apparelType    ApparelType?         @relation(fields: [apparelTypeId], references: [id])
   seasonYear     String?
   matchType      String?
   variants       ProductVariant[]
@@ -511,7 +512,7 @@ model Product {
   @@index([categoryId, isArchived, deletedAt])
   @@index([demographic])
   @@index([colorId])
-  @@index([apparelType])
+  @@index([apparelTypeId])
   @@index([isOnSale])
   @@index([createdAt])
   @@index([deletedAt])
@@ -571,6 +572,31 @@ model ColorTranslation {
   @@unique([colorId, language])
 }
 
+model ApparelType {
+  id           String                   @id @default(cuid())
+  slug         String                   @unique
+  translations ApparelTypeTranslation[]
+  products     Product[]
+  position     Int                      @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+  @@index([position])
+}
+
+model ApparelTypeTranslation {
+  id            String      @id @default(cuid())
+  apparelTypeId String
+  apparelType   ApparelType @relation(fields: [apparelTypeId], references: [id], onDelete: Cascade)
+  language      String      @db.VarChar(5)
+  name          String
+
+  @@unique([apparelTypeId, language])
+}
+
 enum OrderStatusEnum {
   PENDING
   PAID
@@ -625,13 +651,13 @@ model OrderItem {
 }
 
 model Season {
-  id          String     @id @default(cuid())
-  slug        String     @unique
-  name        String     @unique
-  sofascoreId Int?       @unique
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String   @unique
+  sofascoreId Int?     @unique
   startDate   DateTime
   endDate     DateTime
-  isActive    Boolean    @default(false)
+  isActive    Boolean  @default(false)
   matches     Match[]
 
   createdAt         DateTime           @default(now())
