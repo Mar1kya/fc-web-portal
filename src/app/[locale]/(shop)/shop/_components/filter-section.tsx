@@ -18,9 +18,10 @@ type FilterSectionProps = {
     t: (key: string) => string;
     translateItems?: boolean;
     colorSwatches?: Record<string, ColorSwatch>;
+    nameDictionary?: Record<string, { name: string }>;
 }
 
-export default function FilterSection({ title, items, dynamicItems, filterKey, isActive, toggleFilter, t, translateItems = true, colorSwatches }: FilterSectionProps) {
+export default function FilterSection({ title, items, dynamicItems, filterKey, isActive, toggleFilter, t, translateItems = true, colorSwatches, nameDictionary }: FilterSectionProps) {
     if (!items || items.length === 0) return null;
 
     return (
@@ -31,6 +32,7 @@ export default function FilterSection({ title, items, dynamicItems, filterKey, i
                     const active = isActive(filterKey, item);
                     const isDisabled = !active && !dynamicItems.includes(item);
                     const swatch = colorSwatches?.[item];
+                    const dictName = nameDictionary?.[item]?.name;
 
                     return (
                         <label
@@ -69,13 +71,12 @@ export default function FilterSection({ title, items, dynamicItems, filterKey, i
                                     {active && <Check className="h-3 w-3" strokeWidth={3} />}
                                 </div>
                             )}
-
                             <span className={cn(
                                 "text-sm font-medium leading-none transition-colors",
                                 active ? "text-foreground" : "text-muted-foreground",
                                 !isDisabled && !active && "group-hover:text-foreground"
                             )}>
-                                {swatch ? swatch.name : (translateItems ? t(`${filterKey}.${item}`) : item)}
+                                {swatch ? swatch.name : (dictName ?? (translateItems ? t(`${filterKey}.${item}`) : item))}
                             </span>
                         </label>
                     );

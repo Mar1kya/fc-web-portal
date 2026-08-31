@@ -30,6 +30,6 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts",
     "src/**/*"
-  ],
+, "scripts"  ],
   "exclude": ["node_modules"]
 }

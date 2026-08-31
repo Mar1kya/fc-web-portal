@@ -10,9 +10,10 @@ type ColorSwatch = { hex: string; name: string };
 
 type ActiveFiltersProps = {
     colorSwatches?: Record<string, ColorSwatch>;
+    apparelTypeNames?: Record<string, { name: string }>;
 };
 
-export default function ActiveFilters({ colorSwatches = {} }: ActiveFiltersProps) {
+export default function ActiveFilters({ colorSwatches = {}, apparelTypeNames = {} }: ActiveFiltersProps) {
     const t = useTranslations("Shop.Filters");
     const router = useRouter();
     const pathname = usePathname();
@@ -40,6 +41,14 @@ export default function ActiveFilters({ colorSwatches = {} }: ActiveFiltersProps
                     value: val,
                     label: swatch?.name ?? val,
                     hex: swatch?.hex,
+                });
+                return;
+            }
+            if (key === "apparelType") {
+                activeFilters.push({
+                    key,
+                    value: val,
+                    label: apparelTypeNames[val]?.name ?? val,
                 });
                 return;
             }

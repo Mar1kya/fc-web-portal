@@ -24,6 +24,8 @@ type SelectOption = { id: string; name: string; number?: number | null; teamCont
 
 type ColorOption = { id: string; name: string; hex: string }
 
+type ApparelTypeOption = { id: string; name: string }
+
 type ProductWithDetails = {
     id: string
     slug: string
@@ -49,6 +51,7 @@ type EditProductFormProps = {
     categories: { id: string; name: string }[]
     players: SelectOption[]
     colors: ColorOption[]
+    apparelTypes: ApparelTypeOption[]
 }
 
 type VariantItem = {
@@ -58,7 +61,7 @@ type VariantItem = {
     sku: string
 }
 
-export function EditProductForm({ initialData, categories, players, colors }: EditProductFormProps) {
+export function EditProductForm({ initialData, categories, players, colors, apparelTypes }: EditProductFormProps) {
     const router = useRouter()
     const ukTranslation = initialData.translations.find((t) => t.language === "uk")
     const enTranslation = initialData.translations.find((t) => t.language === "en")
@@ -76,7 +79,7 @@ export function EditProductForm({ initialData, categories, players, colors }: Ed
     const [isFeatured, setIsFeatured] = useState(initialData.isFeatured)
     const [isArchived, setIsArchived] = useState(initialData.isArchived)
     const [color, setColor] = useState(initialData.color ?? "none");
-    const [apparelType, setApparelType] = useState(initialData.apparelType ?? "")
+    const [apparelType, setApparelType] = useState(initialData.apparelType ?? "none")
     const [seasonYear, setSeasonYear] = useState(initialData.seasonYear ?? "")
     const [matchType, setMatchType] = useState(initialData.matchType ?? "")
     const [selectedPlayers, setSelectedPlayers] = useState<string[]>(
@@ -148,7 +151,7 @@ export function EditProductForm({ initialData, categories, players, colors }: Ed
         isFeatured,
         isArchived,
         color: color === "none" ? null : color,
-        apparelType: apparelType || null,
+        apparelType: apparelType === "none" ? null : apparelType,
         seasonYear: seasonYear || null,
         matchType: matchType || null,
         relatedPlayerIds: selectedPlayers,
@@ -399,14 +402,12 @@ export function EditProductForm({ initialData, categories, players, colors }: Ed
                             <div className="space-y-2">
                                 <Label>Тип одягу</Label>
                                 <Select value={apparelType} onValueChange={setApparelType} disabled={isPending}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Оберіть тип одягу" />
-                                    </SelectTrigger>
+                                    <SelectTrigger><SelectValue placeholder="Оберіть тип одягу" /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="T_SHIRT">Футболки</SelectItem>
-                                        <SelectItem value="HOODIE">Толстовки й худі</SelectItem>
-                                        <SelectItem value="CAP">Кепки</SelectItem>
-                                        <SelectItem value="SCARF">Шарфи</SelectItem>
+                                        <SelectItem value="none">Без типу</SelectItem>
+                                        {apparelTypes.map((a) => (
+                                            <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>

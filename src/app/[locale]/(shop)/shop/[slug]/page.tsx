@@ -11,6 +11,7 @@ import ActiveFilters from "../_components/active-filters";
 import ShopSidebarSkeleton from "./_components/shop-sidebar-skeleton";
 import ShopSidebarSection from "./_components/shop-sidebar-section";
 import { getColorDictionary } from "@/lib/utils/get-color-dictionary";
+import { getApparelTypeDictionary } from "@/lib/utils/get-apparel-type-dictionary";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -66,7 +67,11 @@ export default async function CategoryPage({
 
     if (!category) notFound();
     const categoryName = getTranslation(category, locale)?.name || category.slug;
-    const colorSwatches = await getColorDictionary();
+
+    const [colorSwatches, apparelTypeNames] = await Promise.all([
+        getColorDictionary(),
+        getApparelTypeDictionary(),
+    ]);
 
     return (
         <div className="flex flex-col gap-6">
@@ -77,11 +82,16 @@ export default async function CategoryPage({
             <div className="flex flex-col lg:flex-row gap-8 items-start">
                 <div className="w-full lg:w-64 shrink-0">
                     <Suspense fallback={<ShopSidebarSkeleton />}>
-                        <ShopSidebarSection categoryId={category.id} searchParams={resolvedSearchParams} colorSwatches={colorSwatches} />
+                        <ShopSidebarSection
+                            categoryId={category.id}
+                            searchParams={resolvedSearchParams}
+                            colorSwatches={colorSwatches}
+                            apparelTypeNames={apparelTypeNames}
+                        />
                     </Suspense>
                 </div>
                 <div className="flex-1 w-full">
-                    <ActiveFilters colorSwatches={colorSwatches} />
+                    <ActiveFilters colorSwatches={colorSwatches} apparelTypeNames={apparelTypeNames} />
                     <Suspense
                         key={JSON.stringify(resolvedSearchParams)}
                         fallback={<CategoryProductsSkeleton />}

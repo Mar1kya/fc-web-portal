@@ -147,7 +147,7 @@ export async function createProduct(
         demographic: data.demographic,
         colorId: data.color || null,
         categoryId: data.categoryId,
-        apparelType: data.apparelType || null,
+        apparelTypeId: data.apparelType || null,
         seasonYear: data.seasonYear || null,
         matchType: data.matchType || null,
 
@@ -252,7 +252,7 @@ export async function updateProduct(
           demographic: data.demographic,
           colorId: data.color || null,
           categoryId: data.categoryId,
-          apparelType: data.apparelType || null,
+          apparelTypeId: data.apparelType || null,
           seasonYear: data.seasonYear || null,
           matchType: data.matchType || null,
           relatedPlayers: {

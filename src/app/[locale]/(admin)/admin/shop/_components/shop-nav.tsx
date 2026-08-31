@@ -25,6 +25,15 @@ export function ShopNav() {
                     Товари
                 </NavLink>
                 <NavLink
+                    href="/admin/shop/attributes"
+                    exact={false}
+                    className="whitespace-nowrap cursor-pointer relative rounded-none border-b-2 px-4 py-3 font-medium shadow-none transition-none"
+                    activeClassName="border-emerald-600 text-foreground"
+                    inactiveClassName="border-transparent text-muted-foreground hover:text-foreground"
+                >
+                    Атрибути
+                </NavLink>
+                <NavLink
                     href="/admin/shop/categories"
                     exact={false}
                     className="whitespace-nowrap cursor-pointer relative rounded-none border-b-2 px-4 py-3 font-medium shadow-none transition-none"

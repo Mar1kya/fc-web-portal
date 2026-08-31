@@ -24,11 +24,15 @@ type SelectOption = { id: string; name: string; number?: number | null; teamCont
 
 type ColorOption = { id: string; name: string; hex: string }
 
+type ApparelTypeOption = { id: string; name: string }
+
 type CreateProductFormProps = {
     categories: { id: string; name: string }[];
     players: SelectOption[];
     colors: ColorOption[];
+    apparelTypes: ApparelTypeOption[];
 }
+
 
 type VariantItem = {
     id: string;
@@ -37,7 +41,7 @@ type VariantItem = {
     sku: string;
 }
 
-export function CreateProductForm({ categories, players, colors }: CreateProductFormProps) {
+export function CreateProductForm({ categories, players, colors, apparelTypes }: CreateProductFormProps) {
     const router = useRouter();
     const [nameUk, setNameUk] = useState("");
     const [nameEn, setNameEn] = useState("");
@@ -51,7 +55,7 @@ export function CreateProductForm({ categories, players, colors }: CreateProduct
     const [isFeatured, setIsFeatured] = useState(false);
     const [isArchived, setIsArchived] = useState(false);
     const [color, setColor] = useState("none");
-    const [apparelType, setApparelType] = useState("");
+    const [apparelType, setApparelType] = useState("none");
     const [seasonYear, setSeasonYear] = useState("");
     const [matchType, setMatchType] = useState("");
     const [playerTeamContext, setPlayerTeamContext] = useState<TeamContext>(TeamContext.MAIN_TEAM);
@@ -110,7 +114,7 @@ export function CreateProductForm({ categories, players, colors }: CreateProduct
         isFeatured,
         isArchived,
         color: color === "none" ? null : color,
-        apparelType: apparelType || null,
+        apparelType: apparelType === "none" ? null : apparelType,
         seasonYear: seasonYear || null,
         matchType: matchType || null,
         relatedPlayerIds: selectedPlayers,
@@ -304,10 +308,10 @@ export function CreateProductForm({ categories, players, colors }: CreateProduct
                                 <Select value={apparelType} onValueChange={setApparelType} disabled={isPending}>
                                     <SelectTrigger><SelectValue placeholder="Оберіть тип одягу" /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="T_SHIRT">Футболки</SelectItem>
-                                        <SelectItem value="HOODIE">Толстовки й худі</SelectItem>
-                                        <SelectItem value="CAP">Кепки</SelectItem>
-                                        <SelectItem value="SCARF">Шарфи</SelectItem>
+                                        <SelectItem value="none">Без типу</SelectItem>
+                                        {apparelTypes.map((a) => (
+                                            <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>

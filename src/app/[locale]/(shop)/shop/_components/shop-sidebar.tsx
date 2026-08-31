@@ -19,9 +19,10 @@ type ShopSidebarProps = {
     availableFilters: { demographics: string[], colors: string[], apparelTypes: string[], sizes: string[], absoluteMinPrice: number, absoluteMaxPrice: number };
     dynamicFilters: { demographics: string[], colors: string[], apparelTypes: string[], sizes: string[] };
     colorSwatches?: Record<string, { hex: string; name: string }>;
+    apparelTypeNames?: Record<string, { name: string }>;
 }
 
-export default function ShopSidebar({ availableFilters, dynamicFilters, colorSwatches = {} }: ShopSidebarProps) {
+export default function ShopSidebar({ availableFilters, dynamicFilters, colorSwatches = {}, apparelTypeNames = {} }: ShopSidebarProps) {
     const t = useTranslations("Shop.Filters");
     const router = useRouter();
     const pathname = usePathname();
@@ -187,7 +188,16 @@ export default function ShopSidebar({ availableFilters, dynamicFilters, colorSwa
                             {t("apparelTypeTitle")}
                         </AccordionTrigger>
                         <AccordionContent className="pt-1 pb-4">
-                            <FilterSection title="" items={availableFilters.apparelTypes} dynamicItems={dynamicFilters.apparelTypes} filterKey="apparelType" isActive={isActive} toggleFilter={toggleFilter} t={t} />
+                            <FilterSection
+                                title=""
+                                items={availableFilters.apparelTypes}
+                                dynamicItems={dynamicFilters.apparelTypes}
+                                filterKey="apparelType"
+                                isActive={isActive}
+                                toggleFilter={toggleFilter}
+                                t={t}
+                                nameDictionary={apparelTypeNames}
+                            />
                         </AccordionContent>
                     </AccordionItem>
                 )}

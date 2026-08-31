@@ -49,7 +49,7 @@ export async function getCategoryProducts({
         : {},
       activeColors.length > 0 ? { color: { slug: { in: activeColors } } } : {},
       activeApparelTypes.length > 0
-        ? { apparelType: { in: activeApparelTypes } }
+        ? { apparelType: { slug: { in: activeApparelTypes } } }
         : {},
       activeSizes.length > 0
         ? {

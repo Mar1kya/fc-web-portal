@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 }
 
 export default async function CreateProductPage() {
-    const [categoriesData, playersData, colorsData] = await Promise.all([
+    const [categoriesData, playersData, colorsData, apparelTypesData] = await Promise.all([
         prisma.category.findMany({
             where: { deletedAt: null },
             include: { translations: { where: { language: 'uk' } } },
@@ -23,6 +23,11 @@ export default async function CreateProductPage() {
             orderBy: [{ number: 'asc' }, { slug: 'asc' }]
         }),
         prisma.color.findMany({
+            where: { deletedAt: null },
+            include: { translations: { where: { language: "uk" } } },
+            orderBy: { position: "asc" },
+        }),
+        prisma.apparelType.findMany({
             where: { deletedAt: null },
             include: { translations: { where: { language: "uk" } } },
             orderBy: { position: "asc" },
@@ -52,6 +57,11 @@ export default async function CreateProductPage() {
         hex: c.hexCode,
     }));
 
+    const apparelTypes = apparelTypesData.map((a) => ({
+        id: a.id,
+        name: a.translations[0]?.name ?? a.slug,
+    }));
+
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -72,6 +82,7 @@ export default async function CreateProductPage() {
                 categories={categories}
                 players={players}
                 colors={colors}
+                apparelTypes={apparelTypes}
             />
         </div>
     )

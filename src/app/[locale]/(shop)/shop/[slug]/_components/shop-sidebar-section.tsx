@@ -6,13 +6,22 @@ export default async function ShopSidebarSection({
   isSale,
   searchParams,
   colorSwatches,
+  apparelTypeNames,
 }: {
   categoryId?: string;
   isSale?: boolean;
   searchParams: { [key: string]: string | string[] | undefined };
   colorSwatches: Record<string, { hex: string; name: string }>;
+  apparelTypeNames: Record<string, { name: string }>;
 }) {
   const { availableFilters, dynamicFilters } = await getCategoryFilters({ categoryId, isSale, searchParams });
 
-  return <ShopSidebar availableFilters={availableFilters} dynamicFilters={dynamicFilters} colorSwatches={colorSwatches} />;
+  return (
+    <ShopSidebar
+      availableFilters={availableFilters}
+      dynamicFilters={dynamicFilters}
+      colorSwatches={colorSwatches}
+      apparelTypeNames={apparelTypeNames}
+    />
+  );
 }
