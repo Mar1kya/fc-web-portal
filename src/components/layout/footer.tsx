@@ -95,6 +95,11 @@ export default async function Footer() {
                                     </Link>
                                 </li>
                                 <li>
+                                    <Link href="/club/galleries" className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
+                                        {t("galleries")}
+                                    </Link>
+                                </li>
+                                <li>
                                     <Link href="/club/stadium" className="text-muted-foreground text-sm transition-colors hover:text-emerald-600 hover:underline underline-offset-4">
                                         {t("stadium")}
                                     </Link>
@@ -185,10 +190,10 @@ export default async function Footer() {
                                             </a>
                                         </div>
                                     </li>
-                                   <li className="flex items-center justify-start gap-3 text-sm text-muted-foreground">
+                                    <li className="flex items-center justify-start gap-3 text-sm text-muted-foreground">
                                         <MapPin className="size-4 shrink-0 text-emerald-600" />
-                                        
-                                            <a href="https://maps.google.com/?q=Житомир,Україна"
+
+                                        <a href="https://maps.google.com/?q=Житомир,Україна"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="hover:text-emerald-600 hover:underline underline-offset-4 transition-colors"

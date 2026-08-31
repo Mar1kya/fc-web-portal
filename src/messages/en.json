@@ -109,6 +109,7 @@
       "shop": "Shop",
       "club": "Club",
       "history": "History",
+      "galleries": "Galleries",
       "stadium": "Stadium",
       "contacts": "Contacts",
       "button": "Open the menu",
@@ -131,6 +132,7 @@
     "club": "Club",
     "news": "News",
     "history": "History",
+    "galleries": "Galleries",
     "stadium": "Stadium",
     "contacts": "Contacts",
     "shop": "Shop",
@@ -689,6 +691,93 @@
         "titleSuffix": "Official Fan Shop",
         "defaultTitle": "Emerald Gang Official Fan Shop"
       }
+    }
+  },
+  "HistoryPage": {
+    "Hero": {
+      "eyebrow": "Since 1959",
+      "title": "The History of Emerald Gang",
+      "description": "From a regional sports society's senior side to bronze in the Premier League — a journey through dissolution, revival, and a return to the top level of Ukrainian football."
+    },
+    "Stats": {
+      "founded": "Founded",
+      "foundedValue": "1959",
+      "achievement": "Best result",
+      "achievementValue": "UPL Bronze",
+      "arena": "Home ground",
+      "arenaValue": "Central City Stadium",
+      "colors": "Club colors",
+      "colorsValue": "Emerald and gold"
+    },
+    "Timeline": {
+      "heading": "Club timeline",
+      "description": "Ten turning points that shaped the club's history — from its first match to the highest finish in the top division.",
+      "events": [
+        {
+          "year": "1959",
+          "title": "Club founded",
+          "description": "The senior team was formed under the regional council of the \"Avanhard\" sports society. A year later it took the field for the first time in the USSR championship under the name that began our history."
+        },
+        {
+          "year": "1967",
+          "title": "Championship year",
+          "tag": "Title",
+          "description": "Playing under a different name, the team becomes champion of Ukraine among physical culture collectives — still the brightest page of the club's Soviet-era history."
+        },
+        {
+          "year": "2004",
+          "title": "Final match and dissolution",
+          "description": "The club withdraws from competition after financial difficulties. A dark page in the chronicle — but, as time would show, not the last one."
+        },
+        {
+          "year": "2017",
+          "title": "New name: Emerald Gang",
+          "tag": "Rebrand",
+          "description": "The club officially reclaims its historic name and emerald-and-gold kit — colors that become the team's calling card for years to come."
+        },
+        {
+          "year": "2026",
+          "title": "Championship bronze",
+          "tag": "Best result",
+          "description": "April 24 will forever remain in the club's chronicle: for the first time in its history dating back to 1959, the team wins bronze medals in the Premier League."
+        }
+      ]
+    },
+    "Trophies": {
+      "heading": "Honours",
+      "items": [
+        { "title": "Champion of Ukraine (amateur)", "year": "1967" },
+        { "title": "First League winners", "year": "2022/23" },
+        { "title": "UPL bronze medalists", "year": "2025/26" }
+      ]
+    },
+    "Legends": {
+      "heading": "People who made history",
+      "people": [
+        {
+          "name": "Ruslan Rotan",
+          "role": "Head coach",
+          "description": "Led the team to historic UPL bronze, building a style of play recognized across the country."
+        },
+        {
+          "name": "Yuriy Kalytvyntsev",
+          "role": "Revival-era coach",
+          "description": "Under his leadership the club rose from the First League to its debut in the top division."
+        },
+        {
+          "name": "The 1967 squad",
+          "role": "Amateur champions",
+          "description": "Sixteen footballers whose names stand at the origin of every future triumph of the club."
+        }
+      ]
+    },
+    "Quote": {
+      "text": "We've come a long way from a regional side to national bronze — and every season we prove that for Zhytomyr, this is only the beginning.",
+      "author": "Club management"
+    },
+    "Metadata": {
+      "title": "Club History",
+      "description": "Emerald Gang — the journey from its founding in 1959 to Premier League bronze. Timeline, honours, and club legends."
     }
   },
   "Enums": {

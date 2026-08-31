@@ -139,6 +139,7 @@ export default function MobileMenu({ activeTeamContexts, matchesMenuData }: { ac
                             </AccordionTrigger>
                             <AccordionContent className="flex flex-col gap-0 pl-4 pb-2">
                                 <MobileLink href="/club/history" setIsOpen={setIsOpen}>{t("history")}</MobileLink>
+                                <MobileLink href="/club/galleries" setIsOpen={setIsOpen}>{t("galleries")}</MobileLink>
                                 <MobileLink href="/club/stadium" setIsOpen={setIsOpen}>{t("stadium")}</MobileLink>
                                 <MobileLink href="/club/contacts" setIsOpen={setIsOpen}>{t("contacts")}</MobileLink>
                             </AccordionContent>
