@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import PlayersWithMerchSkeleton from "./_components/players-with-merch-skeleton";
 import PlayersWithMerchSection from "./_components/players-with-merch-section";
 
-
 export async function generateMetadata() {
     const t = await getTranslations("Shop.PlayersCatalog.Metadata");
     return {
@@ -13,8 +12,9 @@ export async function generateMetadata() {
     };
 }
 
-export default async function ShopByPlayerPage() {
+export default async function ShopByPlayerPage({searchParams}: {searchParams: Promise<{ [key: string]: string | string[] | undefined }>}) {
     const t = await getTranslations("Shop.PlayersCatalog");
+    const resolvedSearchParams = await searchParams;
 
     return (
         <div className="flex flex-col gap-8">
@@ -25,7 +25,7 @@ export default async function ShopByPlayerPage() {
                 </p>
             </div>
             <Suspense fallback={<PlayersWithMerchSkeleton />}>
-                <PlayersWithMerchSection />
+                <PlayersWithMerchSection searchParams={resolvedSearchParams} />
             </Suspense>
         </div>
     );

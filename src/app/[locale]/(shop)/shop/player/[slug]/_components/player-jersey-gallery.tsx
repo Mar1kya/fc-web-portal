@@ -6,6 +6,7 @@ import { User2, ImageOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {  useState } from "react";
+import PlayerCardAvatar from "@/app/[locale]/(main)/team/_components/player-card-avatar";
 
 type PlayerJerseyGalleryProps = {
     player: { slug: string; name: string; number: number; avatar: string | null };
@@ -32,19 +33,7 @@ export default function PlayerJerseyGallery({ player, activeProductImage, active
                 className="relative block w-full aspect-4/5 bg-muted/10 rounded-2xl overflow-hidden border border-border/50 group cursor-pointer"
             >
                 {player.avatar ? (
-                    <Image
-                        src={player.avatar}
-                        alt={player.name}
-                        fill
-                        className={cn(
-                            "object-cover object-top transition-transform duration-700 group-hover:scale-105",
-                            isOutOfStock && "grayscale brightness-75 opacity-90"
-                        )}
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        priority
-                        unoptimized
-                        referrerPolicy="no-referrer"
-                    />
+                    <PlayerCardAvatar src={player.avatar} alt={player.name} />
                 ) : (
                     <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground/30">
                         <User2 className="w-20 h-20" strokeWidth={1.5} />
