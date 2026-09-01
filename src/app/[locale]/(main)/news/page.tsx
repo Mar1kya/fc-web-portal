@@ -78,7 +78,7 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
     const t = await getTranslations("NewsPage");
 
     return (
-        <section className="container mx-auto">
+        <>
             <div className="flex justify-between items-end mb-8 border-b pb-4 border-border">
                 <H1>{t("title")}</H1>
                 <NewsFilters />
@@ -86,6 +86,6 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
             <Suspense key={JSON.stringify(resolvedSearchParams)} fallback={<NewsGridSkeleton />}>
                 <LatestNews searchParams={resolvedSearchParams} />
             </Suspense>
-        </section>
+        </>
     );
 }

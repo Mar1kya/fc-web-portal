@@ -113,11 +113,12 @@ export default function DesktopMenu({ activeTeamContexts, matchesMenuData }: { a
                     </Link>
                 </li>
                 <li className="group relative py-4">
-                    <Link href="/club" className="flex items-center gap-1 font-semibold transition-colors hover:text-emerald-600">
+                    <Link href="/club/history" className="flex items-center gap-1 font-semibold transition-colors hover:text-emerald-600">
                         {t("club")} <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
                     </Link>
                     <ul className="absolute left-0 top-full hidden w-50 flex-col gap-1 rounded-md border border-border/50 bg-background/95 backdrop-blur-md p-2 shadow-lg group-hover:flex animate-in fade-in zoom-in-95 duration-200">
                         <MenuItem href="/club/history" title={t("history")} />
+                        <MenuItem href="/club/galleries" title={t("galleries")} />
                         <MenuItem href="/club/stadium" title={t("stadium")} />
                         <MenuItem href="/club/contacts" title={t("contacts")} />
                     </ul>

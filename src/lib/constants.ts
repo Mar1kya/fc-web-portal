@@ -12,6 +12,7 @@ export const PAGINATION = {
   NEWS_PER_PAGE: 16,
   SHOP_PER_PAGE: 12,
   ORDERS_PER_PAGE: 10,
+  GALLERIES_PER_PAGE: 12,
 };
 export const TARGET_TEAM_ORIGINAL_NAME = "Polissya Zhytomyr";
 export const TEAM_ID = "258536";
@@ -182,4 +183,3 @@ export const TEAM_CONTEXT_PRIORITY: Record<TeamContext, number> = {
   [TeamContext.WOMEN]: 0,
   [TeamContext.GENERAL]: 0,
 };
- 
