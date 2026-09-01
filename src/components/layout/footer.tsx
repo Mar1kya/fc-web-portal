@@ -123,13 +123,20 @@ export default async function Footer() {
                             <ul className="space-y-3">
                                 {orderedContexts.map((context) => {
                                     const contextLabel = tEnums(`TeamContext.${context}`);
-                                    const tournamentStandings = standingsDb
-                                        .filter(s => s.tournamentSeason.tournament.teamContext === context)
-                                        .map(s => ({
-                                            slug: s.tournamentSeason.tournament.slug,
-                                            name: getTranslation(s.tournamentSeason.tournament, locale)?.name || s.tournamentSeason.tournament.slug,
-                                            id: s.tournamentSeason.tournament.id,
-                                        }));
+                                    const tournamentStandings = Array.from(
+                                        new Map(
+                                            standingsDb
+                                                .filter(s => s.tournamentSeason.tournament.teamContext === context)
+                                                .map(s => [
+                                                    s.tournamentSeason.tournament.id,
+                                                    {
+                                                        slug: s.tournamentSeason.tournament.slug,
+                                                        name: getTranslation(s.tournamentSeason.tournament, locale)?.name || s.tournamentSeason.tournament.slug,
+                                                        id: s.tournamentSeason.tournament.id,
+                                                    }
+                                                ])
+                                        ).values()
+                                    );
 
                                     return (
                                         <React.Fragment key={`footer-context-${context}`}>
