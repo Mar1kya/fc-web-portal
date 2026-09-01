@@ -60,24 +60,31 @@ export default async function Header() {
 
     const orderedMatchContexts = Object.values(TeamContext).filter(c => activeMatchContextsSet.has(c));
 
-    const dynamicMatchesMenu = orderedMatchContexts.map(context => {
-        const standingsForContext = standingsDb
-            .filter(s => s.tournamentSeason.tournament.teamContext === context)
-            .map(s => {
-                const tournament = s.tournamentSeason.tournament;
-                const translatedTourName = getTranslation(tournament, locale)?.name || tournament.slug;
-                return {
-                    name: translatedTourName,
-                    link: `/standings/${tournament.slug}`
-                }
-            });
+   const dynamicMatchesMenu = orderedMatchContexts.map(context => {
+    const standingsForContext = Array.from(
+        new Map(
+            standingsDb
+                .filter(s => s.tournamentSeason.tournament.teamContext === context)
+                .map(s => {
+                    const tournament = s.tournamentSeason.tournament;
+                    const translatedTourName = getTranslation(tournament, locale)?.name || tournament.slug;
+                    return [
+                        tournament.id,
+                        {
+                            name: translatedTourName,
+                            link: `/standings/${tournament.slug}`
+                        }
+                    ];
+                })
+        ).values()
+    );
 
-        return {
-            context: context,
-            matchesLink: `/matches?context=${context}`,
-            standings: standingsForContext
-        }
-    });
+    return {
+        context: context,
+        matchesLink: `/matches?context=${context}`,
+        standings: standingsForContext
+    }
+});
     return <header className="sticky top-0 z-50 2xl:border-b bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60 px-2">
         <div className="container mx-auto border-0 lg:border-b 2xl:border-0">
             <div className="flex items-center justify-between border-b py-4">
