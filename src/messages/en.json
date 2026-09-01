@@ -780,6 +780,203 @@
       "description": "Emerald Gang — the journey from its founding in 1959 to Premier League bronze. Timeline, honours, and club legends."
     }
   },
+  "StadiumPage": {
+    "Hero": {
+      "eyebrow": "Home arena",
+      "title": "Central City Stadium",
+      "description": "The stadium where victories are born — the heart of football in Zhytomyr, with a history spanning more than seventy years."
+    },
+    "Stats": {
+      "opened": "Opened",
+      "openedValue": "1951",
+      "capacity": "Capacity",
+      "capacityValue": "5,928 seats",
+      "pitch": "Pitch size",
+      "pitchValue": "105 × 68 m",
+      "address": "Address",
+      "addressValue": "18 Feshchenka-Chopivskoho St."
+    },
+    "Timeline": {
+      "heading": "Stadium history",
+      "description": "From its first opening to a full modern reconstruction — the story of our home arena.",
+      "events": [
+        {
+          "year": "1951",
+          "title": "Stadium founded",
+          "description": "The stadium first opened its gates to supporters in the centre of Zhytomyr.",
+          "tag": "Opening"
+        },
+        {
+          "year": "1980",
+          "title": "Olympic-era reconstruction",
+          "description": "The east, north and south stands were completed, significantly expanding the arena's capacity.",
+          "tag": "Reconstruction"
+        },
+        {
+          "year": "2002",
+          "title": "Years of decline",
+          "description": "Without sufficient funding, the stands gradually fell into disrepair and the venue became harder to maintain.",
+          "tag": "Challenge"
+        },
+        {
+          "year": "2005",
+          "title": "Transferred to the city",
+          "description": "Ownership passed to the local community, paving the way for a full-scale rebuild.",
+          "tag": "New chapter"
+        },
+        {
+          "year": "2021",
+          "title": "Grand reopening",
+          "description": "After a complete reconstruction, the stadium reopened with a capacity of 5,928 seats.",
+          "tag": "Opening"
+        },
+        {
+          "year": "2024",
+          "title": "Top-flight football",
+          "description": "The arena regularly hosts Ukrainian Premier League and Cup matches.",
+          "tag": "Present day"
+        }
+      ]
+    },
+    "Facilities": {
+      "heading": "Infrastructure",
+      "description": "Everything a modern match day needs — for players, media and supporters alike.",
+      "items": [
+        {
+          "title": "Four stands",
+          "description": "The stadium combines four stands with a total capacity of 5,928 seats."
+        },
+        {
+          "title": "Natural pitch",
+          "description": "A regulation-size 105 × 68 m pitch with quality drainage and natural turf."
+        },
+        {
+          "title": "Floodlighting",
+          "description": "A modern lighting system allows matches to be played in the evening."
+        },
+        {
+          "title": "Media zone",
+          "description": "Dedicated press facilities, commentary boxes and an interview area."
+        },
+        {
+          "title": "Medical room",
+          "description": "An emergency medical point and doping-control rooms in line with UAF requirements."
+        },
+        {
+          "title": "CCTV & security",
+          "description": "A video surveillance and access-control system to keep supporters safe."
+        }
+      ]
+    },
+    "Location": {
+      "heading": "How to get there",
+      "description": "The stadium sits close to the centre of Zhytomyr — reachable by public transport or by car.",
+      "addressLabel": "Stadium address",
+      "address": "18 Feshchenka-Chopivskoho St., Zhytomyr, 10001",
+      "mapCta": "Get directions"
+    },
+    "Gallery": {
+      "heading": "Photo gallery",
+      "description": "A closer look at the arena — the stands, the pitch and the atmosphere of match day.",
+      "images": [
+        "Main stand of the stadium",
+        "View of the pitch",
+        "Stadium floodlights",
+        "Stands on match day",
+        "Stadium entrance",
+        "Aerial view of the stadium"
+      ]
+    },
+    "Metadata": {
+      "title": "Stadium",
+      "description": "Central City Stadium — home ground in Zhytomyr: history, infrastructure and how to get there."
+    }
+  },
+  "ContactsPage": {
+    "Hero": {
+      "eyebrow": "Get in touch",
+      "title": "Club Contacts",
+      "description": "Questions about tickets, partnerships, media or the academy — reach out to us through any convenient channel."
+    },
+    "Quick": {
+      "phone": "Phone",
+      "phoneValue": "+380 412 123 456",
+      "email": "Email",
+      "emailValue": "info@emeraldgang.ua",
+      "address": "Office address",
+      "addressValue": "18 Feshchenka-Chopivskoho Street, Zhytomyr",
+      "hours": "Working hours",
+      "hoursValue": "Mon–Fri, 9:00 AM–6:00 PM",
+      "mapCta": "Get directions"
+    },
+    "Departments": {
+      "heading": "Club departments",
+      "description": "Choose the right department to get a faster answer to your question.",
+      "items": [
+        {
+          "name": "Olena Kovalchuk",
+          "role": "Fan Relations Department",
+          "email": "fans@emeraldgang.ua",
+          "phone": "+380 412 123 457"
+        },
+        {
+          "name": "Andriy Melnyk",
+          "role": "Press Office & Media",
+          "email": "media@emeraldgang.ua",
+          "phone": "+380 412 123 458"
+        },
+        {
+          "name": "Iryna Bondarenko",
+          "role": "Ticket Office",
+          "email": "tickets@emeraldgang.ua",
+          "phone": "+380 412 123 459"
+        },
+        {
+          "name": "Maksym Tkachenko",
+          "role": "Commercial & Partnerships",
+          "email": "partners@emeraldgang.ua",
+          "phone": "+380 412 123 460"
+        }
+      ]
+    },
+    "Socials": {
+      "heading": "Follow us",
+      "description": "News, live broadcasts and club life — on our social media.",
+      "items": [
+        {
+          "label": "Facebook",
+          "href": "https://www.facebook.com/fcpolissya"
+        },
+        {
+          "label": "Instagram",
+          "href": "https://www.instagram.com/fcpolissya"
+        },
+        {
+          "label": "Telegram",
+          "href": "https://t.me/fcpolissya"
+        },
+        {
+          "label": "Youtube",
+          "href": "https://www.youtube.com/@fcpolissya"
+        }
+      ]
+    },
+    "Metadata": {
+      "title": "Contacts",
+      "description": "Get in touch with Emerald Gang: phone, email, office address, club departments and social media."
+    }
+  },
+  "GalleriesPage": {
+    "title": "Photo Gallery",
+    "noGalleries": "No galleries yet.",
+    "GalleryCard": {
+      "photoCount": "{count, plural, one {# photo} other {# photos}}"
+    },
+    "Metadata": {
+      "title": "Photo Gallery",
+      "description": "Photo reports from matches, training sessions and club events."
+    }
+  },
   "Enums": {
     "PostType": {
       "NEWS": "News",

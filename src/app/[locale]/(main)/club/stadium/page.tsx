@@ -1,5 +1,17 @@
 import { getTranslations } from "next-intl/server";
-import { Calendar, Trophy, MapPin, Shirt, Quote } from "lucide-react";
+import {
+    Calendar,
+    Users,
+    Ruler,
+    MapPin,
+    Lightbulb,
+    Sprout,
+    Newspaper,
+    Stethoscope,
+    Video,
+    Quote,
+    Navigation,
+} from "lucide-react";
 import {
     Card,
     CardContent,
@@ -8,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Metadata } from "next";
 import Image from "next/image";
-
+import MediaGallery from "@/components/shared/media-gallery";
 
 type TimelineEvent = {
     year: string;
@@ -17,20 +29,23 @@ type TimelineEvent = {
     tag?: string;
 };
 
-type TrophyItem = {
+type FacilityItem = {
     title: string;
-    year: string;
-};
-
-type Legend = {
-    name: string;
-    role: string;
     description: string;
 };
 
+const FACILITY_ICONS = [Users, Sprout, Lightbulb, Newspaper, Stethoscope, Video];
+const GALLERY_IMAGES = [
+    "/images/main-stand.jpg",
+    "/images/main-stand2.jpg",
+    "/images/lighting.jpg",
+    "/images/match-stands.jpg",
+    "/images/exit.jpg",
+    "/images/stadium-above.jpg",
+];
 
 export async function generateMetadata(): Promise<Metadata> {
-    const t = await getTranslations("HistoryPage.Metadata");
+    const t = await getTranslations("StadiumPage.Metadata");
 
     return {
         title: t("title"),
@@ -39,10 +54,10 @@ export async function generateMetadata(): Promise<Metadata> {
             title: t("title"),
             description: t("description"),
             type: "website",
-            url: "/club/history",
+            url: "/club/stadium",
             images: [
                 {
-                    url: "/images/history.jpg",
+                    url: "/images/stadium.jpg",
                     width: 1200,
                     height: 630,
                     alt: t("title"),
@@ -52,30 +67,40 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
-export default async function ClubHistoryPage() {
-    const t = await getTranslations("HistoryPage");
+export default async function ClubStadiumPage() {
+    const t = await getTranslations("StadiumPage");
 
     const stats = [
-        { icon: Calendar, label: t("Stats.founded"), value: t("Stats.foundedValue") },
-        { icon: Trophy, label: t("Stats.achievement"), value: t("Stats.achievementValue") },
-        { icon: MapPin, label: t("Stats.arena"), value: t("Stats.arenaValue") },
-        { icon: Shirt, label: t("Stats.colors"), value: t("Stats.colorsValue") },
+        { icon: Calendar, label: t("Stats.opened"), value: t("Stats.openedValue") },
+        { icon: Users, label: t("Stats.capacity"), value: t("Stats.capacityValue") },
+        { icon: Ruler, label: t("Stats.pitch"), value: t("Stats.pitchValue") },
+        { icon: MapPin, label: t("Stats.address"), value: t("Stats.addressValue") },
     ];
 
     const timeline = t.raw("Timeline.events") as TimelineEvent[];
-    const trophies = t.raw("Trophies.items") as TrophyItem[];
-    const legends = t.raw("Legends.people") as Legend[];
+    const facilities = t.raw("Facilities.items") as FacilityItem[];
+    const galleryCaptions = t.raw("Gallery.images") as string[];
+    const mapQuery = encodeURIComponent(t("Location.address"));
+    const mapSrc = `https://www.google.com/maps?q=${mapQuery}&output=embed`;
+    const directionsHref = `https://www.google.com/maps/dir/?api=1&destination=${mapQuery}`;
+
+
+    const galleryMedia = GALLERY_IMAGES.map((src, index) => ({
+        id: src,
+        url: src,
+        caption: galleryCaptions[index] ?? undefined,
+    }));
 
     return (
         <div className="flex flex-col gap-20">
             <section className="relative overflow-hidden rounded-2xl">
                 <div className="relative flex min-h-105 flex-col justify-end px-6 py-12 sm:px-12 sm:py-16 overflow-hidden">
                     <Image
-                        src="/images/history.jpg"
+                        src="/images/stadium.jpg"
                         alt=""
                         fill
                         priority
-                        className="object-cover -z-10"
+                        className="object-cover object-[center_37%] -z-10"
                     />
                     <div
                         className="absolute inset-0 -z-10"
@@ -206,7 +231,7 @@ export default async function ClubHistoryPage() {
                                             style={{ borderColor: "oklch(0.55 0.13 155)" }}
                                         />
                                     </div>
-                                    <div className="flex justify-start">
+                                    <div>
                                         {!isLeft && (
                                             <div className="w-full max-w-md text-left">
                                                 <div className="mb-1.5 flex items-center gap-2">
@@ -237,54 +262,95 @@ export default async function ClubHistoryPage() {
                 </div>
             </section>
             <section>
-                <h2 className="mb-8 text-3xl font-bold tracking-tight">{t("Trophies.heading")}</h2>
-                <div className="grid gap-4 sm:grid-cols-3">
-                    {trophies.map((item) => (
-                        <Card key={`${item.title}-${item.year}`} className="p-6">
-                            <CardContent className="p-0">
-                                <Trophy
-                                    className="mb-3 h-6 w-6"
-                                    style={{ color: "oklch(0.65 0.13 95)" }}
-                                    strokeWidth={2}
-                                />
-                                <p className="font-semibold leading-snug">{item.title}</p>
-                                <p className="mt-1 text-sm text-muted-foreground">{item.year}</p>
-                            </CardContent>
-                        </Card>
-                    ))}
+                <div className="mb-8">
+                    <h2 className="mb-3 text-3xl font-bold tracking-tight">{t("Facilities.heading")}</h2>
+                    <p className="leading-relaxed text-muted-foreground">
+                        {t("Facilities.description")}
+                    </p>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {facilities.map((item, index) => {
+                        const Icon = FACILITY_ICONS[index % FACILITY_ICONS.length];
+                        return (
+                            <Card key={item.title} className="p-6">
+                                <CardContent className="p-0">
+                                    <Icon
+                                        className="mb-3 h-6 w-6"
+                                        style={{ color: "oklch(0.6 0.13 155)" }}
+                                        strokeWidth={2}
+                                    />
+                                    <p className="font-semibold leading-snug">{item.title}</p>
+                                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                                        {item.description}
+                                    </p>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
                 </div>
             </section>
             <section>
-                <h2 className="mb-8 text-3xl font-bold tracking-tight">{t("Legends.heading")}</h2>
-                <div className="grid gap-4 sm:grid-cols-3">
-                    {legends.map((legend) => (
-                        <Card key={legend.name} className="p-6">
-                            <CardContent className="p-0">
-                                <p className="font-semibold">{legend.name}</p>
-                                <p className="mb-2 text-xs font-medium" style={{ color: "oklch(0.6 0.13 155)" }}>
-                                    {legend.role}
-                                </p>
-                                <p className="text-sm leading-relaxed text-muted-foreground">
-                                    {legend.description}
-                                </p>
-                            </CardContent>
-                        </Card>
-                    ))}
+                <div className="mb-8">
+                    <h2 className="mb-3 text-3xl font-bold tracking-tight">{t("Location.heading")}</h2>
+                    <p className="leading-relaxed text-muted-foreground">
+                        {t("Location.description")}
+                    </p>
+                </div>
+                <div className="grid gap-4 md:grid-cols-[1fr_1.2fr]">
+                    <Card className="flex flex-col justify-between p-6">
+                        <CardContent className="flex flex-col gap-4 p-0">
+                            <div className="flex items-start gap-3">
+                                <div
+                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
+                                    style={{ background: "oklch(0.32 0.08 155)" }}
+                                >
+                                    <MapPin
+                                        className="h-5 w-5"
+                                        style={{ color: "oklch(0.85 0.1 155)" }}
+                                        strokeWidth={2}
+                                    />
+                                </div>
+                                <div>
+                                    <p className="text-sm leading-tight text-muted-foreground">
+                                        {t("Location.addressLabel")}
+                                    </p>
+                                    <p className="text-lg font-semibold leading-snug">
+                                        {t("Location.address")}
+                                    </p>
+                                </div>
+                            </div>
+                            <a
+                                href={directionsHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                                style={{ background: "oklch(0.45 0.1 155)" }}
+                            >
+                                <Navigation className="h-4 w-4" strokeWidth={2} />
+                                {t("Location.mapCta")}
+                            </a>
+                        </CardContent>
+                    </Card>
+                    <div className="overflow-hidden rounded-2xl border border-border">
+                        <iframe
+                            src={mapSrc}
+                            className="h-64 w-full md:h-full"
+                            style={{ border: 0 }}
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            title={t("Location.addressLabel")}
+                        />
+                    </div>
                 </div>
             </section>
-            <section
-                className="rounded-2xl px-8 py-14 text-center sm:px-16 sm:py-20"
-                style={{ background: "oklch(0.3 0.05 155)" }}
-            >
-                <Quote
-                    className="mx-auto mb-6 h-8 w-8"
-                    style={{ color: "oklch(0.75 0.1 155)" }}
-                    strokeWidth={2}
-                />
-                <p className="mx-auto max-w-2xl text-xl font-medium leading-snug sm:text-2xl">
-                    {t("Quote.text")}
-                </p>
-                <p className="mt-5 text-sm text-muted-foreground">{t("Quote.author")}</p>
+            <section>
+                <div className="mb-8">
+                    <h2 className="mb-3 text-3xl font-bold tracking-tight">{t("Gallery.heading")}</h2>
+                    <p className="leading-relaxed text-muted-foreground">
+                        {t("Gallery.description")}
+                    </p>
+                </div>
+                <MediaGallery media={galleryMedia} />
             </section>
         </div>
     );
