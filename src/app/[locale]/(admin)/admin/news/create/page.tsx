@@ -18,7 +18,10 @@ export default async function CreateNewsPage() {
             include: { translations: true },
         }),
         prisma.match.findMany({
-            where: { deletedAt: null },
+            where: {
+                deletedAt: null,
+                season: { isActive: true },
+            },
             orderBy: { date: "desc" },
             include: { opponent: { include: { translations: true } } },
         }),

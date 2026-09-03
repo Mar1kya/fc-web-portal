@@ -26,7 +26,12 @@ import { Badge } from "@/components/ui/badge"
 
 type PlayerWithTranslations = Prisma.PlayerGetPayload<{ include: { translations: true } }>;
 type CoachWithTranslations = Prisma.CoachGetPayload<{ include: { translations: true } }>;
-type MatchWithOpponent = Prisma.MatchGetPayload<{ include: { opponent: { include: { translations: true } } } }>;
+type MatchWithOpponent = Prisma.MatchGetPayload<{
+    include: {
+        opponent: { include: { translations: true } },
+        season: true
+    }
+}>;
 
 type PostForEdit = Prisma.PostGetPayload<{
     include: {
@@ -422,6 +427,9 @@ export function EditNewsForm({ post, players, coaches, matches }: EditNewsFormPr
                                         filteredMatches.map(match => {
                                             const opponentName = getTranslation(match.opponent, "uk")?.name || "Суперник";
                                             const matchDate = new Date(match.date).toLocaleDateString("uk-UA");
+                                            const isCurrentSeason = match.season?.isActive;
+                                            const seasonInfo = !isCurrentSeason && match.season ? ` - ${match.season.name}` : "";
+
                                             return (
                                                 <div key={match.id} className="flex items-center space-x-3">
                                                     <Checkbox
@@ -437,7 +445,10 @@ export function EditNewsForm({ post, players, coaches, matches }: EditNewsFormPr
                                                             handleToggle(match.id, setSelectedMatches);
                                                         }}
                                                     >
-                                                        vs {opponentName} <span className="text-muted-foreground ml-1 text-xs">({matchDate})</span>
+                                                        vs {opponentName}
+                                                        <span className="text-muted-foreground ml-1 text-xs">
+                                                            ({matchDate}{seasonInfo})
+                                                        </span>
                                                     </Label>
                                                 </div>
                                             )

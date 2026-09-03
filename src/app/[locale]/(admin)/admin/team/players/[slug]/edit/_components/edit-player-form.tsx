@@ -21,6 +21,7 @@ import { PlayerPosition, TeamContext, Prisma } from "../../../../../../../../../
 import { COUNTRIES, teamContextTranslations } from "@/lib/constants"
 import { UploadDropzone } from "@/lib/uploadthing"
 import { getTranslation } from "@/lib/utils/get-translation"
+import NationalityFlag from "@/components/ui/nationality-flag"
 
 type PlayerWithRelations = Prisma.PlayerGetPayload<{
     include: { translations: true; media: true }
@@ -330,12 +331,16 @@ export function EditPlayerForm({ player }: { player: PlayerWithRelations }) {
                             <Label>Національність</Label>
                             <Select value={nationality} onValueChange={setNationality} disabled={isPending}>
                                 <SelectTrigger><SelectValue placeholder="Оберіть країну" /></SelectTrigger>
-                                <SelectContent>
+                                <SelectContent
+                                    position="popper"
+                                    sideOffset={4}
+                                    className="w-(--radix-select-trigger-width)"
+                                >
                                     <ScrollArea className="h-60">
                                         {COUNTRIES.map((country) => (
                                             <SelectItem key={country.code} value={country.code}>
                                                 <div className="flex items-center gap-2">
-                                                    <Flag code={country.code} className="h-3 w-4 rounded-sm object-cover" />
+                                                    <NationalityFlag code={country.code} className="h-3 w-4 rounded-sm object-cover" />
                                                     <span>{country.name}</span>
                                                 </div>
                                             </SelectItem>

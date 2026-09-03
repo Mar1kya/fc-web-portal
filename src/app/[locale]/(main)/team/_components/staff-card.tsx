@@ -4,6 +4,8 @@ import { Coach } from "../../../../../../generated/prisma";
 import { getTranslation } from "@/lib/utils/get-translation";
 import Flag from "react-world-flags";
 import { User } from "lucide-react";
+import { normalizeFlagCode } from "@/lib/utils/country-code";
+import NationalityFlag from "@/components/ui/nationality-flag";
 
 type CoachCardProps = {
     coach: Coach & {
@@ -48,8 +50,8 @@ export default async function StaffCard({ coach, locale }: CoachCardProps) {
                         </span>
                     </div>
                     {coach.nationality && (
-                        <Flag
-                            code={coach.nationality}
+                        <NationalityFlag
+                            code={normalizeFlagCode(coach.nationality)}
                             className="h-3.5 w-5 rounded-xs object-cover shadow-sm"
                             fallback={<span className="text-[10px] font-medium text-muted-foreground uppercase">{coach.nationality}</span>}
                         />

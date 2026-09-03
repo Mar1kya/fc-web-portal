@@ -4,6 +4,8 @@ import { getTranslation } from "@/lib/utils/get-translation";
 import Flag from "react-world-flags";
 import { User } from "lucide-react";
 import PlayerCardAvatar from "./player-card-avatar";
+import { normalizeFlagCode } from "@/lib/utils/country-code";
+import NationalityFlag from "@/components/ui/nationality-flag";
 
 type PlayerCardProps = {
     player: Player & {
@@ -43,8 +45,8 @@ export default async function PlayerCard({ player, locale, positionName }: Playe
                         </span>
                     </div>
                     {player.nationality && (
-                        <Flag
-                            code={player.nationality}
+                        <NationalityFlag
+                            code={normalizeFlagCode(player.nationality)}
                             className="h-3.5 w-5 rounded-xs object-cover shadow-sm"
                             fallback={<span className="text-[10px] font-medium text-muted-foreground uppercase">{player.nationality}</span>}
                         />
