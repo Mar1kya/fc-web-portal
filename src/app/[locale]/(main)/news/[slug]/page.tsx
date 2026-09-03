@@ -78,6 +78,8 @@ export default async function SingleNewsPage({ params }: { params: Promise<{ slu
 
     const otherNews = await prisma.post.findMany({
         where: {
+            teamContext: post.teamContext,
+            deletedAt: null,
             isPublished: true,
             slug: { not: slug }
         },

@@ -8,6 +8,8 @@ import { Shirt, User } from "lucide-react";
 import { Prisma } from "../../../../../../../generated/prisma";
 import PlayerAvatar from "./player-avatar";
 import H1 from "@/components/ui/heading";
+import { normalizeFlagCode } from "@/lib/utils/country-code";
+import NationalityFlag from "@/components/ui/nationality-flag";
 
 type PlayerWithRelations = Prisma.PlayerGetPayload<{
     include: {
@@ -51,8 +53,8 @@ export default async function PlayerHero({ player }: PlayerHeroProps) {
                         <span className="text-sm font-medium text-muted-foreground">{tTeam("nationality")}</span>
                         <div className="flex h-7 items-center justify-center lg:justify-start">
                             {player.nationality ? (
-                                <Flag
-                                    code={player.nationality}
+                                <NationalityFlag
+                                    code={normalizeFlagCode(player.nationality)}
                                     className="h-5 w-7 rounded-xs object-cover shadow-sm"
                                     fallback={<span className="text-lg font-bold uppercase">{player.nationality}</span>}
                                 />
@@ -78,7 +80,6 @@ export default async function PlayerHero({ player }: PlayerHeroProps) {
                         </span>
                     </div>
                 </div>
-
                 {hasJersey && (
                     <div className="mt-10 inline-flex lg:mt-20">
                         <Link

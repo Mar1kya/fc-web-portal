@@ -7,6 +7,8 @@ import { uk, enUS } from "date-fns/locale";
 import { User } from "lucide-react";
 import { Prisma } from "../../../../../../../generated/prisma";
 import H1 from "@/components/ui/heading";
+import { normalizeFlagCode } from "@/lib/utils/country-code";
+import NationalityFlag from "@/components/ui/nationality-flag";
 
 type CoachWithRelations = Prisma.CoachGetPayload<{
     include: {
@@ -23,7 +25,7 @@ export default async function StaffHero({ coach }: CoachHeroProps) {
     const tTeam = await getTranslations("TeamPage");
     const translation = getTranslation(coach, locale);
     const name = translation?.name || (locale === "uk" ? "Без назви" : "Untitled");
-    const roleName = translation?.role || "—"; 
+    const roleName = translation?.role || "—";
     const dateLocale = locale === "uk" ? uk : enUS;
     const formattedBirthDate = coach.birthDate ? format(new Date(coach.birthDate), "dd.MM.yyyy", { locale: dateLocale }) : "—";
 
@@ -43,15 +45,15 @@ export default async function StaffHero({ coach }: CoachHeroProps) {
                     <div className="flex flex-col items-center gap-1 xl:items-start">
                         <span className="text-sm font-medium text-muted-foreground">{tTeam("nationality")}</span>
                         <div className="flex h-7 items-center justify-center xl:justify-start">
-                            {coach.nationality ? (
-                                <Flag
-                                    code={coach.nationality}
+                            {coach.nationality ?
+                                <NationalityFlag
+                                    code={normalizeFlagCode(coach.nationality)}
                                     className="h-5 w-7 rounded-xs object-cover shadow-sm"
                                     fallback={<span className="text-lg font-bold uppercase">{coach.nationality}</span>}
                                 />
-                            ) : (
-                                <span className="text-lg font-bold uppercase">—</span>
-                            )}
+                                : (
+                                    <span className="text-lg font-bold uppercase">—</span>
+                                )}
                         </div>
                     </div>
                     {coach.birthDate && (

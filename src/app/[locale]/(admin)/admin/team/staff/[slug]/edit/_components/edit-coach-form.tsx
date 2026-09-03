@@ -19,6 +19,7 @@ import { BoundCoachData, updateCoach } from "@/actions/team"
 import { TeamContext, Prisma } from "../../../../../../../../../../generated/prisma"
 import { COUNTRIES, teamContextTranslations } from "@/lib/constants"
 import { UploadDropzone } from "@/lib/uploadthing"
+import NationalityFlag from "@/components/ui/nationality-flag"
 
 type CoachWithRelations = Prisma.CoachGetPayload<{
     include: { translations: true; media: true }
@@ -296,7 +297,7 @@ export function EditCoachForm({ coach }: { coach: CoachWithRelations }) {
                                         {COUNTRIES.map((country) => (
                                             <SelectItem key={country.code} value={country.code}>
                                                 <div className="flex items-center gap-2">
-                                                    <Flag code={country.code} className="h-3 w-4 rounded-sm object-cover" />
+                                                    <NationalityFlag code={country.code} className="h-3 w-4 rounded-sm object-cover" />
                                                     <span>{country.name}</span>
                                                 </div>
                                             </SelectItem>
