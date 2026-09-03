@@ -30,10 +30,19 @@ export default async function EditNewsPage({ params }: { params: Promise<{ id: s
             where: { deletedAt: null },
             include: { translations: true },
         }),
-        prisma.match.findMany({
-            where: { deletedAt: null },
+       prisma.match.findMany({
+            where: {
+                deletedAt: null,
+                OR: [
+                    { season: { isActive: true } }, 
+                    { relatedPosts: { some: { id } } } 
+                ]
+            },
             orderBy: { date: "desc" },
-            include: { opponent: { include: { translations: true } } },
+            include: { 
+                opponent: { include: { translations: true } },
+                season: true 
+            },
         }),
     ]);
 

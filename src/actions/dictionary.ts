@@ -69,8 +69,7 @@ export async function updateDictionaryEntry(
     });
 
     LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/admin/tournaments/dictionary`);
-      revalidatePath(`/${locale}/admin/tournaments/standings`);
+      revalidatePath(`/${locale}/admin/tournaments`, "layout");
       revalidatePath(`/${locale}/standings`, "layout");
       revalidatePath(`/${locale}/matches`, "layout");
     });

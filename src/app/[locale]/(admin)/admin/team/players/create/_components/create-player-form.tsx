@@ -326,7 +326,11 @@ export function CreatePlayerForm() {
                                 <SelectTrigger>
                                     <SelectValue placeholder="Оберіть країну" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent
+                                    position="popper"
+                                    sideOffset={4}
+                                    className="w-(--radix-select-trigger-width)"
+                                >
                                     <ScrollArea className="h-60">
                                         {COUNTRIES.map((country) => (
                                             <SelectItem key={country.code} value={country.code}>
