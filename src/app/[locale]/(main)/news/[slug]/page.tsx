@@ -10,6 +10,7 @@ import Image from "next/image";
 import NewsCard from "../_components/news-card";
 import sanitizeHtml from 'sanitize-html';
 import H1 from "@/components/ui/heading";
+import NewsCoverImage from "./_components/news-cover-image";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -135,16 +136,13 @@ export default async function SingleNewsPage({ params }: { params: Promise<{ slu
                 </div>
             </header>
             <div className="relative w-full aspect-video mb-8 rounded-xl overflow-hidden bg-muted flex items-center justify-center border border-border/50">
-                {post.media && post.media.length > 0 ? (
-                    <Image
-                        src={post.media[0].url}
-                        alt={translatedPost.title}
-                        fill
-                        className="object-cover"
-                        priority
+                {post.media?.[0]?.url ? (
+                    <NewsCoverImage 
+                        src={post.media[0].url} 
+                        alt={translatedPost.title} 
                     />
                 ) : (
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground/50">
+                    <div className="flex flex-col items-center gap-2 text-muted-foreground/50 h-full justify-center">
                         <Newspaper className="w-20 h-20 md:w-32 md:h-32" strokeWidth={1} />
                     </div>
                 )}

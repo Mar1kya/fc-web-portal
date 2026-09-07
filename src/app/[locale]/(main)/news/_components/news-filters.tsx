@@ -27,7 +27,7 @@ export default function NewsFilters() {
         params.delete("type");
         params.delete("team");
         params.delete("page");
-        
+
         if (value.startsWith("type_")) {
             params.set("type", value.replace("type_", ""));
         } else if (value.startsWith("team_")) {
@@ -49,14 +49,14 @@ export default function NewsFilters() {
                     <SelectItem value="all">
                         {t("allNews")}
                     </SelectItem>
-                    {teamContexts.map((team) => (
-                        <SelectItem value={`team_${team}`} key={`team_${team}`}>
-                            {tEnums(`TeamContext.${team}`)}
-                        </SelectItem>
-                    ))}
                     {postTypes.map((type) => (
                         <SelectItem value={`type_${type}`} key={`type_${type}`}>
                             {tEnums(`PostType.${type}`)}
+                        </SelectItem>
+                    ))}
+                    {teamContexts.map((team) => (
+                        <SelectItem value={`team_${team}`} key={`team_${team}`}>
+                            {tEnums(`TeamContext.${team}`)}
                         </SelectItem>
                     ))}
                 </SelectContent>

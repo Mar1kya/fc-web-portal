@@ -1,5 +1,5 @@
 import { Link } from "@/i18n/navigation";
-import { MapPin, Phone, Mail, Instagram, Facebook, Twitter } from "lucide-react";
+import { MapPin, Phone, Mail, Instagram, Facebook, Youtube, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import SelectLanguage from "./select-language";
@@ -10,9 +10,10 @@ import { getTranslation } from "@/lib/utils/get-translation";
 import React from "react";
 
 const socialMediaLinks = [
-    { icon: Facebook, link: "#", title: "Facebook" },
-    { icon: Twitter, link: "#", title: "Twitter" },
-    { icon: Instagram, link: "#", title: "Instagram" },
+    { icon: Facebook, link: "https://www.facebook.com/fcpolissya", title: "Facebook" },
+    { icon: Instagram, link: "https://www.instagram.com/fcpolissya", title: "Instagram" },
+    { icon: Send, link: "https://t.me/fcpolissya", title: "Telegram" },
+    { icon: Youtube, link: "https://www.youtube.com/@fcpolissya", title: "Youtube" },
 ];
 
 export default async function Footer() {
