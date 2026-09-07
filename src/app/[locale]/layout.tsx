@@ -5,6 +5,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/sonner"
+import TimezoneSync from "@/components/timezone-sync";
 import type { Metadata } from "next";
 import "../globals.css"
 
@@ -59,6 +60,7 @@ export default async function RootLayout({ children, params }: { children: React
             disableTransitionOnChange
           >
             <NextIntlClientProvider messages={messages}>
+              <TimezoneSync />
               {children}
               <Toaster position="top-right" />
             </NextIntlClientProvider>

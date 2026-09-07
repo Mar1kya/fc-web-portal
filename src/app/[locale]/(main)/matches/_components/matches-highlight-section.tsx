@@ -2,11 +2,13 @@ import { prisma } from "@/lib/prisma";
 import { getLocale } from "next-intl/server";
 import { TeamContext, MatchStatus } from "../../../../../../generated/prisma";
 import MatchesHighlight from "./matches-highlight";
+import { getUserTimeZone } from "@/lib/utils/get-user-timezone";
 
 const getThresholdDate = () => new Date(Date.now() - 4 * 60 * 60 * 1000);
 
 export default async function MatchesHighlightSection({ context, seasonId }: { context: TeamContext; seasonId?: string }) {
     const locale = await getLocale();
+    const timeZone = await getUserTimeZone()
     const matchDateThreshold = getThresholdDate();
 
     const [previousMatch, upcomingMatches] = await Promise.all([
@@ -48,6 +50,7 @@ export default async function MatchesHighlightSection({ context, seasonId }: { c
             nextMatch={nextMatch}
             futureMatch={futureMatch}
             locale={locale}
+            timeZone={timeZone}
         />
     );
 }

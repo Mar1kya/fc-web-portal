@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getTranslation } from "@/lib/utils/get-translation";
-import Flag from "react-world-flags";
 import { format } from "date-fns";
 import { uk, enUS } from "date-fns/locale";
 import { User } from "lucide-react";

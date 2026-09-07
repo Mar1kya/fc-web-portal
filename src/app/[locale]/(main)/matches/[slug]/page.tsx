@@ -9,6 +9,7 @@ import MatchLineups from "./_components/match-lineups";
 import MatchVideos from "./_components/match-videos";
 import { getTranslation } from "@/lib/utils/get-translation";
 import { getOurTeamName } from "@/lib/utils/team-display";
+import { getUserTimeZone } from "@/lib/utils/get-user-timezone";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -60,6 +61,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function SingleMatchPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
+    const timeZone = await getUserTimeZone();
     const locale = await getLocale();
     const tTabs = await getTranslations("SingleMatchPage.Tabs");
     const match = await prisma.match.findUnique({
@@ -104,7 +106,7 @@ export default async function SingleMatchPage({ params }: { params: Promise<{ sl
 
     return (
         <>
-            <MatchHero match={match} locale={locale} />
+            <MatchHero match={match} locale={locale} timeZone={timeZone} />
             <MatchTabs
                 lineupsContent={
                     hasAnyLineups ? (

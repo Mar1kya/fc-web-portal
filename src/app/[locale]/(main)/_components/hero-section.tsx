@@ -6,6 +6,8 @@ import { MatchStatus } from "../../../../../generated/prisma";
 import TeamLogo from "../matches/_components/team-logo";
 import { OUR_LOGO_URL } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
+import { getUserTimeZone } from "@/lib/utils/get-user-timezone";
+import { formatMatchDate, formatMatchTime } from "@/lib/utils/format-date";
 
 type HeroMatch = {
     id: string;
@@ -34,6 +36,7 @@ type HeroSectionProps = {
 
 export default async function HeroSection({ match, locale }: HeroSectionProps) {
     const t = await getTranslations("HomePage.Hero");
+    const timeZone = await getUserTimeZone();
     const tMatches = await getTranslations("MatchesPage");
 
     if (!match) {
@@ -50,16 +53,8 @@ export default async function HeroSection({ match, locale }: HeroSectionProps) {
     const isFinished = match.status === MatchStatus.FINISHED;
     const isLive = match.status === MatchStatus.LIVE;
     const isFinishedOrLive = isFinished || isLive;
-    const matchDate = new Intl.DateTimeFormat(locale, {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
-    }).format(match.date).replace(/\./g, '/');
-
-    const matchTime = new Intl.DateTimeFormat(locale, {
-        hour: "2-digit",
-        minute: "2-digit",
-    }).format(match.date);
+    const matchDate = formatMatchDate(match.date, locale, timeZone).replace(/\./g, '/');
+    const matchTime = formatMatchTime(match.date, locale, timeZone);
 
     return (
         <div className="relative w-full py-12 md:py-20 flex flex-col items-center justify-center overflow-hidden bg-card rounded-2xl">

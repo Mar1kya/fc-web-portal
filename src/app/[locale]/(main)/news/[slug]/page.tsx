@@ -11,6 +11,7 @@ import NewsCard from "../_components/news-card";
 import sanitizeHtml from 'sanitize-html';
 import H1 from "@/components/ui/heading";
 import NewsCoverImage from "./_components/news-cover-image";
+import { getUserTimeZone } from "@/lib/utils/get-user-timezone";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -52,6 +53,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function SingleNewsPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const locale = await getLocale();
+    const timeZone = await getUserTimeZone();
     const t = await getTranslations("SingleNewsPage");
     const tEnums = await getTranslations("Enums");
 
@@ -94,7 +96,8 @@ export default async function SingleNewsPage({ params }: { params: Promise<{ slu
         month: "long",
         year: "numeric",
         hour: "2-digit",
-        minute: "2-digit"
+        minute: "2-digit",
+        timeZone
     }).format(post.publishedAt);
 
     return (
@@ -137,9 +140,9 @@ export default async function SingleNewsPage({ params }: { params: Promise<{ slu
             </header>
             <div className="relative w-full aspect-video mb-8 rounded-xl overflow-hidden bg-muted flex items-center justify-center border border-border/50">
                 {post.media?.[0]?.url ? (
-                    <NewsCoverImage 
-                        src={post.media[0].url} 
-                        alt={translatedPost.title} 
+                    <NewsCoverImage
+                        src={post.media[0].url}
+                        alt={translatedPost.title}
                     />
                 ) : (
                     <div className="flex flex-col items-center gap-2 text-muted-foreground/50 h-full justify-center">

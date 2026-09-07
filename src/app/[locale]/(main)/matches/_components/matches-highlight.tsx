@@ -6,13 +6,15 @@ type MatchesHighlightProps = {
     nextMatch: MatchDisplayData | null;
     futureMatch: MatchDisplayData | null;
     locale: string;
+    timeZone: string;
 }
 
 export default function MatchesHighlight({
     previousMatch,
     nextMatch,
     futureMatch,
-    locale
+    locale,
+    timeZone
 }: MatchesHighlightProps) {
     const t = useTranslations("MatchesPage");
     return (
@@ -22,18 +24,21 @@ export default function MatchesHighlight({
                 title={t("previousMatch")}
                 locale={locale}
                 emptyText={t("noPreviousMatch")}
+                timeZone={timeZone}
             />
             <MatchCard
                 match={nextMatch}
                 title={t("nextMatch")}
                 locale={locale}
                 emptyText={t("noUpcomingMatches")}
+                timeZone={timeZone}
             />
             <MatchCard
                 match={futureMatch}
                 title={t("futureMatch")}
                 locale={locale}
                 emptyText={t("noUpcomingMatches")}
+                timeZone={timeZone}
             />
         </div>
     );

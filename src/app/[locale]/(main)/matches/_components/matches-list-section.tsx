@@ -4,9 +4,11 @@ import { TeamContext } from "../../../../../../generated/prisma";
 import { getTranslations } from "next-intl/server";
 import MatchListItem from "./match-list-item";
 import { MatchDisplayData } from "./match-card";
+import { getUserTimeZone } from "@/lib/utils/get-user-timezone";
 
 export default async function MatchesListSection({ context, seasonId }: { context: TeamContext; seasonId?: string }) {
     const locale = await getLocale();
+    const timeZone = await getUserTimeZone();
     const t = await getTranslations("MatchesPage");
 
     const seasonMatches = await prisma.match.findMany({
@@ -27,7 +29,7 @@ export default async function MatchesListSection({ context, seasonId }: { contex
 
     seasonMatches.forEach((match) => {
         const date = new Date(match.date);
-        const monthYear = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(date);
+        const monthYear = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone }).format(date);
         const capitalizedMonthYear = monthYear.charAt(0).toUpperCase() + monthYear.slice(1);
         if (!groupedMatches[capitalizedMonthYear]) {
             groupedMatches[capitalizedMonthYear] = [];
@@ -55,6 +57,7 @@ export default async function MatchesListSection({ context, seasonId }: { contex
                                     key={match.id}
                                     match={match}
                                     locale={locale}
+                                    timeZone={timeZone}
                                 />
                             ))}
                         </div>

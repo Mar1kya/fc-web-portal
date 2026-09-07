@@ -2,10 +2,9 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpDown, Eye } from "lucide-react";
+import { ArrowUpDown} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Link } from "@/i18n/navigation";
 import { OrderStatusEnum, PaymentMethodEnum } from "../../../../../../../../generated/prisma";
 import { OrderActions } from "./order-actions";
 import { formatOrderDate, formatOrderTime } from "@/lib/utils/format-date";
