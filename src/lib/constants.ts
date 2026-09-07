@@ -183,3 +183,6 @@ export const TEAM_CONTEXT_PRIORITY: Record<TeamContext, number> = {
   [TeamContext.WOMEN]: 0,
   [TeamContext.GENERAL]: 0,
 };
+
+export const TIMEZONE_COOKIE = "user-timezone";
+export const DEFAULT_TIMEZONE = "Europe/Kyiv";

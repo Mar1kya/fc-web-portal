@@ -6,10 +6,12 @@ import { MatchStatus } from "../../../../../../generated/prisma";
 import { MatchDisplayData } from "./match-card";
 import TeamLogo from "./team-logo";
 import { getOurLogoUrl, getOurTeamName } from "@/lib/utils/team-display";
+import { formatMatchDate, formatMatchTime } from "@/lib/utils/format-date";
 
 type MatchListItemProps = {
     match: MatchDisplayData;
     locale: string;
+    timeZone: string;
 }
 
 function getStatusBadgeStyles(status: MatchStatus) {
@@ -28,7 +30,7 @@ function getStatusBadgeStyles(status: MatchStatus) {
     }
 }
 
-export default function MatchListItem({ match, locale }: MatchListItemProps) {
+export default function MatchListItem({ match, locale, timeZone }: MatchListItemProps) {
     const tMatchPage = useTranslations("MatchesPage");
     const tList = useTranslations("MatchesPage.MatchList");
     const tStatus = useTranslations("MatchesPage.MatchList.Status");
@@ -40,13 +42,8 @@ export default function MatchListItem({ match, locale }: MatchListItemProps) {
     const awayTeamName = match.isHomeGame ? translatedOpponent : ourTeamName;
     const homeLogo = match.isHomeGame ? ourLogoUrl : (match.opponent.logoUrl || "");
     const awayLogo = match.isHomeGame ? (match.opponent.logoUrl || "") : ourLogoUrl;
-    const matchDate = new Intl.DateTimeFormat(locale, {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
-    }).format(match.date);
-
-    const matchTime = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(match.date);
+    const matchDate = formatMatchDate(match.date, locale, timeZone);
+    const matchTime = formatMatchTime(match.date, locale, timeZone);
     const showScore = match.status === MatchStatus.FINISHED || match.status === MatchStatus.LIVE;
 
     return (

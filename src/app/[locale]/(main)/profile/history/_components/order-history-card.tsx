@@ -6,6 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Prisma } from "../../../../../../../generated/prisma";
 import { getPaymentBadgeConfig, statusColors } from "@/lib/constants";
 import { Link } from "@/i18n/navigation";
+import { formatOrderDate } from "@/lib/utils/format-date";
 
 type OrderWithItems = Prisma.OrderGetPayload<{
     include: {
@@ -79,9 +80,7 @@ export default async function OrderHistoryCard({
                         #{order.id.slice(-6).toUpperCase()}
                     </h3>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                        {new Date(order.createdAt).toLocaleDateString(locale, {
-                            day: "numeric", month: "long", year: "numeric"
-                        })}
+                        {formatOrderDate(order.createdAt, locale)}
                     </p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-background/50 p-2.5 sm:px-3 rounded-lg border border-border/50 w-full md:w-auto">

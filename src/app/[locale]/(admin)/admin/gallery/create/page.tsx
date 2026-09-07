@@ -24,7 +24,7 @@ export default async function CreateGalleryPage() {
 
     const matches = matchesData.map(m => {
         const opponentName = m.opponent.translations[0]?.name || m.opponent.slug;
-        const dateStr = new Date(m.date).toLocaleDateString("uk-UA");
+        const dateStr = new Date(m.date).toLocaleDateString("uk-UA", { timeZone: "Europe/Kyiv" });
         return {
             id: m.id,
             label: `${dateStr} | vs ${opponentName}`,

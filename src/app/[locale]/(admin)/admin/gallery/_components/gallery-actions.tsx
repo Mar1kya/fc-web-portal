@@ -20,7 +20,7 @@ import {
     AlertDialogTrigger,
     AlertDialogCancel,
 } from "@/components/ui/alert-dialog"
-import { MoreHorizontal, Edit, Archive } from "lucide-react"
+import { MoreHorizontal, Edit, Archive, Eye } from "lucide-react"
 import { Link } from "@/i18n/navigation"
 import { toast } from "sonner"
 import { type GalleryWithRelations } from "./columns"
@@ -62,6 +62,12 @@ export function GalleryActions({ gallery }: GalleryActionsProps) {
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Дії</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                        <Link href={`/club/galleries/${gallery.slug}`} target="_blank" className="cursor-pointer">
+                            <Eye className="mr-2 h-4 w-4" />
+                            Оглянути
+                        </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                         <Link
                             href={`/admin/gallery/${gallery.id}/edit`}

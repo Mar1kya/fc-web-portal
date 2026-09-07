@@ -8,6 +8,7 @@ import MatchesHighlight from "./matches/_components/matches-highlight";
 import NewsCard from "./news/_components/news-card";
 import ProductCard from "../(shop)/shop/_components/product-card";
 import { Metadata } from "next";
+import { getUserTimeZone } from "@/lib/utils/get-user-timezone";
 
 export const dynamic = 'force-dynamic';
 
@@ -38,6 +39,7 @@ const getCurrentDate = () => new Date();
 
 export default async function HomePage() {
   const locale = await getLocale();
+  const timeZone = await getUserTimeZone();
   const t = await getTranslations("HomePage");
 
   const activeSeason = await prisma.season.findFirst({
@@ -214,6 +216,7 @@ export default async function HomePage() {
             nextMatch={matchToDisplay(nextMatch)}
             futureMatch={matchToDisplay(futureMatch)}
             locale={locale}
+            timeZone={timeZone}
           />
         </section>
         {latestPosts.length > 0 && (

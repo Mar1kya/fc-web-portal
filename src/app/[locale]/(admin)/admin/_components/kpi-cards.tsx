@@ -59,7 +59,7 @@ export function KPICards({ pendingOrders, revenue, nextMatch, newsCount, teamCon
                         {matchTitle}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                        {nextMatch ? new Date(nextMatch.date).toLocaleDateString("uk-UA") : "-"}
+                        {nextMatch ? new Date(nextMatch.date).toLocaleDateString("uk-UA", { timeZone: "Europe/Kyiv" }) : "-"}
                     </p>
                 </CardContent>
             </Card>

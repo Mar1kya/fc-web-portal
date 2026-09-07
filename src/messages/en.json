@@ -261,7 +261,7 @@
     "backButton": "Back to news"
   },
   "TeamPage": {
-    "all": "All",
+    "all": "All players",
     "coaches": "Coaching staff",
     "noPhoto": "No Photo",
     "noPlayers": "No players found",
@@ -663,7 +663,7 @@
       "paymentUponDelivery": "Pay on delivery",
       "paymentPendingNotice": "We are awaiting payment confirmation from the payment gateway. The status will update automatically within a minute.",
       "guestBannerTitle": "Want to save this order?",
-      "guestBannerDesc": "Sign up or log in with Google using the email {email}, and this order will automatically appear in your personal account history!",
+      "guestBannerDesc": "Log in with Google using the email {email}, and this order will automatically appear in your personal account history!",
       "statuses": {
         "PENDING": "Pending",
         "PAID": "Paid",

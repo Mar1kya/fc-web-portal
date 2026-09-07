@@ -28,7 +28,7 @@ export const columns: ColumnDef<PostWithRelations>[] = [
                             src={mediaUrl}
                             alt="Cover"
                             fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                            className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
                             sizes="(max-width: 768px) 100vw, 80px"
                         />
                     ) : (

@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { getTranslation } from "@/lib/utils/get-translation";
 import { MatchStatus, TeamContext } from "../../../../../../generated/prisma";
 import TeamLogo from "./team-logo";
-import { SOFASCORE_TEAM_IDS } from "@/lib/constants";
 import { getOurLogoUrl, getOurTeamName } from "@/lib/utils/team-display";
+import { formatMatchDate, formatMatchTime } from "@/lib/utils/format-date";
 
 type TranslatableTournament = {
     slug: string;
@@ -39,9 +39,10 @@ type MatchCardProps = {
     title: string;
     locale: string;
     emptyText: string;
+    timeZone: string;
 }
 
-export default function MatchCard({ match, title, locale, emptyText }: MatchCardProps) {
+export default function MatchCard({ match, title, locale, emptyText, timeZone }: MatchCardProps) {
     const t = useTranslations("MatchesPage");
 
     if (!match) {
@@ -65,14 +66,8 @@ export default function MatchCard({ match, title, locale, emptyText }: MatchCard
     const awayTeamName = match.isHomeGame ? translatedOpponent : ourTeamName;
     const homeLogo = match.isHomeGame ? ourLogoUrl : (match.opponent.logoUrl || "");
     const awayLogo = match.isHomeGame ? (match.opponent.logoUrl || "") : ourLogoUrl;
-
-    const matchDate = new Intl.DateTimeFormat(locale, {
-        day: "2-digit", month: "2-digit", year: "numeric"
-    }).format(match.date);
-
-    const matchTime = new Intl.DateTimeFormat(locale, {
-        hour: "2-digit", minute: "2-digit"
-    }).format(match.date);
+    const matchDate = formatMatchDate(match.date, locale, timeZone);
+    const matchTime = formatMatchTime(match.date, locale, timeZone);
 
     return (
         <div className="flex flex-col gap-2 w-full">

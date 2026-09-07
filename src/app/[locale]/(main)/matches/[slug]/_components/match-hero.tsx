@@ -4,6 +4,7 @@ import { MatchStatus, Prisma } from "../../../../../../../generated/prisma";
 import { getTranslation } from "@/lib/utils/get-translation";
 import TeamLogo from "./team-logo";
 import { getOurLogoUrl, getOurTeamName } from "@/lib/utils/team-display";
+import { formatMatchDate, formatMatchTime } from "@/lib/utils/format-date";
 
 const SoccerBallIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -28,9 +29,10 @@ type MatchWithDetails = Prisma.MatchGetPayload<{
 type MatchHeroProps = {
     match: MatchWithDetails;
     locale: string;
+    timeZone: string;
 }
 
-export default function MatchHero({ match, locale }: MatchHeroProps) {
+export default function MatchHero({ match, locale, timeZone }: MatchHeroProps) {
     const t = useTranslations("SingleMatchPage.Hero");
     const tMatch = useTranslations("MatchesPage");
     const translatedTournament = getTranslation(match.tournament, locale)?.name || "";
@@ -43,14 +45,8 @@ export default function MatchHero({ match, locale }: MatchHeroProps) {
     const awayLogo = match.isHomeGame ? (match.opponent?.logoUrl || "") : ourLogoUrl;
     const homeCoach = match.homeCoachName;
     const awayCoach = match.awayCoachName;
-
-    const matchDate = new Intl.DateTimeFormat(locale, {
-        day: "2-digit", month: "2-digit", year: "numeric"
-    }).format(match.date).replace(/\./g, '/');
-
-    const matchTime = new Intl.DateTimeFormat(locale, {
-        hour: "2-digit", minute: "2-digit"
-    }).format(match.date);
+    const matchDate = formatMatchDate(match.date, locale, timeZone).replace(/\./g, '/');
+    const matchTime = formatMatchTime(match.date, locale, timeZone);
 
     const isFinishedOrLive = match.status === MatchStatus.FINISHED || match.status === MatchStatus.LIVE;
     const allEvents = match.events || [];

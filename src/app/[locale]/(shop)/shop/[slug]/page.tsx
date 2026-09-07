@@ -92,10 +92,7 @@ export default async function CategoryPage({
                 </div>
                 <div className="flex-1 w-full">
                     <ActiveFilters colorSwatches={colorSwatches} apparelTypeNames={apparelTypeNames} />
-                    <Suspense
-                        key={JSON.stringify(resolvedSearchParams)}
-                        fallback={<CategoryProductsSkeleton />}
-                    >
+                    <Suspense fallback={<CategoryProductsSkeleton />}>
                         <CategoryProductsSection categoryId={category.id} searchParams={resolvedSearchParams} />
                     </Suspense>
                 </div>
