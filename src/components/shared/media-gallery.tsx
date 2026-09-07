@@ -12,6 +12,7 @@ import "yet-another-react-lightbox/plugins/thumbnails.css";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Download from "yet-another-react-lightbox/plugins/download";
 import Share from "yet-another-react-lightbox/plugins/share";
+import { useImageOrientation } from "@/hooks/use-image-orientation";
 
 type MediaItem = {
     id: string;
@@ -21,6 +22,29 @@ type MediaItem = {
 type MediaGalleryProps = {
     media: MediaItem[];
 };
+
+function GalleryThumbnail({ item, onClick }: { item: MediaItem; onClick: () => void }) {
+    const { onLoad, objectPositionClass } = useImageOrientation();
+
+    return (
+        <div
+            className="group relative w-full aspect-4/3 rounded-2xl overflow-hidden bg-muted flex items-center justify-center border border-border/50 cursor-pointer"
+            onClick={onClick}
+        >
+            <Image
+                src={item.url}
+                alt="Media"
+                fill
+                className={`object-cover ${objectPositionClass} transition-transform duration-500 group-hover:scale-105`}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                onLoad={onLoad}
+            />
+            <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/20 flex items-center justify-center">
+                <ZoomIn className="w-10 h-10 text-emerald-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100 drop-shadow-md" />
+            </div>
+        </div>
+    );
+}
 
 export default function MediaGallery({ media }: MediaGalleryProps) {
     const [index, setIndex] = useState(-1);
@@ -37,32 +61,25 @@ export default function MediaGallery({ media }: MediaGalleryProps) {
                     const isValid = item.url && item.url.trim() !== "";
                     const currentSlideIndex = isValid ? lightboxIndex++ : -1;
 
-                    return (
-                        <div
-                            key={item.id}
-                            className={`group relative w-full aspect-4/3 rounded-2xl overflow-hidden bg-muted flex items-center justify-center border border-border/50 ${isValid ? "cursor-pointer" : "cursor-default"
-                                }`}
-                            onClick={() => isValid && setIndex(currentSlideIndex)}
-                        >
-                            {isValid ? (
-                                <>
-                                    <Image
-                                        src={item.url}
-                                        alt="Media"
-                                        fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                    />
-                                    <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/20 flex items-center justify-center">
-                                        <ZoomIn className="w-10 h-10 text-emerald-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100 drop-shadow-md" />
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="flex flex-col items-center gap-2 text-muted-foreground/50 transition-transform duration-500 group-hover:scale-105 group-hover:text-emerald-600/50">
+                    if (!isValid) {
+                        return (
+                            <div
+                                key={item.id}
+                                className="relative w-full aspect-4/3 rounded-2xl overflow-hidden bg-muted flex items-center justify-center border border-border/50"
+                            >
+                                <div className="flex flex-col items-center gap-2 text-muted-foreground/50">
                                     <ImageOff className="w-12 h-12" strokeWidth={1.5} />
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        );
+                    }
+
+                    return (
+                        <GalleryThumbnail
+                            key={item.id}
+                            item={item}
+                            onClick={() => setIndex(currentSlideIndex)}
+                        />
                     );
                 })}
             </div>

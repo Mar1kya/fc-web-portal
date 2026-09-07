@@ -7,6 +7,7 @@ import { uk, enUS } from "date-fns/locale";
 import { getTranslation } from "@/lib/utils/get-translation";
 import { Newspaper } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useImageOrientation } from "@/hooks/use-image-orientation";
 
 type NewsCardProps = {
     post: {
@@ -35,17 +36,20 @@ export default function NewsCard({ post, locale }: NewsCardProps) {
     const teamContextStr = t(`TeamContext.${post.teamContext}`);
     const dateLocale = locale === 'uk' ? uk : enUS;
     const formattedDate = format(new Date(post.publishedAt), "dd.MM.yyyy, HH:mm", { locale: dateLocale });
+    const { onLoad, objectPositionClass } = useImageOrientation();
+
 
     return (
-        <Link href={`/news/${post.slug}`} className="group flex flex-col gap-4 cursor-pointer">
+       <Link href={`/news/${post.slug}`} className="group flex flex-col gap-4 cursor-pointer">
             <div className="relative w-full aspect-4/3 rounded-2xl overflow-hidden bg-muted flex items-center justify-center border border-border/50">
                 {imageUrl ? (
                     <Image
                         src={imageUrl}
                         alt={title}
                         fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        className={`object-cover ${objectPositionClass} transition-transform duration-500 group-hover:scale-105`}
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        onLoad={onLoad}
                     />
                 ) : (
                     <div className="flex flex-col items-center gap-2 text-muted-foreground/50 transition-transform duration-500 group-hover:scale-105 group-hover:text-emerald-600/50">

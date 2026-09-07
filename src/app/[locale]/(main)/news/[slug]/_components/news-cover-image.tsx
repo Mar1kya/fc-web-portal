@@ -3,14 +3,16 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Newspaper } from "lucide-react";
+import { useImageOrientation } from "@/hooks/use-image-orientation";
 
 type NewsCoverImageProps = {
-    src?: string | null; 
+    src?: string | null;
     alt?: string | null;
 };
 
 export default function NewsCoverImage({ src, alt }: NewsCoverImageProps) {
     const [hasError, setHasError] = useState(!src);
+    const { onLoad, objectPositionClass } = useImageOrientation();
 
     if (hasError || !src) {
         return (
@@ -23,13 +25,14 @@ export default function NewsCoverImage({ src, alt }: NewsCoverImageProps) {
     return (
         <Image
             src={src}
-            alt={alt || "Обкладинка новини"}
+            alt={alt || ""}
             fill
-            className="object-cover"
+            className={`object-cover ${objectPositionClass}`}
             priority
             unoptimized
             referrerPolicy="no-referrer"
             onError={() => setHasError(true)}
+            onLoad={onLoad}
         />
     );
 }
