@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./columns";
-import { cancelExpiredOrders } from "@/lib/utils/expire-order";
+import { ExpireOrdersTrigger } from "@/components/expire-orders-trigger";
 
 const filterConfigs = [
     {
@@ -12,6 +12,7 @@ const filterConfigs = [
             { label: "Відправлено", value: "SHIPPED" },
             { label: "Доставлено", value: "DELIVERED" },
             { label: "Скасовано", value: "CANCELLED" },
+            { label: "Скасовано, очікує повернення", value: "CANCELLED_REFUND_PENDING" },
         ],
     },
     {
@@ -20,6 +21,7 @@ const filterConfigs = [
         options: [
             { label: "Оплачено", value: "PAID" },
             { label: "Не оплачено", value: "UNPAID" },
+            { label: "Повернено", value: "REFUNDED" },
         ],
     },
     {
@@ -33,7 +35,6 @@ const filterConfigs = [
 ];
 
 export default async function OrdersTableSection() {
-    await cancelExpiredOrders();
 
     const rawOrders = await prisma.order.findMany({
         where: { deletedAt: null },
@@ -65,11 +66,14 @@ export default async function OrdersTableSection() {
     }));
 
     return (
-        <DataTable
-            columns={columns}
-            data={orders}
-            searchPlaceholder="Пошук за клієнтом або товаром..."
-            filters={filterConfigs}
-        />
+        <>
+            <ExpireOrdersTrigger />
+            <DataTable
+                columns={columns}
+                data={orders}
+                searchPlaceholder="Пошук за клієнтом або товаром..."
+                filters={filterConfigs}
+            />
+        </>
     );
 }

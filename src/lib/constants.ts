@@ -137,33 +137,63 @@ export const statusColors: Record<OrderStatusEnum, string> = {
   SHIPPED: "bg-blue-500/10 text-blue-500 border-none",
   DELIVERED: "bg-emerald-600/10 text-emerald-600 border-none",
   CANCELLED: "bg-destructive/10 text-destructive border-none",
+  CANCELLED_REFUND_PENDING: "bg-orange-500/10 text-orange-500 border-none",
 };
 
+export const statusTranslations: Record<OrderStatusEnum, string> = {
+  PENDING: "Очікує",
+  PAID: "Оплачено",
+  SHIPPED: "Відправлено",
+  DELIVERED: "Доставлено",
+  CANCELLED: "Скасовано",
+  CANCELLED_REFUND_PENDING: "Скасовано, очікує повернення",
+};
+export const adminLabels: Record<string, string> = {
+  paid: "Оплачено",
+  refunded: "Повернено",
+  refundPending: "Очікує повернення",
+  notPaid: "Не оплачено",
+  "statuses.CANCELLED": "Скасовано",
+  paymentUponDelivery: "Оплата при отриманні",
+};
 export function getPaymentBadgeConfig(
   isPaid: boolean,
   status: OrderStatusEnum,
   paymentMethod: "CARD" | "COD",
-): { label: string; className: string } {
+  refundedAt: Date | null,
+): { labelKey: string; className: string } {
+  if (status === OrderStatusEnum.CANCELLED && refundedAt) {
+    return {
+      labelKey: "refunded",
+      className: "bg-orange-500/10 text-orange-500 border-none",
+    };
+  }
+  if (status === OrderStatusEnum.CANCELLED && isPaid && !refundedAt) {
+    return {
+      labelKey: "refundPending",
+      className: "bg-amber-500/10 text-amber-500 border-none",
+    };
+  }
   if (isPaid) {
     return {
-      label: "Оплачено",
+      labelKey: "paid",
       className: "bg-emerald-600 hover:bg-emerald-600 text-white border-none",
     };
   }
   if (status === OrderStatusEnum.CANCELLED) {
     return {
-      label: "Скасовано",
+      labelKey: "statuses.CANCELLED",
       className: "bg-destructive/10 text-destructive border-none",
     };
   }
   if (paymentMethod === "CARD") {
     return {
-      label: "Не оплачено",
+      labelKey: "notPaid",
       className: "bg-amber-500/10 text-amber-500 border-none",
     };
   }
   return {
-    label: "Оплата при отриманні",
+    labelKey: "paymentUponDelivery",
     className: "bg-blue-500/10 text-blue-500 border-none",
   };
 }
@@ -186,3 +216,10 @@ export const TEAM_CONTEXT_PRIORITY: Record<TeamContext, number> = {
 
 export const TIMEZONE_COOKIE = "user-timezone";
 export const DEFAULT_TIMEZONE = "Europe/Kyiv";
+
+export const NON_CANCELLABLE_STATUSES = [
+  "SHIPPED",
+  "DELIVERED",
+  "CANCELLED",
+  "CANCELLED_REFUND_PENDING",
+];

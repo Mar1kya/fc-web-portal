@@ -2,12 +2,13 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpDown} from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { OrderStatusEnum, PaymentMethodEnum } from "../../../../../../../../generated/prisma";
 import { OrderActions } from "./order-actions";
 import { formatOrderDate, formatOrderTime } from "@/lib/utils/format-date";
+import { adminLabels, getPaymentBadgeConfig, statusColors, statusTranslations } from "@/lib/constants";
 
 
 export type OrderItemPlain = {
@@ -31,43 +32,13 @@ export type OrderPlain = {
     city: string;
     status: OrderStatusEnum;
     isPaid: boolean;
+    refundedAt: Date | null;
     totalPrice: number;
     paymentMethod: PaymentMethodEnum;
     createdAt: Date;
     deletedAt: Date | null;
     orderItems: OrderItemPlain[];
 };
-
-export const statusTranslations: Record<OrderStatusEnum, string> = {
-    PENDING: "Очікує",
-    PAID: "Оплачено",
-    SHIPPED: "Відправлено",
-    DELIVERED: "Доставлено",
-    CANCELLED: "Скасовано",
-};
-
-const statusColors: Record<OrderStatusEnum, string> = {
-    PENDING: "bg-amber-500/10 text-amber-500 border-none",
-    PAID: "bg-emerald-600/10 text-emerald-600 border-none",
-    SHIPPED: "bg-blue-500/10 text-blue-500 border-none",
-    DELIVERED: "bg-emerald-600/10 text-emerald-600 border-none",
-    CANCELLED: "bg-destructive/10 text-destructive border-none",
-};
-
-
-function getPaymentBadge(isPaid: boolean, status: OrderStatusEnum, paymentMethod: PaymentMethodEnum) {
-    if (isPaid) {
-        return { label: "Оплачено", className: "bg-emerald-600 hover:bg-emerald-600 text-white border-none" };
-    }
-    if (status === OrderStatusEnum.CANCELLED) {
-        return { label: "Скасовано", className: "bg-destructive/10 text-destructive border-none" };
-    }
-    if (paymentMethod === PaymentMethodEnum.CARD) {
-        return { label: "Не оплачено", className: "bg-amber-500/10 text-amber-500 border-none" };
-    }
-    return { label: "Оплата при отриманні", className: "bg-blue-500/10 text-blue-500 border-none" };
-}
-
 
 export const columns: ColumnDef<OrderPlain>[] = [
     {
@@ -139,8 +110,8 @@ export const columns: ColumnDef<OrderPlain>[] = [
         accessorKey: "status",
         header: "Статуси",
         cell: ({ row }) => {
-            const { status, isPaid, paymentMethod } = row.original;
-            const payment = getPaymentBadge(isPaid, status, paymentMethod);
+            const { status, isPaid, paymentMethod, refundedAt } = row.original;
+            const payment = getPaymentBadgeConfig(isPaid, status, paymentMethod, refundedAt);
 
             return (
                 <div className="flex flex-col gap-2">
@@ -165,7 +136,7 @@ export const columns: ColumnDef<OrderPlain>[] = [
                                 payment.className
                             )}
                         >
-                            {payment.label}
+                            {adminLabels[payment.labelKey] ?? payment.labelKey}
                         </Badge>
                     </div>
                 </div>
@@ -184,8 +155,10 @@ export const columns: ColumnDef<OrderPlain>[] = [
         enableHiding: true,
         filterFn: (row, _columnId, value) => {
             if (!value || value === "ALL") return true;
-            if (value === "PAID") return row.original.isPaid === true;
-            if (value === "UNPAID") return row.original.isPaid === false;
+            const { isPaid, status, refundedAt } = row.original;
+            if (value === "PAID") return isPaid === true && status !== OrderStatusEnum.CANCELLED;
+            if (value === "UNPAID") return isPaid === false;
+            if (value === "REFUNDED") return status === OrderStatusEnum.CANCELLED && !!refundedAt;
             return true;
         },
     },

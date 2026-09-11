@@ -35,6 +35,7 @@ export type CategoryBreakdownPoint = {
 export type PaymentConversionStats = {
   paidCount: number;
   cancelledCount: number;
+  refundPendingCount: number;
   pendingUnpaidCount: number;
   totalCount: number;
 };
@@ -57,7 +58,7 @@ function periodWhereClauseSql(period: AnalyticsPeriod): {
 }
 
 export async function getSalesTimeSeries(
-  period: AnalyticsPeriod
+  period: AnalyticsPeriod,
 ): Promise<SalesTimeSeriesPoint[]> {
   const { sql: periodSql, startDate } = periodWhereClauseSql(period);
   const granularity = getGranularityForPeriod(period);
@@ -74,11 +75,12 @@ export async function getSalesTimeSeries(
       COUNT(*) AS order_count
     FROM "Order" o
     WHERE o."isPaid" = true
+      AND o."refundedAt" IS NULL
       ${periodSql}
     GROUP BY 1
     ORDER BY 1 ASC
     `,
-    ...(startDate ? [startDate] : [])
+    ...(startDate ? [startDate] : []),
   );
 
   return rows.map((r) => {
@@ -95,7 +97,7 @@ export async function getSalesTimeSeries(
 
 export async function getTopProducts(
   period: AnalyticsPeriod,
-  limit = 10
+  limit = 10,
 ): Promise<TopProductPoint[]> {
   const { sql: periodSql, startDate } = periodWhereClauseSql(period);
 
@@ -125,12 +127,13 @@ export async function getTopProducts(
       LIMIT 1
     ) pt_any ON pt_uk.id IS NULL
     WHERE o."isPaid" = true
+      AND o."refundedAt" IS NULL
       ${periodSql}
     GROUP BY p.id, product_name
     ORDER BY quantity_sold DESC
     LIMIT ${limit}
     `,
-    ...(startDate ? [startDate] : [])
+    ...(startDate ? [startDate] : []),
   );
 
   return rows.map((r) => ({
@@ -142,7 +145,7 @@ export async function getTopProducts(
 }
 
 export async function getSizeBreakdown(
-  period: AnalyticsPeriod
+  period: AnalyticsPeriod,
 ): Promise<SizeBreakdownPoint[]> {
   const startDate = getPeriodStartDate(period);
 
@@ -151,6 +154,7 @@ export async function getSizeBreakdown(
     where: {
       order: {
         isPaid: true,
+        refundedAt: null,
         ...(startDate ? { createdAt: { gte: startDate } } : {}),
       },
       size: { not: null },
@@ -169,7 +173,7 @@ export async function getSizeBreakdown(
 
 export async function getSizeBreakdownForProduct(
   period: AnalyticsPeriod,
-  productId: string
+  productId: string,
 ): Promise<SizeBreakdownPoint[]> {
   const startDate = getPeriodStartDate(period);
 
@@ -179,6 +183,7 @@ export async function getSizeBreakdownForProduct(
       productId,
       order: {
         isPaid: true,
+        refundedAt: null,
         ...(startDate ? { createdAt: { gte: startDate } } : {}),
       },
       size: { not: null },
@@ -196,7 +201,7 @@ export async function getSizeBreakdownForProduct(
 }
 
 export async function getCategoryBreakdown(
-  period: AnalyticsPeriod
+  period: AnalyticsPeriod,
 ): Promise<CategoryBreakdownPoint[]> {
   const { sql: periodSql, startDate } = periodWhereClauseSql(period);
 
@@ -227,11 +232,12 @@ export async function getCategoryBreakdown(
       LIMIT 1
     ) ct_any ON ct_uk.id IS NULL
     WHERE o."isPaid" = true
+      AND o."refundedAt" IS NULL
       ${periodSql}
     GROUP BY c.id, category_name
     ORDER BY revenue DESC
     `,
-    ...(startDate ? [startDate] : [])
+    ...(startDate ? [startDate] : []),
   );
 
   return rows.map((r) => ({
@@ -243,46 +249,74 @@ export async function getCategoryBreakdown(
 }
 
 export async function getPaymentConversion(
-  period: AnalyticsPeriod
+  period: AnalyticsPeriod,
 ): Promise<PaymentConversionStats> {
   const startDate = getPeriodStartDate(period);
+  const dateFilter = startDate ? { createdAt: { gte: startDate } } : {};
 
-  const grouped = await prisma.order.groupBy({
-    by: ["status", "isPaid"],
-    where: {
-      deletedAt: null,
-      ...(startDate ? { createdAt: { gte: startDate } } : {}),
-    },
-    _count: { _all: true },
-  });
+  const [
+    paidCount,
+    refundedCount,
+    cancelledCount,
+    refundPendingCount,
+    pendingUnpaidCount,
+    totalCount,
+  ] = await Promise.all([
+    prisma.order.count({
+      where: { deletedAt: null, isPaid: true, refundedAt: null, ...dateFilter },
+    }),
+    prisma.order.count({
+      where: {
+        deletedAt: null,
+        isPaid: true,
+        refundedAt: { not: null },
+        ...dateFilter,
+      },
+    }),
+    prisma.order.count({
+      where: {
+        deletedAt: null,
+        status: "CANCELLED",
+        isPaid: false,
+        ...dateFilter,
+      },
+    }),
+    prisma.order.count({
+      where: {
+        deletedAt: null,
+        status: "CANCELLED_REFUND_PENDING",
+        ...dateFilter,
+      },
+    }),
+    prisma.order.count({
+      where: {
+        deletedAt: null,
+        isPaid: false,
+        status: { notIn: ["CANCELLED", "CANCELLED_REFUND_PENDING"] },
+        ...dateFilter,
+      },
+    }),
+    prisma.order.count({ where: { deletedAt: null, ...dateFilter } }),
+  ]);
 
-  let paidCount = 0;
-  let cancelledCount = 0;
-  let pendingUnpaidCount = 0;
-  let totalCount = 0;
-
-  for (const g of grouped) {
-    totalCount += g._count._all;
-    if (g.isPaid) {
-      paidCount += g._count._all;
-    } else if (g.status === "CANCELLED") {
-      cancelledCount += g._count._all;
-    } else {
-      pendingUnpaidCount += g._count._all;
-    }
-  }
-
-  return { paidCount, cancelledCount, pendingUnpaidCount, totalCount };
+  return {
+    paidCount,
+    cancelledCount: cancelledCount + refundedCount,
+    refundPendingCount,
+    pendingUnpaidCount,
+    totalCount,
+  };
 }
 
 export async function getCustomizationStats(
-  period: AnalyticsPeriod
+  period: AnalyticsPeriod,
 ): Promise<CustomizationStats> {
   const startDate = getPeriodStartDate(period);
 
   const baseWhere = {
     order: {
       isPaid: true,
+      refundedAt: null,
       ...(startDate ? { createdAt: { gte: startDate } } : {}),
     },
   };
@@ -316,7 +350,7 @@ export type ShopAnalytics = {
 export const SHOP_ANALYTICS_CACHE_TAG = "shop-analytics";
 
 async function computeShopAnalytics(
-  period: AnalyticsPeriod
+  period: AnalyticsPeriod,
 ): Promise<ShopAnalytics> {
   const [
     salesTimeSeries,
@@ -345,7 +379,7 @@ async function computeShopAnalytics(
 }
 
 export async function getShopAnalytics(
-  period: AnalyticsPeriod
+  period: AnalyticsPeriod,
 ): Promise<ShopAnalytics> {
   const cached = unstable_cache(
     () => computeShopAnalytics(period),
@@ -353,7 +387,7 @@ export async function getShopAnalytics(
     {
       revalidate: 120,
       tags: [SHOP_ANALYTICS_CACHE_TAG],
-    }
+    },
   );
 
   return cached();

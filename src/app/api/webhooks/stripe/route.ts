@@ -39,6 +39,10 @@ export async function POST(req: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const orderId = session.metadata?.orderId;
+    const paymentIntentId =
+      typeof session.payment_intent === "string"
+        ? session.payment_intent
+        : session.payment_intent?.id;
 
     if (orderId) {
       try {
@@ -50,7 +54,11 @@ export async function POST(req: Request) {
             });
             if (!order) return;
 
-            if (order.status === "CANCELLED") {
+            if (order.refundedAt) return;
+
+            const wasCancelledBySystem = order.status === "CANCELLED";
+
+            if (wasCancelledBySystem) {
               for (const item of order.orderItems) {
                 if (item.variantId) {
                   await tx.productVariant.update({
@@ -65,7 +73,9 @@ export async function POST(req: Request) {
               where: { id: orderId },
               data: {
                 isPaid: true,
-                status: order.status === "CANCELLED" ? "PAID" : order.status,
+                status: wasCancelledBySystem ? "PENDING" : order.status,
+                stripePaymentIntentId:
+                  paymentIntentId ?? order.stripePaymentIntentId,
               },
             });
           },
@@ -95,7 +105,12 @@ export async function POST(req: Request) {
 
             await tx.order.update({
               where: { id: orderId },
-              data: { status: "CANCELLED" },
+              data: {
+                status: "CANCELLED",
+                stockRestored: true,
+                cancelledBy: "SYSTEM",
+                cancelledAt: new Date(),
+              },
             });
 
             for (const item of order.orderItems) {

@@ -1,4 +1,7 @@
+"use server";
+
 import { prisma } from "@/lib/prisma";
+import { systemCancelExpiredOrder } from "@/actions/order";
 import type { Order } from "../../../generated/prisma";
 
 const PAYMENT_TIME_LIMIT_MS = 30 * 60 * 1000;
@@ -15,10 +18,7 @@ export async function checkAndExpireOrder<
     const timePassedMs = Date.now() - order.createdAt.getTime();
 
     if (timePassedMs >= PAYMENT_TIME_LIMIT_MS) {
-      await prisma.order.update({
-        where: { id: order.id },
-        data: { status: "CANCELLED" },
-      });
+      await systemCancelExpiredOrder(order.id);
       return { ...order, status: "CANCELLED" };
     }
   }
@@ -29,16 +29,20 @@ export async function checkAndExpireOrder<
 export async function cancelExpiredOrders(userId?: string) {
   const cutoff = new Date(Date.now() - PAYMENT_TIME_LIMIT_MS);
 
-  await prisma.order.updateMany({
+  const expiredOrders = await prisma.order.findMany({
     where: {
       ...(userId ? { userId } : {}),
       isPaid: false,
       paymentMethod: "CARD",
-      status: { notIn: ["CANCELLED"] },
+      status: { notIn: ["CANCELLED", "CANCELLED_REFUND_PENDING"] },
       createdAt: { lt: cutoff },
     },
-    data: { status: "CANCELLED" },
+    select: { id: true },
   });
-}
 
-export { PAYMENT_TIME_LIMIT_MS };
+  for (const order of expiredOrders) {
+    await systemCancelExpiredOrder(order.id);
+  }
+
+  return { expiredCount: expiredOrders.length };
+}

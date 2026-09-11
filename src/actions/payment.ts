@@ -6,6 +6,9 @@ import { stripe } from "@/lib/stripe";
 import { redirect as nativeRedirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { getTranslation } from "@/lib/utils/get-translation";
+import { systemCancelExpiredOrder } from "@/actions/order";
+
+const PAYMENT_WINDOW_MS = 30 * 60 * 1000;
 
 export async function retryPayment(orderId: string) {
   try {
@@ -28,7 +31,17 @@ export async function retryPayment(orderId: string) {
     }
 
     if (order.isPaid) return { error: "alreadyPaid" };
-    if (order.status === "CANCELLED") return { error: "cancelled" };
+
+    if (order.status === "CANCELLED" || order.status === "CANCELLED_REFUND_PENDING") {
+      return { error: "cancelled" };
+    }
+    
+    const isCardPayment = order.paymentMethod === "CARD";
+    const timePassedMs = Date.now() - order.createdAt.getTime();
+    if (isCardPayment && timePassedMs >= PAYMENT_WINDOW_MS) {
+      await systemCancelExpiredOrder(orderId);
+      return { error: "cancelled" };
+    }
 
     const line_items = order.orderItems.map((item) => {
       const translatedData = getTranslation(
@@ -76,6 +89,11 @@ export async function retryPayment(orderId: string) {
     if (!stripeSession.url) {
       return { error: "stripeError" };
     }
+
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { stripeSessionId: stripeSession.id },
+    });
 
     nativeRedirect(stripeSession.url);
   } catch (error: unknown) {

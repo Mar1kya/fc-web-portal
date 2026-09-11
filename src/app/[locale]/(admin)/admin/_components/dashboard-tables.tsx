@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { formatPrice } from "@/lib/utils"
 import { OrderStatusEnum, PaymentMethodEnum, Prisma, TeamContext } from "../../../../../../generated/prisma"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { statusColors } from "@/lib/constants"
+import { adminLabels, getPaymentBadgeConfig, statusColors, statusTranslations } from "@/lib/constants"
 import { getOurTeamNameAdmin } from "@/lib/utils/team-display"
 import { CollapsibleCard } from "./collapsible-card"
 
@@ -36,14 +36,6 @@ type DashboardTablesProps = {
     unsyncedMatches: MatchWithOpponent[];
     teamContext: TeamContext;
 }
-
-const statusTranslations: Record<OrderStatusEnum, string> = {
-    PENDING: "Очікує",
-    PAID: "Оплачено",
-    SHIPPED: "Відправлено",
-    DELIVERED: "Доставлено",
-    CANCELLED: "Скасовано"
-};
 
 export function DashboardTables({ recentOrders, lowStock, unsyncedMatches, teamContext }: DashboardTablesProps) {
     const ourTeamName = getOurTeamNameAdmin("Смарагдова Банда", teamContext);
@@ -76,23 +68,13 @@ export function DashboardTables({ recentOrders, lowStock, unsyncedMatches, teamC
                             <TableRow><TableCell colSpan={5} className="text-center">Немає замовлень</TableCell></TableRow>
                         ) : (
                             recentOrders.map((order) => {
-                                let paymentBadgeText = "";
-                                let paymentBadgeClass = "";
-                                const isCardPayment = order.paymentMethod === PaymentMethodEnum.CARD;
+                                const payment = getPaymentBadgeConfig(
+                                    order.isPaid,
+                                    order.status,
+                                    order.paymentMethod as "CARD" | "COD",
+                                    order.refundedAt,
+                                );
 
-                                if (order.isPaid) {
-                                    paymentBadgeText = "Оплачено";
-                                    paymentBadgeClass = "bg-emerald-600 hover:bg-emerald-600 text-white";
-                                } else if (order.status === OrderStatusEnum.CANCELLED) {
-                                    paymentBadgeText = "Скасовано";
-                                    paymentBadgeClass = "bg-destructive/10 text-destructive";
-                                } else if (isCardPayment) {
-                                    paymentBadgeText = "Не оплачено";
-                                    paymentBadgeClass = "bg-amber-500/10 text-amber-500";
-                                } else {
-                                    paymentBadgeText = "Оплата при отриманні";
-                                    paymentBadgeClass = "bg-blue-500/10 text-blue-500";
-                                }
                                 return (
                                     <TableRow key={order.id}>
                                         <TableCell className="font-medium whitespace-nowrap">
@@ -135,9 +117,9 @@ export function DashboardTables({ recentOrders, lowStock, unsyncedMatches, teamC
                                                     <span className="text-[10px] uppercase text-muted-foreground w-12">Оплата:</span>
                                                     <Badge
                                                         variant="outline"
-                                                        className={cn("h-6 text-[10px] font-bold uppercase tracking-wider px-2 border-none rounded-md", paymentBadgeClass)}
+                                                        className={cn("h-6 text-[10px] font-bold uppercase tracking-wider px-2 border-none rounded-md", payment.className)}
                                                     >
-                                                        {paymentBadgeText}
+                                                        {adminLabels[payment.labelKey] ?? payment.labelKey}
                                                     </Badge>
                                                 </div>
                                             </div>
@@ -156,7 +138,6 @@ export function DashboardTables({ recentOrders, lowStock, unsyncedMatches, teamC
                     </TableBody>
                 </Table>
             </CollapsibleCard>
-
             <div className="col-span-1 lg:col-span-3 flex flex-col gap-4 min-w-0">
                 <CollapsibleCard
                     id="low-stock"

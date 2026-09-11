@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { OrderPlain, statusTranslations } from "../../_components/columns";
+import { OrderPlain } from "../../_components/columns";
 import { OrderStatusEnum, PaymentMethodEnum } from "../../../../../../../../../generated/prisma";
-import { getPaymentBadgeConfig, statusColors } from "@/lib/constants";
+import { adminLabels, getPaymentBadgeConfig, statusColors, statusTranslations } from "@/lib/constants";
 import { ArchiveActions } from "./archive-actions";
 
 export const archiveColumns: ColumnDef<OrderPlain>[] = [
@@ -51,8 +51,8 @@ export const archiveColumns: ColumnDef<OrderPlain>[] = [
         id: "status",
         header: "Статуси",
         cell: ({ row }) => {
-            const { status, isPaid, paymentMethod } = row.original;
-            const payment = getPaymentBadgeConfig(isPaid, status, paymentMethod as "CARD" | "COD");
+            const { status, isPaid, paymentMethod, refundedAt } = row.original;
+            const payment = getPaymentBadgeConfig(isPaid, status, paymentMethod as "CARD" | "COD", refundedAt);
             return (
                 <div className="flex flex-col gap-1.5">
                     <div className="flex items-center gap-2">
@@ -76,7 +76,7 @@ export const archiveColumns: ColumnDef<OrderPlain>[] = [
                                 payment.className
                             )}
                         >
-                            {payment.label}
+                            {adminLabels[payment.labelKey] ?? payment.labelKey}
                         </Badge>
                     </div>
                 </div>

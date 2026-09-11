@@ -6,12 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { maskName, maskEmail, maskPhone, maskAddress } from "@/lib/utils/mask-data";
+import { verifyGuestOrderToken } from "@/lib/utils/guest-order-token";
 import ClearCartTrigger from "./_components/clear-cart-trigger";
 import OrderGuestBanner from "./_components/order-guest-banner";
 import OrderDetails from "./_components/order-details";
 import RetryPaymentButton from "./_components/retry-payment-button";
-import { getPaymentBadgeConfig, statusColors } from "@/lib/constants";
+import { getPaymentBadgeConfig, NON_CANCELLABLE_STATUSES, statusColors } from "@/lib/constants";
 import { formatOrderDateTime } from "@/lib/utils/format-date";
+import CancelOrderDialog from "./_components/cancel-order-dialog";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string; locale: string }> }) {
     const { id, locale } = await params;
@@ -24,8 +26,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     };
 }
 
-export default async function OrderPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
+export default async function OrderPage({
+    params,
+    searchParams,
+}: {
+    params: Promise<{ id: string; locale: string }>;
+    searchParams: Promise<{ token?: string }>;
+}) {
     const { id, locale } = await params;
+    const { token } = await searchParams;
     const t = await getTranslations("Shop.OrderPage");
 
     const order = await prisma.order.findUnique({
@@ -43,6 +52,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
     const session = await auth();
     const isOwner = !!order.userId && session?.user?.id === order.userId;
+    const isGuestOwner = !order.userId && verifyGuestOrderToken(order.id, token);
 
     if (order.userId && !isOwner) notFound();
 
@@ -51,7 +61,8 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     let showRetryButton = false;
     let expiresAt = 0;
 
-    if (!order.isPaid && isCardPayment && currentStatus !== "CANCELLED") {
+    const NON_RETRYABLE = ["CANCELLED", "CANCELLED_REFUND_PENDING"];
+    if (!order.isPaid && isCardPayment && !NON_RETRYABLE.includes(currentStatus)) {
         const timeLimitMs = 30 * 60 * 1000;
         // eslint-disable-next-line react-hooks/purity
         const timePassedMs = Date.now() - order.createdAt.getTime();
@@ -64,33 +75,27 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         }
     }
 
+    const canViewFullDetails = isOwner || isGuestOwner;
     const safeAddress = order.address || "";
     const displayData = {
-        firstName: isOwner ? order.firstName : maskName(order.firstName),
-        lastName: isOwner ? order.lastName : maskName(order.lastName),
-        email: isOwner ? order.email : maskEmail(order.email),
-        phone: isOwner ? order.phone : maskPhone(order.phone),
-        address: isOwner ? safeAddress : maskAddress(safeAddress),
+        firstName: canViewFullDetails ? order.firstName : maskName(order.firstName),
+        lastName: canViewFullDetails ? order.lastName : maskName(order.lastName),
+        email: canViewFullDetails ? order.email : maskEmail(order.email),
+        phone: canViewFullDetails ? order.phone : maskPhone(order.phone),
+        address: canViewFullDetails ? safeAddress : maskAddress(safeAddress),
     };
 
-    const showPendingNotice = isCardPayment && !order.isPaid && currentStatus !== "CANCELLED";
+    const showPendingNotice = isCardPayment && !order.isPaid && !NON_RETRYABLE.includes(currentStatus);
 
     const payment = getPaymentBadgeConfig(
         order.isPaid,
-        currentStatus,
-        order.paymentMethod as "CARD" | "COD"
+        order.status,
+        order.paymentMethod as "CARD" | "COD",
+        order.refundedAt,
     );
 
-    let paymentBadgeText = "";
-    if (order.isPaid) {
-        paymentBadgeText = t("paid");
-    } else if (currentStatus === "CANCELLED") {
-        paymentBadgeText = t("statuses.CANCELLED");
-    } else if (isCardPayment) {
-        paymentBadgeText = t("notPaid");
-    } else {
-        paymentBadgeText = t("paymentUponDelivery");
-    }
+    const canCancel =
+        (isOwner || isGuestOwner) && !NON_CANCELLABLE_STATUSES.includes(currentStatus);
 
     return (
         <div className="max-w-4xl mx-auto space-y-8">
@@ -133,13 +138,18 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                                     payment.className
                                 )}
                             >
-                                {paymentBadgeText}
+                                {t(payment.labelKey)}
                             </Badge>
                         </div>
                     </div>
                     {showRetryButton && (
                         <div className="w-full md:w-auto">
                             <RetryPaymentButton orderId={order.id} expiresAt={expiresAt} />
+                        </div>
+                    )}
+                    {canCancel && (
+                        <div className="w-full md:w-auto">
+                            <CancelOrderDialog orderId={order.id} token={isGuestOwner ? token : undefined} />
                         </div>
                     )}
                 </div>

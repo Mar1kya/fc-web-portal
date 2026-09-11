@@ -66,10 +66,13 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
                 </CardHeader>
                 <CardContent>
                     <OrderStatusForm
+                        key={`${order.status}-${order.isPaid}-${order.stockRestored}`}
                         orderId={order.id}
                         currentStatus={order.status}
                         isPaid={order.isPaid}
                         paymentMethod={order.paymentMethod}
+                        refundedAt={order.refundedAt}
+                        stockRestored={order.stockRestored}
                     />
                 </CardContent>
             </Card>
@@ -170,7 +173,6 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
                                             </div>
                                         )}
                                     </div>
-
                                     <div className="text-sm font-black text-foreground shrink-0 text-right">
                                         {formatPrice(Number(item.fixedPrice) * item.quantity)}
                                     </div>

@@ -56,19 +56,9 @@ export default async function OrderHistoryCard({
     const payment = getPaymentBadgeConfig(
         order.isPaid,
         order.status,
-        order.paymentMethod as "CARD" | "COD"
+        order.paymentMethod as "CARD" | "COD",
+        order.refundedAt,
     );
-
-    let paymentBadgeText = "";
-    if (order.isPaid) {
-        paymentBadgeText = tOrder("paid");
-    } else if (order.status === "CANCELLED") {
-        paymentBadgeText = tOrder("statuses.CANCELLED");
-    } else if (isCardPayment) {
-        paymentBadgeText = tOrder("notPaid");
-    } else {
-        paymentBadgeText = tOrder("paymentUponDelivery");
-    }
 
     const needsPayment = !order.isPaid && isCardPayment && order.status !== "CANCELLED";
 
@@ -110,7 +100,7 @@ export default async function OrderHistoryCard({
                                 payment.className
                             )}
                         >
-                            {paymentBadgeText}
+                            {tOrder(payment.labelKey)}
                         </Badge>
                     </div>
                 </div>
