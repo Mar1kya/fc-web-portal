@@ -294,6 +294,11 @@ export async function processCheckout(
         throw new Error("Stripe session URL generation failed");
       }
 
+      await prisma.order.update({
+        where: { id: order.order.id },
+        data: { stripeSessionId: stripeSession.id },
+      });
+
       nativeRedirect(stripeSession.url);
     }
   } catch (error: unknown) {

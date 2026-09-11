@@ -4,7 +4,7 @@ import OrderHistoryCard from "./order-history-card";
 import { PAGINATION } from "@/lib/constants"; 
 import { Prisma } from "../../../../../../../generated/prisma";
 import AppPagination from "@/components/layout/app-pagination";
-import { cancelExpiredOrders } from "@/lib/utils/expire-order";
+import { ExpireOrdersTrigger } from "@/components/expire-orders-trigger";
 
 type OrderListProps = {
     userId: string;
@@ -20,8 +20,6 @@ export default async function OrderList({ userId, searchParams, locale }: OrderL
     
     const pageParam = typeof page === 'string' ? parseInt(page) : 1;
     const currentPage = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
-
-    await cancelExpiredOrders(userId);
 
     const whereCondition: Prisma.OrderWhereInput = {
         userId: userId,
@@ -69,14 +67,18 @@ export default async function OrderList({ userId, searchParams, locale }: OrderL
 
     if (orders.length === 0) {
         return (
-            <div className="text-center py-12 text-muted-foreground bg-muted/10 rounded-xl border border-dashed">
-                {t("empty")}
-            </div>
+            <>
+                <ExpireOrdersTrigger userId={userId} />
+                <div className="text-center py-12 text-muted-foreground bg-muted/10 rounded-xl border border-dashed">
+                    {t("empty")}
+                </div>
+            </>
         );
     }
 
     return (
         <>
+            <ExpireOrdersTrigger userId={userId} />
             <div className="flex flex-col gap-4">
                 {orders.map((order) => (
                     <OrderHistoryCard key={order.id} order={order} locale={locale} />

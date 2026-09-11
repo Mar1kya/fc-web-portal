@@ -11,12 +11,13 @@ const percentFormatter = new Intl.NumberFormat("uk-UA", {
 })
 
 export function PaymentConversionCard({ data }: PaymentConversionCardProps) {
-    const { paidCount, cancelledCount, pendingUnpaidCount, totalCount } = data
+    const { paidCount, cancelledCount, refundPendingCount, pendingUnpaidCount, totalCount } = data
 
     const segments = [
         { label: "Оплачено", count: paidCount, color: "var(--chart-2)" },
         { label: "Скасовано", count: cancelledCount, color: "var(--destructive)" },
-        { label: "Очікує оплати", count: pendingUnpaidCount, color: "var(--chart-4)" },
+        { label: "Очікує повернення", count: refundPendingCount, color: "var(--chart-4)" },
+        { label: "Очікує оплати", count: pendingUnpaidCount, color: "var(--chart-5)" },
     ]
 
     return (

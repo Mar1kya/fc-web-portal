@@ -32,7 +32,7 @@ export default async function AdminDashboardPage({ searchParams }: { searchParam
         shopAnalytics
     ] = await Promise.all([
         prisma.order.count({ where: { status: "PENDING", deletedAt: null } }),
-        prisma.order.aggregate({ _sum: { totalPrice: true }, where: { isPaid: true } }),
+        prisma.order.aggregate({ _sum: { totalPrice: true }, where: { isPaid: true, refundedAt: null } }),
         prisma.match.findFirst({
             where: { status: "SCHEDULED", teamContext, deletedAt: null },
             orderBy: { date: "asc" },

@@ -652,6 +652,8 @@
       "deliveryAddress": "Delivery Address",
       "items": "Items in Order",
       "paid": "Paid",
+      "refunded": "Returned",
+      "refundPending": "Awaiting return",
       "notPaid": "Pending Payment",
       "paymentCard": "Card Online / Apple Pay / Google Pay",
       "paymentCOD": "Cash on Delivery",
@@ -669,13 +671,29 @@
         "PAID": "Paid",
         "SHIPPED": "Shipped",
         "DELIVERED": "Delivered",
-        "CANCELLED": "Cancelled"
+        "CANCELLED": "Cancelled",
+        "CANCELLED_REFUND_PENDING": "Cancelled, refund pending"
       },
       "retryPayment": "Pay now",
       "processing": "Redirecting...",
       "errorCancelled": "This order has already been cancelled.",
       "errorAlreadyPaid": "This order is already paid!",
       "errorGeneric": "An error occurred. Please try again.",
+      "Cancel": {
+        "trigger": "Cancel order",
+        "title": "Cancel this order?",
+        "description": "This action cannot be undone. If the order was paid by card, the funds will be automatically refunded to your card within a few business days.",
+        "dismiss": "Keep order",
+        "confirm": "Yes, cancel",
+        "confirming": "Cancelling...",
+        "success": "Order has been cancelled.",
+        "successRefunded": "Order cancelled, funds refunded to your card.",
+        "successRefundPending": "Order cancelled. The refund is being processed and may take a bit longer.",
+        "unauthorized": "You need to be logged in.",
+        "notFound": "Order not found.",
+        "forbidden": "You don't have permission to cancel this order.",
+        "cannotCancel": "This order can no longer be cancelled."
+      },
       "Metadata": {
         "title": "Order #{id}",
         "description": "Details of your order #{id}. Check the status, payment, and delivery information."

@@ -10,8 +10,9 @@ import ClearCartTrigger from "./_components/clear-cart-trigger";
 import OrderGuestBanner from "./_components/order-guest-banner";
 import OrderDetails from "./_components/order-details";
 import RetryPaymentButton from "./_components/retry-payment-button";
-import { getPaymentBadgeConfig, statusColors } from "@/lib/constants";
+import { getPaymentBadgeConfig, NON_CANCELLABLE_STATUSES, statusColors } from "@/lib/constants";
 import { formatOrderDateTime } from "@/lib/utils/format-date";
+import CancelOrderDialog from "./_components/cancel-order-dialog";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string; locale: string }> }) {
     const { id, locale } = await params;
@@ -51,7 +52,8 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     let showRetryButton = false;
     let expiresAt = 0;
 
-    if (!order.isPaid && isCardPayment && currentStatus !== "CANCELLED") {
+    const NON_RETRYABLE = ["CANCELLED", "CANCELLED_REFUND_PENDING"];
+    if (!order.isPaid && isCardPayment && !NON_RETRYABLE.includes(currentStatus)) {
         const timeLimitMs = 30 * 60 * 1000;
         // eslint-disable-next-line react-hooks/purity
         const timePassedMs = Date.now() - order.createdAt.getTime();
@@ -73,24 +75,17 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         address: isOwner ? safeAddress : maskAddress(safeAddress),
     };
 
-    const showPendingNotice = isCardPayment && !order.isPaid && currentStatus !== "CANCELLED";
+    const showPendingNotice = isCardPayment && !order.isPaid && !NON_RETRYABLE.includes(currentStatus);
 
     const payment = getPaymentBadgeConfig(
         order.isPaid,
-        currentStatus,
-        order.paymentMethod as "CARD" | "COD"
+        order.status,
+        order.paymentMethod as "CARD" | "COD",
+        order.refundedAt,
     );
 
-    let paymentBadgeText = "";
-    if (order.isPaid) {
-        paymentBadgeText = t("paid");
-    } else if (currentStatus === "CANCELLED") {
-        paymentBadgeText = t("statuses.CANCELLED");
-    } else if (isCardPayment) {
-        paymentBadgeText = t("notPaid");
-    } else {
-        paymentBadgeText = t("paymentUponDelivery");
-    }
+    const canCancel = isOwner && !NON_CANCELLABLE_STATUSES.includes(currentStatus);
+
 
     return (
         <div className="max-w-4xl mx-auto space-y-8">
@@ -133,13 +128,18 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                                     payment.className
                                 )}
                             >
-                                {paymentBadgeText}
+                                {t(payment.labelKey)}
                             </Badge>
                         </div>
                     </div>
                     {showRetryButton && (
                         <div className="w-full md:w-auto">
                             <RetryPaymentButton orderId={order.id} expiresAt={expiresAt} />
+                        </div>
+                    )}
+                    {canCancel && (
+                        <div className="w-full md:w-auto">
+                            <CancelOrderDialog orderId={order.id} />
                         </div>
                     )}
                 </div>

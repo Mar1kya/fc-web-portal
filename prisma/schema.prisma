@@ -603,6 +603,7 @@ enum OrderStatusEnum {
   SHIPPED
   DELIVERED
   CANCELLED
+  CANCELLED_REFUND_PENDING
 }
 
 enum PaymentMethodEnum {
@@ -610,22 +611,34 @@ enum PaymentMethodEnum {
   COD
 }
 
+enum CancelledBy {
+  USER
+  ADMIN
+  SYSTEM
+}
+
 model Order {
-  id            String            @id @default(cuid())
-  userId        String?
-  user          User?             @relation(fields: [userId], references: [id])
-  status        OrderStatusEnum   @default(PENDING)
-  isPaid        Boolean           @default(false)
-  totalPrice    Decimal           @db.Decimal(10, 2)
-  firstName     String
-  lastName      String
-  email         String
-  phone         String
-  city          String
-  postalCode    String?
-  address       String?
-  orderItems    OrderItem[]
-  paymentMethod PaymentMethodEnum @default(CARD)
+  id                    String            @id @default(cuid())
+  userId                String?
+  user                  User?             @relation(fields: [userId], references: [id])
+  status                OrderStatusEnum   @default(PENDING)
+  isPaid                Boolean           @default(false)
+  totalPrice            Decimal           @db.Decimal(10, 2)
+  firstName             String
+  lastName              String
+  email                 String
+  phone                 String
+  city                  String
+  postalCode            String?
+  address               String?
+  orderItems            OrderItem[]
+  paymentMethod         PaymentMethodEnum @default(CARD)
+  stripeSessionId       String?
+  stripePaymentIntentId String?
+  cancelledBy           CancelledBy?
+  cancelledAt           DateTime?
+  refundedAt            DateTime?
+  stockRestored         Boolean           @default(true)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
