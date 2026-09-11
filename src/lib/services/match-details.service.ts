@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { Prisma, EventType, PlayerPosition, TeamContext } from "../../../generated/prisma";
+import { Prisma, EventType, TeamContext } from "../../../generated/prisma";
 import { generatePlayerSlug } from "@/lib/utils/slugify";
 import {
   mapSofaPosition,
@@ -115,7 +115,13 @@ async function ensurePlayerExists(
 ): Promise<string | null> {
   const existing = await tx.player.findUnique({
     where: { sofascoreId: sofaPlayer.id },
-    select: { id: true, number: true, position: true, isManualAvatar: true, avatar: true },
+    select: {
+      id: true,
+      number: true,
+      position: true,
+      isManualAvatar: true,
+      avatar: true,
+    },
   });
 
   const jerseyNumber = sofaJerseyNumberToInt(sofaPlayer.jerseyNumber);
@@ -143,7 +149,8 @@ async function ensurePlayerExists(
   let enriched = sofaPlayer;
   if (jerseyNumber === null || !sofaPlayer.position) {
     const fetched = await fetchSofaPlayerProfile(sofaPlayer.id);
-    if (fetched) enriched = { ...fetched, name: sofaPlayer.name || fetched.name };
+    if (fetched)
+      enriched = { ...fetched, name: sofaPlayer.name || fetched.name };
   }
 
   const finalNumber = sofaJerseyNumberToInt(enriched.jerseyNumber) ?? 0;
@@ -235,9 +242,11 @@ export async function processMatchSync(matchDbId: string) {
       const isOpponentIncident = inc.isHome !== match.isHomeGame;
       if (isOpponentIncident) return;
 
-      const addIfMissing = (player: { id: number; name: string } | undefined) => {
+      const addIfMissing = (
+        player: { id: number; name: string } | undefined,
+      ) => {
         if (!player) return;
-        if (ourSofaPlayersById.has(player.id)) return; 
+        if (ourSofaPlayersById.has(player.id)) return;
         ourSofaPlayersById.set(player.id, {
           id: player.id,
           name: player.name,
@@ -290,7 +299,10 @@ export async function processMatchSync(matchDbId: string) {
             if (playerDbId) {
               await tx.matchLineup.upsert({
                 where: {
-                  matchId_playerId: { matchId: matchDbId, playerId: playerDbId },
+                  matchId_playerId: {
+                    matchId: matchDbId,
+                    playerId: playerDbId,
+                  },
                 },
                 create: {
                   matchId: matchDbId,

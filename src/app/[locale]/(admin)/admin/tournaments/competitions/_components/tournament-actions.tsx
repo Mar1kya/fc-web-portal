@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
-import { Archive, Edit, MoreHorizontal, Loader2, CalendarCog } from "lucide-react"
+import { Archive, Edit, MoreHorizontal, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -79,14 +79,14 @@ export function TournamentActions({ tournament, activeSeasonId, activeSeasonName
                         </Link>
                     </DropdownMenuItem>
                     {tournament.hasStandings && tournament.sofascoreId ? (
-                        
-                            <ManageSeasonDialog
-                                tournamentId={tournament.id}
-                                tournamentName={name}
-                                activeSeasonId={activeSeasonId}
-                                activeSeasonName={activeSeasonName}
-                                currentSofascoreSeasonId={currentSofascoreSeasonId}
-                            />
+
+                        <ManageSeasonDialog
+                            tournamentId={tournament.id}
+                            tournamentName={name}
+                            activeSeasonId={activeSeasonId}
+                            activeSeasonName={activeSeasonName}
+                            currentSofascoreSeasonId={currentSofascoreSeasonId}
+                        />
                     ) : null}
                     <DropdownMenuSeparator />
                     <AlertDialogTrigger asChild>

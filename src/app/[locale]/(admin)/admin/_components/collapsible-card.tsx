@@ -41,7 +41,6 @@ export function CollapsibleCard({
             if (stored !== null) setOpen(stored === "1")
         } catch {
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [storageKey])
 
     function handleOpenChange(next: boolean) {

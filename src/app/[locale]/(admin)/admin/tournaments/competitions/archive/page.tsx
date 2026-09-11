@@ -1,10 +1,7 @@
 import { Metadata } from "next";
-import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { DataTable } from "@/components/ui/data-table";
-import { archiveColumns } from "./_components/archive-columns";
 import CompetitionsArchiveTableSection from "./_components/competitions-archive-table-section";
 import { Suspense } from "react";
 import AdminTableSkeleton from "../../../_components/admin-table-skeleton";

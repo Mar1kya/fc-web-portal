@@ -1,7 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { Player } from "../../../../../../generated/prisma";
 import { getTranslation } from "@/lib/utils/get-translation";
-import Flag from "react-world-flags";
 import { User } from "lucide-react";
 import PlayerCardAvatar from "./player-card-avatar";
 import { normalizeFlagCode } from "@/lib/utils/country-code";

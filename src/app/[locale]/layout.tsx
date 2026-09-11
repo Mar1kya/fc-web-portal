@@ -13,7 +13,7 @@ function getAppUrl(): URL {
   const raw = process.env.NEXT_PUBLIC_APP_URL;
   try {
     return new URL(raw || "http://localhost:3000");
-  } catch (error) {
+  } catch {
     console.error(`Invalid NEXT_PUBLIC_APP_URL: "${raw}"`);
     return new URL("http://localhost:3000");
   }
