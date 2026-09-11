@@ -10,6 +10,7 @@ import { CartItem } from "@/store/useCartStore";
 import { stripe } from "@/lib/stripe";
 import { getTranslation } from "@/lib/utils/get-translation";
 import { Prisma } from "../../generated/prisma";
+import { generateGuestOrderToken } from "@/lib/utils/guest-order-token";
 
 export async function getCheckoutInitialData() {
   const session = await auth();
@@ -242,8 +243,17 @@ export async function processCheckout(
 
     const appUrl = process.env.AUTH_URL || "http://localhost:3000";
 
+    const isGuestOrder = !session?.user?.id;
+    const guestToken = isGuestOrder
+      ? generateGuestOrderToken(order.order.id)
+      : null;
+    const tokenQuery = guestToken ? `?token=${guestToken}` : "";
+
     if (paymentMethod === "cod") {
-      redirect({ href: `/shop/order/${order.order.id}`, locale: locale });
+      redirect({
+        href: `/shop/order/${order.order.id}${tokenQuery}`,
+        locale: locale,
+      });
     } else {
       const line_items = order.resolvedLines.map((line) => {
         const translatedData = getTranslation(
@@ -283,8 +293,8 @@ export async function processCheckout(
         billing_address_collection: "auto",
         line_items,
         expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
-        success_url: `${appUrl}/${locale}/shop/order/${order.order.id}`,
-        cancel_url: `${appUrl}/${locale}/shop/order/${order.order.id}`,
+        success_url: `${appUrl}/${locale}/shop/order/${order.order.id}${tokenQuery}`,
+        cancel_url: `${appUrl}/${locale}/shop/order/${order.order.id}${tokenQuery}`,
         metadata: {
           orderId: order.order.id,
         },

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { maskName, maskEmail, maskPhone, maskAddress } from "@/lib/utils/mask-data";
+import { verifyGuestOrderToken } from "@/lib/utils/guest-order-token";
 import ClearCartTrigger from "./_components/clear-cart-trigger";
 import OrderGuestBanner from "./_components/order-guest-banner";
 import OrderDetails from "./_components/order-details";
@@ -25,8 +26,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     };
 }
 
-export default async function OrderPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
+export default async function OrderPage({
+    params,
+    searchParams,
+}: {
+    params: Promise<{ id: string; locale: string }>;
+    searchParams: Promise<{ token?: string }>;
+}) {
     const { id, locale } = await params;
+    const { token } = await searchParams;
     const t = await getTranslations("Shop.OrderPage");
 
     const order = await prisma.order.findUnique({
@@ -44,6 +52,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
     const session = await auth();
     const isOwner = !!order.userId && session?.user?.id === order.userId;
+    const isGuestOwner = !order.userId && verifyGuestOrderToken(order.id, token);
 
     if (order.userId && !isOwner) notFound();
 
@@ -66,13 +75,14 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         }
     }
 
+    const canViewFullDetails = isOwner || isGuestOwner;
     const safeAddress = order.address || "";
     const displayData = {
-        firstName: isOwner ? order.firstName : maskName(order.firstName),
-        lastName: isOwner ? order.lastName : maskName(order.lastName),
-        email: isOwner ? order.email : maskEmail(order.email),
-        phone: isOwner ? order.phone : maskPhone(order.phone),
-        address: isOwner ? safeAddress : maskAddress(safeAddress),
+        firstName: canViewFullDetails ? order.firstName : maskName(order.firstName),
+        lastName: canViewFullDetails ? order.lastName : maskName(order.lastName),
+        email: canViewFullDetails ? order.email : maskEmail(order.email),
+        phone: canViewFullDetails ? order.phone : maskPhone(order.phone),
+        address: canViewFullDetails ? safeAddress : maskAddress(safeAddress),
     };
 
     const showPendingNotice = isCardPayment && !order.isPaid && !NON_RETRYABLE.includes(currentStatus);
@@ -84,8 +94,8 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         order.refundedAt,
     );
 
-    const canCancel = isOwner && !NON_CANCELLABLE_STATUSES.includes(currentStatus);
-
+    const canCancel =
+        (isOwner || isGuestOwner) && !NON_CANCELLABLE_STATUSES.includes(currentStatus);
 
     return (
         <div className="max-w-4xl mx-auto space-y-8">
@@ -139,7 +149,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                     )}
                     {canCancel && (
                         <div className="w-full md:w-auto">
-                            <CancelOrderDialog orderId={order.id} />
+                            <CancelOrderDialog orderId={order.id} token={isGuestOwner ? token : undefined} />
                         </div>
                     )}
                 </div>

@@ -7,6 +7,7 @@ import { OrderStatusEnum, Prisma } from "../../generated/prisma";
 import { stripe } from "@/lib/stripe";
 import { LOCALES } from "@/lib/constants";
 import { getTranslations } from "next-intl/server";
+import { verifyGuestOrderToken } from "@/lib/utils/guest-order-token";
 function revalidatePublicOrderPaths(orderId: string) {
   LOCALES.forEach((locale) => {
     revalidatePath(`/${locale}/shop/order/${orderId}`);
@@ -45,7 +46,7 @@ const CANCELLED_STATUSES: OrderStatusEnum[] = [
   OrderStatusEnum.CANCELLED_REFUND_PENDING,
 ];
 
-type CancelActor = "USER" | "ADMIN";
+type CancelActor = "USER" | "ADMIN" | "GUEST";
 
 const allowedTransitions: Record<ManualOrderStatus, ManualOrderStatus[]> = {
   PENDING: [OrderStatusEnum.SHIPPED, OrderStatusEnum.DELIVERED],
@@ -262,7 +263,7 @@ export async function markStockRestored(id: string) {
 async function restoreStockAndCancel(
   orderId: string,
   status: "CANCELLED" | "CANCELLED_REFUND_PENDING",
-  cancelledBy: "USER" | "ADMIN" | "SYSTEM",
+  cancelledBy: "USER" | "ADMIN" | "SYSTEM" | "GUEST",
   refunded: boolean,
   restoreStock: boolean,
 ) {
@@ -304,6 +305,7 @@ async function restoreStockAndCancel(
 export async function cancelOrder(
   orderId: string,
   actor: CancelActor,
+  guestToken?: string,
 ): Promise<CancelOrderState> {
   const t = await getTranslations("Shop.OrderPage");
   const session = await auth();
@@ -311,6 +313,10 @@ export async function cancelOrder(
   if (actor === "ADMIN") {
     if (!session?.user?.email || session.user.role !== "ADMIN") {
       return { success: false, message: "Немає прав" };
+    }
+  } else if (actor === "GUEST") {
+    if (!verifyGuestOrderToken(orderId, guestToken)) {
+      return { success: false, message: t("Cancel.unauthorized") };
     }
   } else {
     if (!session?.user?.id) {
@@ -328,6 +334,10 @@ export async function cancelOrder(
     return { success: false, message: t("Cancel.forbidden") };
   }
 
+  if (actor === "GUEST" && order.userId !== null) {
+    return { success: false, message: t("Cancel.forbidden") };
+  }
+
   if (
     order.status === "CANCELLED" ||
     order.status === "CANCELLED_REFUND_PENDING"
@@ -337,7 +347,19 @@ export async function cancelOrder(
 
   const isShippedOrDelivered =
     order.status === "SHIPPED" || order.status === "DELIVERED";
-  if (isShippedOrDelivered && actor === "USER") {
+  if (isShippedOrDelivered && actor !== "ADMIN") {
+    return { success: false, message: t("Cancel.cannotCancel") };
+  }
+
+  const claim = await prisma.order.updateMany({
+    where: {
+      id: orderId,
+      status: { notIn: ["CANCELLED", "CANCELLED_REFUND_PENDING"] },
+    },
+    data: { status: "CANCELLED_REFUND_PENDING" }, 
+  });
+
+  if (claim.count === 0) {
     return { success: false, message: t("Cancel.cannotCancel") };
   }
 
@@ -348,29 +370,12 @@ export async function cancelOrder(
   };
 
   if (!order.isPaid) {
-    await restoreStockAndCancel(
-      orderId,
-      "CANCELLED",
-      actor,
-      false,
-      restoreStock,
-    );
+    await restoreStockAndCancel(orderId, "CANCELLED", actor, false, restoreStock);
     paths();
     return { success: true, message: t("Cancel.success") };
   }
 
-  if (order.paymentMethod !== "CARD") {
-    await restoreStockAndCancel(
-      orderId,
-      "CANCELLED_REFUND_PENDING",
-      actor,
-      false,
-      restoreStock,
-    );
-    paths();
-    return { success: true, message: t("Cancel.successRefundPending") };
-  }
-  if (!order.stripePaymentIntentId) {
+  if (order.paymentMethod !== "CARD" || !order.stripePaymentIntentId) {
     await restoreStockAndCancel(
       orderId,
       "CANCELLED_REFUND_PENDING",
@@ -387,13 +392,7 @@ export async function cancelOrder(
       payment_intent: order.stripePaymentIntentId,
     });
 
-    await restoreStockAndCancel(
-      orderId,
-      "CANCELLED",
-      actor,
-      true,
-      restoreStock,
-    );
+    await restoreStockAndCancel(orderId, "CANCELLED", actor, true, restoreStock);
     paths();
     return { success: true, message: t("Cancel.successRefunded") };
   } catch (error) {
@@ -451,4 +450,12 @@ export async function systemCancelExpiredOrder(orderId: string) {
   );
 
   revalidateOrderPaths(orderId);
+}
+
+
+export async function cancelOrderByGuestToken(
+  orderId: string,
+  guestToken: string,
+): Promise<CancelOrderState> {
+  return cancelOrder(orderId, "GUEST", guestToken);
 }

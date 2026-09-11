@@ -14,19 +14,22 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { cancelOrderByUser } from "@/actions/order";
+import { cancelOrderByUser, cancelOrderByGuestToken } from "@/actions/order";
 
 type CancelOrderDialogProps = {
     orderId: string;
+    token?: string;
 };
 
-export default function CancelOrderDialog({ orderId }: CancelOrderDialogProps) {
+export default function CancelOrderDialog({ orderId, token }: CancelOrderDialogProps) {
     const t = useTranslations("Shop.OrderPage.Cancel");
     const [open, setOpen] = useState(false);
-    const [state, actionFn, isPending] = useActionState(
-        cancelOrderByUser.bind(null, orderId),
-        undefined,
-    );
+
+    const boundAction = token
+        ? cancelOrderByGuestToken.bind(null, orderId, token)
+        : cancelOrderByUser.bind(null, orderId);
+
+    const [state, actionFn, isPending] = useActionState(boundAction, undefined);
 
     useEffect(() => {
         if (state?.success) {
