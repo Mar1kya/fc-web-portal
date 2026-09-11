@@ -9,7 +9,6 @@ import {
     Newspaper,
     Stethoscope,
     Video,
-    Quote,
     Navigation,
 } from "lucide-react";
 import {

@@ -1,7 +1,5 @@
 import H1 from "@/components/ui/heading"
-import ProfileForm from "./_components/profile-form"
 import { getLocale, getTranslations } from "next-intl/server"
-import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { redirect } from "@/i18n/navigation";
 import { Suspense } from "react";

@@ -3,7 +3,6 @@
 import { useState, useActionState, useEffect } from "react"
 import { Link, useRouter } from "@/i18n/navigation"
 import { toast } from "sonner"
-import Flag from "react-world-flags"
 import { Loader2, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"

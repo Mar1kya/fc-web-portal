@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { Loader2, CheckCircle2, XCircle, Undo2, PackageCheck } from "lucide-react";

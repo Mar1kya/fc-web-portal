@@ -17,13 +17,14 @@ export default function NationalityFlag({ code, className, fallback }: Nationali
     const upperCode = code.toUpperCase();
 
     if (isCustomFlag(upperCode)) {
-        return (
+        return 
+            // eslint-disable-next-line @next/next/no-img-element
             <img
                 src={CUSTOM_FLAGS[upperCode]}
                 alt={upperCode}
                 className={className}
             />
-        );
+        ;
     }
 
     return (

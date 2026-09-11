@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
-import { LOCALES, SOFASCORE_TEAM_IDS, TEAM_CONTEXT_PRIORITY, TEAM_ID } from "@/lib/constants";
+import { LOCALES, SOFASCORE_TEAM_IDS, TEAM_CONTEXT_PRIORITY } from "@/lib/constants";
 import { PlayerPosition, TeamContext } from "../../generated/prisma";
 import { createCoachSchema, createPlayerSchema } from "@/lib/schemas";
 import { generatePlayerSlug } from "@/lib/utils/slugify";

@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getTranslation } from "@/lib/utils/get-translation";
 import { Link } from "@/i18n/navigation";
-import Image from "next/image";
 import { User2 } from "lucide-react";
 import PlayersTeamFilter from "./players-team-filter";
 import { TeamContext } from "../../../../../../../generated/prisma";

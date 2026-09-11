@@ -2,7 +2,6 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { Coach } from "../../../../../../generated/prisma";
 import { getTranslation } from "@/lib/utils/get-translation";
-import Flag from "react-world-flags";
 import { User } from "lucide-react";
 import { normalizeFlagCode } from "@/lib/utils/country-code";
 import NationalityFlag from "@/components/ui/nationality-flag";

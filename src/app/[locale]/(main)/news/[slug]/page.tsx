@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { CalendarIcon, Newspaper, ArrowLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import Image from "next/image";
 import NewsCard from "../_components/news-card";
 import sanitizeHtml from 'sanitize-html';
 import H1 from "@/components/ui/heading";

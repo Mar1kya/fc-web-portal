@@ -11,9 +11,10 @@ export interface LiveCartItem extends CartItem {
   priceChanged: boolean;
   previousPrice: number;
 }
+const EMPTY_ITEMS: CartItem[] = [];
 
 export function useLiveCart() {
-  const persistedItems = useStore(useCartStore, (s) => s.items) ?? [];
+  const persistedItems = useStore(useCartStore, (s) => s.items) ?? EMPTY_ITEMS;
   const removeItem = useCartStore((s) => s.removeItem);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
 
