@@ -2,7 +2,7 @@
   "RootLayout": {
     "Metadata": {
       "title": "Emerald Gang",
-      "description": "Emerald Gang — your favorite portal. Latest news, player statistics, match schedules, and much more."
+      "description": "Emerald Gang – your favorite portal. Latest news, player statistics, match schedules, and much more."
     }
   },
   "HomePage": {
@@ -27,7 +27,7 @@
     },
     "Metadata": {
       "title": "Home",
-      "description": "Emerald Gang — your favorite portal. Latest news, player statistics, match schedules, and much more."
+      "description": "Emerald Gang – your favorite portal. Latest news, player statistics, match schedules, and much more."
     }
   },
   "GlobalNotFound": {
@@ -715,7 +715,7 @@
     "Hero": {
       "eyebrow": "Since 1959",
       "title": "The History of Emerald Gang",
-      "description": "From a regional sports society's senior side to bronze in the Premier League — a journey through dissolution, revival, and a return to the top level of Ukrainian football."
+      "description": "From a regional sports society's senior side to bronze in the Premier League – a journey through dissolution, revival, and a return to the top level of Ukrainian football."
     },
     "Stats": {
       "founded": "Founded",
@@ -729,7 +729,7 @@
     },
     "Timeline": {
       "heading": "Club timeline",
-      "description": "Ten turning points that shaped the club's history — from its first match to the highest finish in the top division.",
+      "description": "Ten turning points that shaped the club's history – from its first match to the highest finish in the top division.",
       "events": [
         {
           "year": "1959",
@@ -740,18 +740,18 @@
           "year": "1967",
           "title": "Championship year",
           "tag": "Title",
-          "description": "Playing under a different name, the team becomes champion of Ukraine among physical culture collectives — still the brightest page of the club's Soviet-era history."
+          "description": "Playing under a different name, the team becomes champion of Ukraine among physical culture collectives – still the brightest page of the club's Soviet-era history."
         },
         {
           "year": "2004",
           "title": "Final match and dissolution",
-          "description": "The club withdraws from competition after financial difficulties. A dark page in the chronicle — but, as time would show, not the last one."
+          "description": "The club withdraws from competition after financial difficulties. A dark page in the chronicle – but, as time would show, not the last one."
         },
         {
           "year": "2017",
           "title": "New name: Emerald Gang",
           "tag": "Rebrand",
-          "description": "The club officially reclaims its historic name and emerald-and-gold kit — colors that become the team's calling card for years to come."
+          "description": "The club officially reclaims its historic name and emerald-and-gold kit – colors that become the team's calling card for years to come."
         },
         {
           "year": "2026",
@@ -790,19 +790,19 @@
       ]
     },
     "Quote": {
-      "text": "We've come a long way from a regional side to national bronze — and every season we prove that for Zhytomyr, this is only the beginning.",
+      "text": "We've come a long way from a regional side to national bronze – and every season we prove that for Zhytomyr, this is only the beginning.",
       "author": "Club management"
     },
     "Metadata": {
       "title": "Club History",
-      "description": "Emerald Gang — the journey from its founding in 1959 to Premier League bronze. Timeline, honours, and club legends."
+      "description": "Emerald Gang – the journey from its founding in 1959 to Premier League bronze. Timeline, honours, and club legends."
     }
   },
   "StadiumPage": {
     "Hero": {
       "eyebrow": "Home arena",
       "title": "Central City Stadium",
-      "description": "The stadium where victories are born — the heart of football in Zhytomyr, with a history spanning more than seventy years."
+      "description": "The stadium where victories are born – the heart of football in Zhytomyr, with a history spanning more than seventy years."
     },
     "Stats": {
       "opened": "Opened",
@@ -816,7 +816,7 @@
     },
     "Timeline": {
       "heading": "Stadium history",
-      "description": "From its first opening to a full modern reconstruction — the story of our home arena.",
+      "description": "From its first opening to a full modern reconstruction – the story of our home arena.",
       "events": [
         {
           "year": "1951",
@@ -858,7 +858,7 @@
     },
     "Facilities": {
       "heading": "Infrastructure",
-      "description": "Everything a modern match day needs — for players, media and supporters alike.",
+      "description": "Everything a modern match day needs – for players, media and supporters alike.",
       "items": [
         {
           "title": "Four stands",
@@ -888,14 +888,14 @@
     },
     "Location": {
       "heading": "How to get there",
-      "description": "The stadium sits close to the centre of Zhytomyr — reachable by public transport or by car.",
+      "description": "The stadium sits close to the centre of Zhytomyr – reachable by public transport or by car.",
       "addressLabel": "Stadium address",
       "address": "18 Feshchenka-Chopivskoho St., Zhytomyr, 10001",
       "mapCta": "Get directions"
     },
     "Gallery": {
       "heading": "Photo gallery",
-      "description": "A closer look at the arena — the stands, the pitch and the atmosphere of match day.",
+      "description": "A closer look at the arena – the stands, the pitch and the atmosphere of match day.",
       "images": [
         "Main stand of the stadium",
         "View of the pitch",
@@ -907,14 +907,14 @@
     },
     "Metadata": {
       "title": "Stadium",
-      "description": "Central City Stadium — home ground in Zhytomyr: history, infrastructure and how to get there."
+      "description": "Central City Stadium – home ground in Zhytomyr: history, infrastructure and how to get there."
     }
   },
   "ContactsPage": {
     "Hero": {
       "eyebrow": "Get in touch",
       "title": "Club Contacts",
-      "description": "Questions about tickets, partnerships, media or the academy — reach out to us through any convenient channel."
+      "description": "Questions about tickets, partnerships, media or the academy – reach out to us through any convenient channel."
     },
     "Quick": {
       "phone": "Phone",
@@ -959,7 +959,7 @@
     },
     "Socials": {
       "heading": "Follow us",
-      "description": "News, live broadcasts and club life — on our social media.",
+      "description": "News, live broadcasts and club life – on our social media.",
       "items": [
         {
           "label": "Facebook",

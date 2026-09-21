@@ -100,7 +100,7 @@ export function ManageSeasonDialog({
                 </DialogHeader>
                 {!activeSeasonId ? (
                     <p className="text-sm text-red-500 pt-2">
-                        Немає активного сезону — спочатку позначте сезон як активний.
+                        Немає активного сезону – спочатку позначте сезон як активний.
                     </p>
                 ) : (
                     <form onSubmit={onSubmit} className="space-y-4 pt-4">
@@ -117,7 +117,7 @@ export function ManageSeasonDialog({
                                 disabled={isPending}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Знайти можна в URL сторінки турніру на sofascore.com — параметр
+                                Знайти можна в URL сторінки турніру на sofascore.com – параметр
                                 &quot;seasonId&quot; або в адресному рядку розділу &quot;Standings&quot;.
                             </p>
                             {error && <p className="text-sm text-red-500">{error}</p>}

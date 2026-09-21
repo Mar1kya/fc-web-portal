@@ -195,8 +195,8 @@ export function DashboardTables({ recentOrders, lowStock, unsyncedMatches, teamC
                                     || match.opponent.slug;
 
                                 const matchTitle = match.isHomeGame
-                                    ? `${ourTeamName} — ${opponentName}`
-                                    : `${opponentName} — ${ourTeamName}`;
+                                    ? `${ourTeamName} – ${opponentName}`
+                                    : `${opponentName} – ${ourTeamName}`;
 
                                 const hasManualData =
                                     !match.sofascoreId &&

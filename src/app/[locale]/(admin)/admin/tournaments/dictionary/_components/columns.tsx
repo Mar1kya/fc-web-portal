@@ -25,7 +25,7 @@ export const columns: ColumnDef<DictionaryWithTranslations>[] = [
         id: "nameUk",
         header: "Українською",
         cell: ({ row }) => {
-            const name = getTranslation(row.original, "uk")?.name || "—";
+            const name = getTranslation(row.original, "uk")?.name || "–";
             return <div className="font-semibold">{name}</div>;
         },
     },
@@ -33,7 +33,7 @@ export const columns: ColumnDef<DictionaryWithTranslations>[] = [
         id: "nameEn",
         header: "Англійською",
         cell: ({ row }) => {
-            const name = getTranslation(row.original, "en")?.name || "—";
+            const name = getTranslation(row.original, "en")?.name || "–";
             return <div>{name}</div>;
         },
     },

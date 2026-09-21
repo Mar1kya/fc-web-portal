@@ -4,204 +4,271 @@
 [![Vercel](https://img.shields.io/github/deployments/Mar1kya/fc-web-portal/Production?label=Vercel&logo=vercel)](https://fc-web-portal.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-Повностековий вебпортал футбольного клубу «Смарагдова Банда» з інтегрованим фаншопом – єдина цифрова екосистема для інформування вболівальників та онлайн-продажів клубної атрибутики.
+[Українська версія](./README.uk.md)
 
-## Живий застосунок
+A full-stack web portal for the football club "Emerald Gang" with an integrated fan shop – a single digital ecosystem for fan engagement and online merchandise sales.
+
+## Live app
 
 **URL:** https://fc-web-portal.vercel.app
 
-## Технологічний стек
+## Tech stack
 
-| Шар | Технології |
-|-----|-----------|
-| **Фреймворк** | Next.js 16 (App Router), React 19 |
-| **Мова** | TypeScript |
-| **Стилізація** | TailwindCSS v4, shadcn/ui, Radix UI |
-| **База даних** | PostgreSQL (Neon), Prisma ORM (pg driver adapter) |
-| **Автентифікація** | NextAuth v5 (credentials + Google OAuth), bcryptjs, @auth/prisma-adapter |
-| **Стан** | Zustand (кошик з persist) |
-| **Data fetching** | SWR |
-| **Валідація** | Zod |
-| **Редактор** | TipTap, sanitize-html (санітизація контенту) |
-| **Таблиці** | TanStack Table |
-| **Візуалізація даних** | Recharts (дашборд аналітики продажів) |
-| **Медіа** | UploadThing, embla-carousel-react, yet-another-react-lightbox |
-| **Платежі** | Stripe (Checkout + Webhook) |
-| **Спортивні дані** | Sofascore via RapidAPI, react-world-flags (прапори країн гравців/тренерів) |
-| **Мультимовність** | next-intl (uk/en) |
-| **Хостинг** | Vercel + Neon (serverless) |
-| **CI/CD** | GitHub Actions → Vercel, Husky (pre-commit хуки) |
+| Layer                  | Technologies                                                               |
+| ---------------------- | -------------------------------------------------------------------------- |
+| **Framework**          | Next.js 16 (App Router), React 19                                          |
+| **Language**           | TypeScript                                                                 |
+| **Styling**            | TailwindCSS v4, shadcn/ui, Radix UI                                        |
+| **Database**           | PostgreSQL (Neon), Prisma ORM (pg driver adapter)                          |
+| **Authentication**     | NextAuth v5 (credentials + Google OAuth), bcryptjs, @auth/prisma-adapter   |
+| **State**              | Zustand (cart with persist)                                                |
+| **Data fetching**      | SWR                                                                        |
+| **Validation**         | Zod                                                                        |
+| **Editor**             | TipTap, sanitize-html (content sanitization)                               |
+| **Tables**             | TanStack Table                                                             |
+| **Data visualization** | Recharts (sales analytics dashboard)                                       |
+| **Media**              | UploadThing, embla-carousel-react, yet-another-react-lightbox              |
+| **Payments**           | Stripe (Checkout + Webhook)                                                |
+| **Sports data**        | Sofascore via RapidAPI, react-world-flags (player/coach nationality flags) |
+| **i18n**               | next-intl (uk/en)                                                          |
+| **Hosting**            | Vercel + Neon (serverless)                                                 |
+| **CI/CD**              | GitHub Actions → Vercel, Husky (pre-commit hooks)                          |
 
-## Основні можливості
+## Screenshots
 
-### Публічна частина порталу
- 
-- **Новини** – стрічка новин, інтерв'ю та офіційних заяв клубу з прив'язкою до конкретних матчів і гравців.
-- **Фотогалерея** – архів фотозвітів з матчів та подій клубу, кожен альбом містить набір зображень.
-- **Команда** – профілі гравців і тренерів: біографія, антропометричні дані, прапор країни походження. Гібридна система статистики поєднує історичні показники з даними, обчисленими динамічно на основі реальних подій матчів.
-- **Матч-центр** – календар ігор, детальні протоколи матчів (склади, голи, картки, заміни). Дані синхронізуються із сервісом Sofascore через RapidAPI – частина оновлень відбувається автоматично за розкладом, частина запускається адміністратором вручну (детальніше – у розділі «Адміністративна панель»).
-- **Турнірні таблиці** – таблиця обраного турніру з фільтрацією за сезонами, оновлюється автоматично за розкладом (cron) або вручну адміністратором.
-- **Фаншоп** – каталог атрибутики з розмірною сіткою та знижками, кошик з персистентним станом без авторизації (Zustand + localStorage), оплата через Stripe.
-- **Оформлення замовлення** – покупка доступна як з акаунтом, так і без реєстрації (гостьовий чекаут). Якщо гість пізніше реєструється через Google OAuth, його попередні замовлення прив'язуються до акаунту автоматично. При реєстрації через email/пароль користувач може прив'язати гостьові замовлення вручну в особистому кабінеті, ввівши номер телефону замовлення та його 6-значний ідентифікатор.
-- **Мультимовність** – інтерфейс доступний українською та англійською (next-intl).
+### Public portal
 
-### Адміністративна панель
- 
-- **Дашборд** – KPI-картки, графіки аналітики продажів (Recharts), останні 10 замовлень, товарні залишки (менше 5 шт. на складі), список матчів, що завершились, але ще очікують оновлення детального протоколу.
-- **Новини** – CRUD-керування публікаціями.
-- **Команда** – CRUD-керування гравцями та тренерами. Ростер гравців (без тренерів) можна синхронізувати з Sofascore одним натисканням.
-- **Турніри та матчі** – керування матчами, турнірами, сезонами, турнірними таблицями, суперниками та перекладами назв команд. Через Sofascore можна: підтягнути всі матчі поточного сезону одним натисканням, довантажити детальну статистику окремого матчу (склади, голи, картки, заміни) вручну, оновити турнірну таблицю – автоматично за розкладом (cron) або вручну як запасний варіант.
-- **Фаншоп** – керування замовленнями, товарами, атрибутикою та категоріями.
-- **Галерея** – керування фотоматеріалами.
-- **Ролі** – розмежування доступу Admin / User.
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/home.png" alt="Portal home page" /></td>
+    <td width="50%"><img src="docs/screenshots/news.png" alt="News feed" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Home page</sub></td>
+    <td align="center"><sub>News</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/gallery.png" alt="Photo gallery" /></td>
+    <td width="50%"><img src="docs/screenshots/team.png" alt="Player profile" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Photo gallery</sub></td>
+    <td align="center"><sub>Team – player profile</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/match-center.png" alt="Detailed match report" /></td>
+    <td width="50%"><img src="docs/screenshots/standings.png" alt="League standings" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Match center – match report</sub></td>
+    <td align="center"><sub>League standings</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/shop-catalog.png" alt="Fan shop catalog" /></td>
+    <td width="50%"><img src="docs/screenshots/product-detail.png" alt="Product page with size chart" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Fan shop – catalog</sub></td>
+    <td align="center"><sub>Fan shop – product page</sub></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="docs/screenshots/checkout-flow.gif" alt="Cart, checkout, and guest order linking" /></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><sub>Cart (Zustand + persist) → guest checkout → linking a guest order to an account</sub></td>
+  </tr>
+</table>
 
-## Локальний запуск
+### Admin panel
 
-### Вимоги
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/admin-dashboard.png" alt="Admin dashboard with KPIs and charts" /></td>
+    <td width="50%"><img src="docs/screenshots/admin-sync.gif" alt="Syncing matches from Sofascore" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Dashboard – KPIs and sales analytics</sub></td>
+    <td align="center"><sub>One-click sync with Sofascore</sub></td>
+  </tr>
+</table>
+
+## Key features
+
+### Public portal
+
+- **News** – a feed of news, interviews, and official club statements, linked to specific matches and players.
+- **Photo gallery** – an archive of match and event photo reports, each album grouping a set of images.
+- **Team** – player and coach profiles: bio, physical attributes, and nationality flag. A hybrid stats system combines historical figures with numbers computed dynamically from real match events.
+- **Match center** – match calendar and detailed match reports (lineups, goals, cards, substitutions). Data syncs with Sofascore via RapidAPI – some updates run automatically on a schedule, others are triggered manually by an admin (see "Admin panel" below).
+- **Standings** – table for a selected tournament with season filtering, updated automatically on a schedule (cron) or manually by an admin.
+- **Fan shop** – merchandise catalog with size charts and discounts, a persistent cart that works without an account (Zustand + localStorage), and checkout via Stripe.
+- **Checkout** – purchases are available both with an account and without registration (guest checkout).
+  - A guest order is accessible via a signed, single-order access token appended to the confirmation link the guest is redirected to after checkout. The order page itself is publicly viewable by anyone with the link (personal details shown masked), while the token unlocks the full, unmasked details and order-management actions (such as cancellation) for whoever holds it.
+  - If a guest later signs up via Google OAuth, their prior guest orders are linked to the new account automatically (matched by email).
+  - If a user instead registers with email/password, they can link their guest orders manually from their profile by entering the order's phone number and its 6-character order ID.
+- **i18n** – UI available in Ukrainian and English (next-intl).
+
+### Admin panel
+
+- **Dashboard** – KPI cards, sales analytics charts (Recharts), the 10 most recent orders, low-stock items (fewer than 5 units), and a list of finished matches still awaiting a detailed report.
+- **News** – full CRUD for publications.
+- **Team** – full CRUD for players and coaches. The player roster (coaches excluded) can be synced from Sofascore with one click.
+- **Tournaments & matches** – manage matches, tournaments, seasons, standings, opponents, and team name translations. Via Sofascore you can: pull in all matches for the current season with one click, manually fetch detailed stats for a single match (lineups, goals, cards, substitutions), and update standings – automatically on a schedule (cron) or manually as a fallback.
+- **Fan shop** – manage orders, products, merchandise, and categories.
+- **Gallery** – manage photo content.
+- **Roles** – Admin / User access separation.
+
+## Running locally
+
+### Requirements
+
 - Node.js 20+
 - npm
 
-### Встановлення
+### Setup
 
 ```bash
-# 1. Клонування репозиторію
+# 1. Clone the repository
 git clone https://github.com/Mar1kya/fc-web-portal.git
 cd fc-web-portal
 
-# 2. Встановлення залежностей (без скриптів, щоб уникнути Husky в CI)
+# 2. Install dependencies (skip scripts to avoid Husky in CI)
 npm ci --ignore-scripts
 
-# 3. Генерація Prisma клієнта
+# 3. Generate the Prisma client
 npm run prisma-generate
 
-# 4. Налаштування змінних середовища
+# 4. Configure environment variables
 cp .env.example .env.local
-# Заповніть значення у .env.local
+# Fill in the values in .env.local
 
-# 5. Міграція бази даних
+# 5. Run database migrations
 npx prisma migrate deploy
 
-# 6. Запуск у режимі розробки
+# 6. Start the dev server
 npm run dev
 ```
 
-Застосунок буде доступний за адресою: http://localhost:3000
+The app will be available at: http://localhost:3000
 
-> **Примітка щодо Husky:** крок 2 навмисно пропускає `prepare`-скрипт (`--ignore-scripts`), тому pre-commit хуки (lint + type-check перед комітом) не встановлюються автоматично. Якщо плануєте комітити в цей репозиторій локально, встановіть їх вручну: `npm run prepare`.
+> **Note on Husky:** step 2 intentionally skips the `prepare` script (`--ignore-scripts`), so pre-commit hooks (lint + type-check before commit) aren't installed automatically. If you plan to commit to this repo locally, install them manually: `npm run prepare`.
 
-## Змінні середовища
+## Environment variables
 
-Створіть файл `.env.local` у кореневій директорії (шаблон – у [`.env.example`](.env.example)):
+Create a `.env.local` file in the project root (template in [`.env.example`](.env.example)):
 
 ```env
-# База даних (Neon PostgreSQL)
-# Обов'язкова змінна – саме її використовує Prisma (prisma.config.ts, lib/prisma.ts).
+# Database (Neon PostgreSQL)
+# Required – this is the variable Prisma actually uses (prisma.config.ts, lib/prisma.ts).
 DATABASE_URL=
 
 # NextAuth
-AUTH_SECRET=                         # Секретний ключ для підпису JWT-токенів
-AUTH_URL=                            # Базова URL-адреса застосунку
-AUTH_TRUST_HOST=true                 # Дозвіл довіри хосту
+AUTH_SECRET=                         # Secret key used to sign JWTs
+AUTH_URL=                            # Base URL of the app
+AUTH_TRUST_HOST=true                 # Trust the host header
 
 # Google OAuth
-AUTH_GOOGLE_ID=                      # Client ID OAuth-додатку Google
-AUTH_GOOGLE_SECRET=                  # Client Secret OAuth-додатку Google
+AUTH_GOOGLE_ID=                      # Google OAuth app client ID
+AUTH_GOOGLE_SECRET=                  # Google OAuth app client secret
 
 # UploadThing
-UPLOADTHING_TOKEN=                   # Токен для роботи з UploadThing API
-UPLOADTHING_SECRET=                  # Секретний ключ UploadThing
+UPLOADTHING_TOKEN=                   # UploadThing API token
+UPLOADTHING_SECRET=                  # UploadThing secret key
 
 # Vercel Cron
-CRON_SECRET=                         # Секретний ключ для авторизації Cron-запитів
+CRON_SECRET=                         # Secret used to authorize Cron requests
 
 # RapidAPI / Sofascore
-RAPIDAPI_KEY=                        # Ключ доступу до Sofascore через RapidAPI
+RAPIDAPI_KEY=                        # Access key for Sofascore via RapidAPI
 
 # Stripe
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=  # Публічний ключ Stripe (клієнт)
-STRIPE_SECRET_KEY=                   # Секретний ключ Stripe (сервер)
-STRIPE_WEBHOOK_SECRET=               # Секрет для верифікації Stripe Webhook подій
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=  # Stripe publishable key (client)
+STRIPE_SECRET_KEY=                   # Stripe secret key (server)
+STRIPE_WEBHOOK_SECRET=               # Secret used to verify Stripe webhook events
+
+# Guest order access
+GUEST_ORDER_TOKEN_SECRET=            # Secret used to sign guest order access tokens (generate with: openssl rand -hex 32)
 ```
 
-> При підключенні Neon через інтеграцію Vercel автоматично додається ще низка змінних (`DATABASE_URL_UNPOOLED`, `PGHOST`, `POSTGRES_*` тощо). Проєкт їх не використовує – достатньо однієї `DATABASE_URL`. Повний перелік – у `.env.example`.
+> When connecting Neon through the Vercel integration, a number of extra variables are added automatically (`DATABASE_URL_UNPOOLED`, `PGHOST`, `POSTGRES_*`, etc.). The project doesn't use them – a single `DATABASE_URL` is enough. See `.env.example` for the full list.
 
-## Доступні команди
+## Available scripts
 
 ```bash
-npm run dev            # Запуск у режимі розробки
-npm run build          # Production збірка
-npm run start          # Запуск production сервера
-npm run lint            # Статичний аналіз коду (ESLint)
-npm run type-check      # Перевірка TypeScript типів
-npm run prisma-generate # Генерація Prisma клієнта
+npm run dev            # Start the dev server
+npm run build          # Production build
+npm run start           # Start the production server
+npm run lint            # Static analysis (ESLint)
+npm run type-check      # TypeScript type checking
+npm run prisma-generate # Generate the Prisma client
 ```
 
-## CI/CD Pipeline
+## CI/CD pipeline
 
-Pipeline на GitHub Actions запускається при push та pull request до `main` і складається з чотирьох job'ів:
+The GitHub Actions pipeline runs on push and pull request to `main` and consists of four jobs:
 
-`lint` → `type-check` → `build` → `deploy` (тільки push у `main`, після успішного проходження попередніх job'ів)
+`lint` → `type-check` → `build` → `deploy` (push to `main` only, after the previous jobs succeed)
 
-| Job | Опис |
-|-----|------|
-| `lint` | Статичний аналіз коду через ESLint |
-| `type-check` | Перевірка TypeScript типів через `tsc --noEmit` |
-| `build` | Production збірка Next.js + генерація Prisma клієнта |
-| `deploy` | Продакшн-деплой на Vercel через `vercel build` + `vercel deploy --prebuilt --prod` |
+| Job          | Description                                                                        |
+| ------------ | ---------------------------------------------------------------------------------- |
+| `lint`       | Static analysis via ESLint                                                         |
+| `type-check` | TypeScript type checking via `tsc --noEmit`                                        |
+| `build`      | Next.js production build + Prisma client generation                                |
+| `deploy`     | Production deploy to Vercel via `vercel build` + `vercel deploy --prebuilt --prod` |
 
-Конфігурація: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+Configuration: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 
-## Структура проєкту
+## Project structure
 
 ```
 fc-web-portal/
 ├── .github/workflows/         ← CI/CD pipeline (ci.yml)
-├── .husky/                    ← Pre-commit хуки (lint + type-check)
-├── prisma/                    ← Схема БД (37 моделей) + міграції
-├── public/                    ← Статичні файли
+├── .husky/                    ← Pre-commit hooks (lint + type-check)
+├── prisma/                    ← DB schema (37 models) + migrations
+├── public/                    ← Static files
 ├── src/
-│   ├── actions/                ← Server Actions (бізнес-логіка мутацій, 19 файлів)
+│   ├── actions/                ← Server Actions (mutation business logic, 19 files)
 │   ├── app/
 │   │   ├── [locale]/
-│   │   │   ├── (admin)/        ← Адміністративна панель (дашборд, новини, команда, турніри, фаншоп, галерея)
-│   │   │   ├── (auth)/         ← Сторінки входу та реєстрації
-│   │   │   ├── (main)/         ← Публічна частина порталу (новини, команда, матчі, турнірні таблиці, клубна інформація, кабінет)
-│   │   │   ├── (shop)/         ← Фаншоп (каталог, кошик, чекаут, замовлення)
-│   │   │   ├── [...catchAll]/  ← Обробник невідомих маршрутів
+│   │   │   ├── (admin)/        ← Admin panel (dashboard, news, team, tournaments, fan shop, gallery)
+│   │   │   ├── (auth)/         ← Sign-in and sign-up pages
+│   │   │   ├── (main)/         ← Public portal (news, team, matches, standings, club info, profile)
+│   │   │   ├── (shop)/         ← Fan shop (catalog, cart, checkout, orders)
+│   │   │   ├── [...catchAll]/  ← Unknown-route handler
 │   │   │   ├── layout.tsx
 │   │   │   └── not-found.tsx
 │   │   └── api/
-│   │       ├── auth/           ← NextAuth обробники
-│   │       ├── cron/           ← Vercel Cron Jobs (5 завдань)
-│   │       ├── uploadthing/    ← UploadThing файловий роутер
+│   │       ├── auth/           ← NextAuth handlers
+│   │       ├── cron/           ← Vercel Cron Jobs (5 tasks)
+│   │       ├── uploadthing/    ← UploadThing file router
 │   │       └── webhooks/
-│   │           └── stripe/     ← Stripe Webhook обробник
-│   ├── components/             ← UI компоненти (layout, auth, shared, ui – shadcn/ui)
-│   ├── hooks/                  ← Клієнтські React хуки
-│   ├── i18n/                   ← Конфігурація next-intl
-│   ├── lib/                    ← Сервіси (Sofascore, аналітика), утиліти, Prisma/Stripe клієнти, Zod-схеми
-│   ├── messages/                ← Файли перекладів (uk.json, en.json)
-│   ├── store/                   ← Zustand (кошик фаншопу)
-│   ├── auth.ts                  ← NextAuth конфігурація
-│   └── proxy.ts                 ← Комбінований middleware (NextAuth + next-intl)
-├── .env.example                 ← Шаблон змінних середовища (заповнюється локально в .env.local)
+│   │           └── stripe/     ← Stripe webhook handler
+│   ├── components/             ← UI components (layout, auth, shared, ui – shadcn/ui)
+│   ├── hooks/                  ← Client React hooks
+│   ├── i18n/                   ← next-intl configuration
+│   ├── lib/                    ← Services (Sofascore, analytics), utilities, Prisma/Stripe clients, Zod schemas
+│   ├── messages/                ← Translation files (uk.json, en.json)
+│   ├── store/                   ← Zustand (fan shop cart)
+│   ├── auth.ts                  ← NextAuth configuration
+│   └── proxy.ts                 ← Combined middleware (NextAuth + next-intl)
+├── .env.example                 ← Environment variable template (filled in locally as .env.local)
 ├── .gitignore
 ├── LICENSE                      ← MIT
-├── components.json              ← Конфігурація shadcn/ui
-├── eslint.config.mjs            ← ESLint конфігурація
-├── next.config.ts               ← Next.js конфігурація
-├── next-auth.d.ts               ← NextAuth TypeScript типи
-├── postcss.config.mjs           ← PostCSS конфігурація (TailwindCSS v4)
-├── prisma.config.ts             ← Prisma конфігурація
+├── components.json              ← shadcn/ui configuration
+├── eslint.config.mjs            ← ESLint configuration
+├── next.config.ts               ← Next.js configuration
+├── next-auth.d.ts               ← NextAuth TypeScript types
+├── postcss.config.mjs           ← PostCSS configuration (TailwindCSS v4)
+├── prisma.config.ts             ← Prisma configuration
 ├── package.json
 ├── tsconfig.json
-└── vercel.json                  ← Vercel Cron Jobs конфігурація
+└── vercel.json                  ← Vercel Cron Jobs configuration
 ```
 
-Кожен розділ адмінки та публічної частини (наприклад, `admin/tournaments`, `matches/[slug]`, `shop/product/[slug]`) має власні `_components/`, а списки записів – окремий підмаршрут `archive/` для архівованих елементів. Ця вкладеність навмисно не показана в дереві вище, щоб не перевантажувати огляд.
+Each admin and public section (e.g. `admin/tournaments`, `matches/[slug]`, `shop/product/[slug]`) has its own `_components/`, and list views have a separate `archive/` sub-route for archived items. This nesting is intentionally omitted from the tree above to keep the overview readable.
 
-> **Cron-завдання:** у `vercel.json` налаштовано 4 автоматичних cron-завдання (`update-standings`, `sync-matches`, `sync-details`, `cancel-expired-orders`). П'ятий роут – `sync-roster` – використовує ту саму структуру, але запускається вручну з адміністративної панелі, а не за розкладом.
+> **Cron jobs:** `vercel.json` defines 4 scheduled cron jobs (`update-standings`, `sync-matches`, `sync-details`, `cancel-expired-orders`). A fifth route, `sync-roster`, uses the same structure but is triggered manually from the admin panel rather than on a schedule.
 
-## Ліцензія
+## License
 
-Проєкт розповсюджується під ліцензією MIT – деталі у файлі [LICENSE](./LICENSE).
+This project is distributed under the MIT License – see [LICENSE](./LICENSE) for details.

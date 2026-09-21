@@ -32,13 +32,13 @@ export const archiveColumns: ColumnDef<OpponentWithTranslations>[] = [
     },
     {
         id: "nameUk",
-        accessorFn: (row) => getTranslation(row, "uk")?.name || "—",
+        accessorFn: (row) => getTranslation(row, "uk")?.name || "–",
         header: "Назва (Українською)",
         cell: ({ getValue }) => <div className="font-medium text-muted-foreground">{getValue() as string}</div>,
     },
     {
         id: "nameEn",
-        accessorFn: (row) => getTranslation(row, "en")?.name || "—",
+        accessorFn: (row) => getTranslation(row, "en")?.name || "–",
         header: "Назва (Англійською)",
         cell: ({ getValue }) => <div className="text-muted-foreground/70">{getValue() as string}</div>,
     },
@@ -50,7 +50,7 @@ export const archiveColumns: ColumnDef<OpponentWithTranslations>[] = [
             return id ? (
                 <Badge variant="outline" className="opacity-60">{id}</Badge>
             ) : (
-                <span className="text-muted-foreground/60">—</span>
+                <span className="text-muted-foreground/60">–</span>
             );
         },
     },

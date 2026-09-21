@@ -26,7 +26,7 @@ export const archiveColumns: ColumnDef<TournamentWithRelations>[] = [
             return id ? (
                 <Badge variant="outline" className="opacity-60">{id}</Badge>
             ) : (
-                <span className="text-muted-foreground/60">—</span>
+                <span className="text-muted-foreground/60">–</span>
             );
         },
     },

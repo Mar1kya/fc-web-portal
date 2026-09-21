@@ -215,7 +215,7 @@ export function CreateManualMatchForm({ seasons, tournaments, opponents, opponen
                             </div>
                             {selectedSeason?.startDate && selectedSeason?.endDate && (
                                 <p className="text-xs text-muted-foreground">
-                                    Сезон {selectedSeason.name}: {new Intl.DateTimeFormat("uk").format(new Date(selectedSeason.startDate))} — {new Intl.DateTimeFormat("uk").format(new Date(selectedSeason.endDate))}
+                                    Сезон {selectedSeason.name}: {new Intl.DateTimeFormat("uk").format(new Date(selectedSeason.startDate))} – {new Intl.DateTimeFormat("uk").format(new Date(selectedSeason.endDate))}
                                 </p>
                             )}
                             {isDateOutOfSeasonRange && (

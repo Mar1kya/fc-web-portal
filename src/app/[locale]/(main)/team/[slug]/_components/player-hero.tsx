@@ -28,7 +28,7 @@ export default async function PlayerHero({ player }: PlayerHeroProps) {
     const translation = getTranslation(player, locale);
     const name = translation?.name || (locale === "uk" ? "Без назви" : "Untitled");
     const dateLocale = locale === "uk" ? uk : enUS;
-    const formattedBirthDate = player.birthDate ? format(new Date(player.birthDate), "dd.MM.yyyy", { locale: dateLocale }) : "—";
+    const formattedBirthDate = player.birthDate ? format(new Date(player.birthDate), "dd.MM.yyyy", { locale: dateLocale }) : "–";
     const positionName = tEnums(`PlayerRole.${player.position}`);
     const hasJersey = player.relatedProducts.length > 0;
 
@@ -58,7 +58,7 @@ export default async function PlayerHero({ player }: PlayerHeroProps) {
                                     fallback={<span className="text-lg font-bold uppercase">{player.nationality}</span>}
                                 />
                             ) : (
-                                <span className="text-lg font-bold uppercase">—</span>
+                                <span className="text-lg font-bold uppercase">–</span>
                             )}
                         </div>
                     </div>
@@ -69,13 +69,13 @@ export default async function PlayerHero({ player }: PlayerHeroProps) {
                     <div className="flex flex-col items-center gap-1 lg:items-start">
                         <span className="text-sm font-medium text-muted-foreground">{tTeam("height")}</span>
                         <span className="text-lg font-bold uppercase">
-                            {player.height ? `${player.height} ${tTeam("cm")}` : "—"}
+                            {player.height ? `${player.height} ${tTeam("cm")}` : "–"}
                         </span>
                     </div>
                     <div className="flex flex-col items-center gap-1 lg:items-start">
                         <span className="text-sm font-medium text-muted-foreground">{tTeam("weight")}</span>
                         <span className="text-lg font-bold uppercase">
-                            {player.weight ? `${player.weight} ${tTeam("kg")}` : "—"}
+                            {player.weight ? `${player.weight} ${tTeam("kg")}` : "–"}
                         </span>
                     </div>
                 </div>

@@ -114,7 +114,7 @@ export const columns: ColumnDef<MatchWithRelations>[] = [
             const isSynced = match.isDetailsSynced;
             const hasSofaId = !!match.sofascoreId;
 
-            if (!isFinished) return <span className="text-xs text-muted-foreground">—</span>;
+            if (!isFinished) return <span className="text-xs text-muted-foreground">–</span>;
 
             if (hasSofaId) {
                 return isSynced ? (

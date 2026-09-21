@@ -24,9 +24,9 @@ export default async function StaffHero({ coach }: CoachHeroProps) {
     const tTeam = await getTranslations("TeamPage");
     const translation = getTranslation(coach, locale);
     const name = translation?.name || (locale === "uk" ? "Без назви" : "Untitled");
-    const roleName = translation?.role || "—";
+    const roleName = translation?.role || "–";
     const dateLocale = locale === "uk" ? uk : enUS;
-    const formattedBirthDate = coach.birthDate ? format(new Date(coach.birthDate), "dd.MM.yyyy", { locale: dateLocale }) : "—";
+    const formattedBirthDate = coach.birthDate ? format(new Date(coach.birthDate), "dd.MM.yyyy", { locale: dateLocale }) : "–";
 
     return (
         <div className="flex w-full flex-col-reverse overflow-hidden rounded-lg border bg-card xl:flex-row">
@@ -51,7 +51,7 @@ export default async function StaffHero({ coach }: CoachHeroProps) {
                                     fallback={<span className="text-lg font-bold uppercase">{coach.nationality}</span>}
                                 />
                                 : (
-                                    <span className="text-lg font-bold uppercase">—</span>
+                                    <span className="text-lg font-bold uppercase">–</span>
                                 )}
                         </div>
                     </div>

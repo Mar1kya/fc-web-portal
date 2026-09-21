@@ -83,7 +83,7 @@ export default async function EditProductPage({
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight">Редагувати товар</h2>
                     <p className="text-muted-foreground mt-1">
-                        Змініть потрібні поля та збережіть — кеш оновиться автоматично.
+                        Змініть потрібні поля та збережіть – кеш оновиться автоматично.
                     </p>
                 </div>
                 <Button variant="outline" asChild>

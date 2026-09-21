@@ -28,7 +28,7 @@ export const columns: ColumnDef<OpponentWithTranslations>[] = [
     },
     {
         id: "nameUk",
-        accessorFn: (row) => getTranslation(row, "uk")?.name || "—",
+        accessorFn: (row) => getTranslation(row, "uk")?.name || "–",
         header: "Назва (Українською)",
         cell: ({ getValue }) => {
             return <div className="font-semibold">{getValue() as string}</div>;
@@ -36,7 +36,7 @@ export const columns: ColumnDef<OpponentWithTranslations>[] = [
     },
     {
         id: "nameEn",
-        accessorFn: (row) => getTranslation(row, "en")?.name || "—",
+        accessorFn: (row) => getTranslation(row, "en")?.name || "–",
         header: "Назва (Англійською)",
         cell: ({ getValue }) => {
             return <div className="text-muted-foreground">{getValue() as string}</div>;
