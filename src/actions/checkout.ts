@@ -11,6 +11,8 @@ import { stripe } from "@/lib/stripe";
 import { getTranslation } from "@/lib/utils/get-translation";
 import { Prisma } from "../../generated/prisma";
 import { generateGuestOrderToken } from "@/lib/utils/guest-order-token";
+import { revalidatePath, updateTag } from "next/cache";
+import { SHOP_ANALYTICS_CACHE_TAG } from "@/lib/analytics/shop-analytics";
 
 export async function getCheckoutInitialData() {
   const session = await auth();
@@ -240,6 +242,9 @@ export async function processCheckout(
     );
 
     console.log("Order created successfully:", order.order.id);
+    revalidatePath("/admin");
+    revalidatePath("/admin/shop/orders");
+    updateTag(SHOP_ANALYTICS_CACHE_TAG);
 
     const appUrl = process.env.AUTH_URL || "http://localhost:3000";
 

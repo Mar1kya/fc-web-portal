@@ -8,12 +8,14 @@ import { processMatchSync } from "@/lib/services/match-details.service";
 import { MatchStatus, TeamContext } from "../../generated/prisma";
 import { createManualMatchSchema, updateMatchSchema } from "@/lib/schemas";
 import { z } from "zod";
+import { getLocale } from "next-intl/server";
 
 export async function revalidateMatchPaths(
   slug?: string,
   oldSlug?: string,
   playerSlugs?: string[],
 ) {
+  revalidatePath("/admin");
   LOCALES.forEach((locale) => {
     revalidatePath(`/${locale}/admin/tournaments/matches`);
     revalidatePath(`/${locale}/matches`, "layout");
@@ -165,7 +167,10 @@ export async function hardDeleteMatch(id: string) {
     };
   }
 }
-async function fetchMatchesFromSofaScore(endpoint: string, sofascoreTeamId: string) {
+async function fetchMatchesFromSofaScore(
+  endpoint: string,
+  sofascoreTeamId: string,
+) {
   const response = await fetch(
     `https://sofascore.p.rapidapi.com/teams/${endpoint}?teamId=${sofascoreTeamId}`,
     {
@@ -206,8 +211,14 @@ export async function executeMatchSync(
       return { success: false, error: "Не знайдено активного сезону в базі." };
     }
 
-    const pastMatches = await fetchMatchesFromSofaScore("get-last-matches", sofascoreTeamId);
-    const futureMatches = await fetchMatchesFromSofaScore("get-next-matches", sofascoreTeamId);
+    const pastMatches = await fetchMatchesFromSofaScore(
+      "get-last-matches",
+      sofascoreTeamId,
+    );
+    const futureMatches = await fetchMatchesFromSofaScore(
+      "get-next-matches",
+      sofascoreTeamId,
+    );
 
     const rawMatches = [...pastMatches, ...futureMatches];
     const uniqueMatchesMap = new Map();
@@ -217,7 +228,10 @@ export async function executeMatchSync(
     const allMatches = Array.from(uniqueMatchesMap.values());
 
     if (allMatches.length === 0) {
-      return { success: false, error: `Матчів не знайдено (teamId: ${sofascoreTeamId})` };
+      return {
+        success: false,
+        error: `Матчів не знайдено (teamId: ${sofascoreTeamId})`,
+      };
     }
 
     let createdCount = 0;
@@ -229,12 +243,16 @@ export async function executeMatchSync(
         for (const event of allMatches) {
           const matchDate = new Date(event.startTimestamp * 1000);
 
-          if (matchDate < activeSeason.startDate || matchDate > activeSeason.endDate) {
+          if (
+            matchDate < activeSeason.startDate ||
+            matchDate > activeSeason.endDate
+          ) {
             skippedCount++;
             continue;
           }
 
-          const isHomeGame = Number(event.homeTeam.id) === Number(sofascoreTeamId);
+          const isHomeGame =
+            Number(event.homeTeam.id) === Number(sofascoreTeamId);
           const opponentData = isHomeGame ? event.awayTeam : event.homeTeam;
 
           let tournament = await tx.tournament.findFirst({
@@ -253,8 +271,14 @@ export async function executeMatchSync(
                 sofascoreId: event.tournament.uniqueTournament.id,
                 translations: {
                   create: [
-                    { language: "uk", name: event.tournament.uniqueTournament.name },
-                    { language: "en", name: event.tournament.uniqueTournament.name },
+                    {
+                      language: "uk",
+                      name: event.tournament.uniqueTournament.name,
+                    },
+                    {
+                      language: "en",
+                      name: event.tournament.uniqueTournament.name,
+                    },
                   ],
                 },
               },
@@ -333,7 +357,7 @@ export async function executeMatchSync(
                 isHomeGame,
                 homeScore,
                 awayScore,
-                teamContext, 
+                teamContext,
                 seasonId: activeSeason.id,
                 tournamentId: tournament.id,
                 opponentId: opponent.id,
@@ -345,7 +369,7 @@ export async function executeMatchSync(
       },
       { maxWait: 10000, timeout: 30000 },
     );
-
+    revalidatePath("/admin");
     return {
       success: true,
       processed: allMatches.length,
@@ -354,8 +378,14 @@ export async function executeMatchSync(
       updated: updatedCount,
     };
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Невідома помилка";
-    console.error("Sync Matches Error:", errorMessage, "teamContext:", teamContext);
+    const errorMessage =
+      error instanceof Error ? error.message : "Невідома помилка";
+    console.error(
+      "Sync Matches Error:",
+      errorMessage,
+      "teamContext:",
+      teamContext,
+    );
     return { success: false, error: errorMessage };
   }
 }

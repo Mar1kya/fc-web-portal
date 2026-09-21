@@ -2,12 +2,13 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { OrderStatusEnum, Prisma } from "../../generated/prisma";
 import { stripe } from "@/lib/stripe";
 import { LOCALES } from "@/lib/constants";
 import { getTranslations } from "next-intl/server";
 import { verifyGuestOrderToken } from "@/lib/utils/guest-order-token";
+import { SHOP_ANALYTICS_CACHE_TAG } from "@/lib/analytics/shop-analytics";
 function revalidatePublicOrderPaths(orderId: string) {
   LOCALES.forEach((locale) => {
     revalidatePath(`/${locale}/shop/order/${orderId}`);
@@ -16,6 +17,8 @@ function revalidatePublicOrderPaths(orderId: string) {
 }
 
 function revalidateAdminOrderPaths(orderId?: string) {
+  revalidatePath("/admin");
+  updateTag(SHOP_ANALYTICS_CACHE_TAG)
   revalidatePath("/admin/shop/orders");
   if (orderId) {
     revalidatePath(`/admin/shop/orders/${orderId}`);

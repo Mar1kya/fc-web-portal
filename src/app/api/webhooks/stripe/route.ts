@@ -4,14 +4,17 @@ import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
 import { LOCALES } from "@/lib/constants";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { Prisma } from "../../../../../generated/prisma";
+import { SHOP_ANALYTICS_CACHE_TAG } from "@/lib/analytics/shop-analytics";
 
 function revalidateOrderPaths(orderId: string) {
+  revalidatePath("/admin");
+  revalidatePath("/admin/shop/orders");
+  revalidatePath(`/admin/shop/orders/${orderId}`);
+  revalidateTag(SHOP_ANALYTICS_CACHE_TAG, "max");
   LOCALES.forEach((locale) => {
     revalidatePath(`/${locale}/shop/order/${orderId}`);
-    revalidatePath(`/${locale}/admin/shop/orders/${orderId}`);
-    revalidatePath(`/${locale}/admin/shop/orders`);
     revalidatePath(`/${locale}/profile/history`);
   });
 }

@@ -1,15 +1,15 @@
 import { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
-import { KPICards } from "./_components/kpi-cards"
-import { DashboardTables } from "./_components/dashboard-tables"
-import { RefreshButton } from "./_components/refresh-button"
-import { TeamSwitcher } from "./_components/team-switcher"
-import { PeriodSwitcher } from "./_components/period-switcher"
-import { CollapsibleCard } from "./_components/collapsible-card"
 import { parseTeamContext } from "@/lib/utils/team-context"
 import { getShopAnalytics } from "@/lib/analytics/shop-analytics"
 import { parseAnalyticsPeriod } from "@/lib/analytics/period"
-import { AnalyticsSection } from "./_components/analytics-section"
+import { TeamSwitcher } from "../_components/team-switcher"
+import { RefreshButton } from "../_components/refresh-button"
+import { CollapsibleCard } from "../_components/collapsible-card"
+import { KPICards } from "../_components/kpi-cards"
+import { PeriodSwitcher } from "../_components/period-switcher"
+import { DashboardTables } from "../_components/dashboard-tables"
+import { AnalyticsSection } from "../_components/analytics-section"
 
 export const metadata: Metadata = {
     title: "Дашборд",
