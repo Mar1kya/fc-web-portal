@@ -2,13 +2,46 @@
 
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { LOCALES, SOFASCORE_TEAM_IDS } from "@/lib/constants";
+import {
+  LOCALES,
+  SOFASCORE_SYNC_MAX_PAGES,
+  SOFASCORE_TEAM_IDS,
+} from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 import { processMatchSync } from "@/lib/services/match-details.service";
 import { MatchStatus, TeamContext } from "../../generated/prisma";
 import { createManualMatchSchema, updateMatchSchema } from "@/lib/schemas";
 import { z } from "zod";
-import { getLocale } from "next-intl/server";
+
+type SeasonBounds = { startDate: Date; endDate: Date };
+
+type SofaScoreTeamRef = {
+  id: number;
+  slug: string;
+  name: string;
+};
+
+type SofaScoreEvent = {
+  id: number;
+  slug: string;
+  startTimestamp: number;
+  homeTeam: SofaScoreTeamRef;
+  awayTeam: SofaScoreTeamRef;
+  status: { type: string };
+  roundInfo?: { round?: number };
+  homeScore?: { current?: number };
+  awayScore?: { current?: number };
+  tournament: {
+    slug: string;
+    uniqueTournament: { id: number; name: string };
+  };
+};
+
+type SofaScorePageResponse = {
+  events?: SofaScoreEvent[];
+  hasNextPage?: boolean;
+  error?: unknown;
+};
 
 export async function revalidateMatchPaths(
   slug?: string,
@@ -167,27 +200,68 @@ export async function hardDeleteMatch(id: string) {
     };
   }
 }
-async function fetchMatchesFromSofaScore(
-  endpoint: string,
-  sofascoreTeamId: string,
-) {
-  const response = await fetch(
-    `https://sofascore.p.rapidapi.com/teams/${endpoint}?teamId=${sofascoreTeamId}`,
-    {
-      headers: {
-        "x-rapidapi-host": "sofascore.p.rapidapi.com",
-        "x-rapidapi-key": process.env.RAPIDAPI_KEY!,
-      },
-      cache: "no-store",
-    },
-  );
 
-  if (!response.ok) {
-    throw new Error(`API error fetching ${endpoint}: ${response.statusText}`);
+async function fetchMatchesFromSofaScore(
+  endpoint: "get-last-matches" | "get-next-matches",
+  sofascoreTeamId: string,
+  season: SeasonBounds,
+) {
+  const collected: SofaScoreEvent[] = [];
+
+  const minDate = new Date(season.startDate);
+  const maxDate = new Date(season.endDate);
+  maxDate.setUTCHours(23, 59, 59, 999);
+
+  let pagesFetched = 0;
+
+  for (let pageIndex = 0; pageIndex < SOFASCORE_SYNC_MAX_PAGES; pageIndex++) {
+    const response = await fetch(
+      `https://sofascore.p.rapidapi.com/teams/${endpoint}?teamId=${sofascoreTeamId}&pageIndex=${pageIndex}`,
+      {
+        headers: {
+          "x-rapidapi-host": "sofascore.p.rapidapi.com",
+          "x-rapidapi-key": process.env.RAPIDAPI_KEY!,
+        },
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) {
+      if (pageIndex === 0) {
+        throw new Error(
+          `API error fetching ${endpoint}: ${response.statusText}`,
+        );
+      }
+      break;
+    }
+
+    const data: SofaScorePageResponse = await response.json();
+    if (data.error) break;
+
+    const events: SofaScoreEvent[] = data.events ?? [];
+    if (events.length === 0) break;
+
+    pagesFetched++;
+
+    const timestamps = events.map((e) => e.startTimestamp * 1000);
+    const pageOldest = new Date(Math.min(...timestamps));
+    const pageNewest = new Date(Math.max(...timestamps));
+
+    collected.push(
+      ...events.filter((e) => {
+        const d = new Date(e.startTimestamp * 1000);
+        return d >= minDate && d <= maxDate;
+      }),
+    );
+
+    if (data.hasNextPage !== true) break;
+
+    if (endpoint === "get-last-matches" && pageOldest <= minDate) break;
+
+    if (endpoint === "get-next-matches" && pageNewest >= maxDate) break;
   }
 
-  const data = await response.json();
-  return data.events || [];
+  return { events: collected, pagesFetched };
 }
 
 export async function executeMatchSync(
@@ -211,16 +285,28 @@ export async function executeMatchSync(
       return { success: false, error: "Не знайдено активного сезону в базі." };
     }
 
-    const pastMatches = await fetchMatchesFromSofaScore(
-      "get-last-matches",
-      sofascoreTeamId,
-    );
-    const futureMatches = await fetchMatchesFromSofaScore(
-      "get-next-matches",
-      sofascoreTeamId,
-    );
+    const now = new Date();
+    const seasonEnded = new Date(activeSeason.endDate) < now;
+    const seasonNotStarted = new Date(activeSeason.startDate) > now;
 
-    const rawMatches = [...pastMatches, ...futureMatches];
+    const past = seasonNotStarted
+      ? { events: [], pagesFetched: 0 }
+      : await fetchMatchesFromSofaScore(
+          "get-last-matches",
+          sofascoreTeamId,
+          activeSeason,
+        );
+
+    const future = seasonEnded
+      ? { events: [], pagesFetched: 0 }
+      : await fetchMatchesFromSofaScore(
+          "get-next-matches",
+          sofascoreTeamId,
+          activeSeason,
+        );
+
+    const rawMatches = [...past.events, ...future.events];
+    const totalPages = past.pagesFetched + future.pagesFetched;
     const uniqueMatchesMap = new Map();
     for (const match of rawMatches) {
       uniqueMatchesMap.set(match.id, match);
@@ -230,7 +316,10 @@ export async function executeMatchSync(
     if (allMatches.length === 0) {
       return {
         success: false,
-        error: `Матчів не знайдено (teamId: ${sofascoreTeamId})`,
+        error:
+          totalPages === 0
+            ? `API не повернув жодного матчу (teamId: ${sofascoreTeamId})`
+            : `Переглянуто ${totalPages} стор., але жодного матчу в межах сезону ${activeSeason.name} (${activeSeason.startDate.toISOString().slice(0, 10)} – ${activeSeason.endDate.toISOString().slice(0, 10)})`,
       };
     }
 
@@ -376,6 +465,7 @@ export async function executeMatchSync(
       skipped: skippedCount,
       created: createdCount,
       updated: updatedCount,
+      apiRequests: totalPages,
     };
   } catch (error: unknown) {
     const errorMessage =

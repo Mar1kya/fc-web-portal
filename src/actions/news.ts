@@ -169,7 +169,6 @@ export async function hardDeletePost(id: string) {
       where: { id },
     });
 
-    const locale = await getLocale();
     revalidatePath("/admin");
     revalidatePath("/admin/news");
     revalidatePath("/admin/news/archive");
