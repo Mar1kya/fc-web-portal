@@ -68,9 +68,9 @@ export async function softDeletePost(id: string) {
 
     const locale = await getLocale();
 
-    revalidatePath(`/${locale}/admin`);
-    revalidatePath(`/${locale}/admin/news`);
-    revalidatePath(`/${locale}/admin/news/archive`);
+    revalidatePath("/admin");
+    revalidatePath("/admin/news");
+    revalidatePath("/admin/news/archive");
     revalidatePath(`/${locale}/news`);
     revalidatePath(`/${locale}`);
 
@@ -124,9 +124,9 @@ export async function restorePost(id: string) {
 
     const locale = await getLocale();
 
-    revalidatePath(`/${locale}/admin`);
-    revalidatePath(`/${locale}/admin/news`);
-    revalidatePath(`/${locale}/admin/news/archive`);
+    revalidatePath("/admin");
+    revalidatePath("/admin/news");
+    revalidatePath("/admin/news/archive");
     revalidatePath(`/${locale}/news`);
     revalidatePath(`/${locale}`);
 
@@ -169,11 +169,9 @@ export async function hardDeletePost(id: string) {
       where: { id },
     });
 
-    const locale = await getLocale();
-
-    revalidatePath(`/${locale}/admin`);
-    revalidatePath(`/${locale}/admin/news`);
-    revalidatePath(`/${locale}/admin/news/archive`);
+    revalidatePath("/admin");
+    revalidatePath("/admin/news");
+    revalidatePath("/admin/news/archive");
 
     return {
       success: true,
@@ -310,10 +308,9 @@ export async function createPost(
           })
         : [],
     ]);
-
+    revalidatePath("/admin");
+    revalidatePath("/admin/news");
     LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/admin`);
-      revalidatePath(`/${locale}/admin/news`);
       revalidatePath(`/${locale}/news`);
       revalidatePath(`/${locale}`);
       players.forEach((p) => revalidatePath(`/${locale}/team/${p.slug}`));
@@ -468,10 +465,9 @@ export async function updatePost(
           })
         : [],
     ]);
-
+    revalidatePath("/admin");
+    revalidatePath("/admin/news");
     LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/admin`);
-      revalidatePath(`/${locale}/admin/news`);
       revalidatePath(`/${locale}/news`);
       revalidatePath(`/${locale}/news/${oldSlug}`);
 

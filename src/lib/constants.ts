@@ -15,7 +15,6 @@ export const PAGINATION = {
   GALLERIES_PER_PAGE: 12,
 };
 export const TARGET_TEAM_ORIGINAL_NAME = "Polissya Zhytomyr";
-export const TEAM_ID = "258536";
 export const SOFASCORE_TEAM_IDS: Partial<Record<TeamContext, string>> = {
   [TeamContext.MAIN_TEAM]: "258536",
   [TeamContext.RESERVE]: "1244265",
@@ -223,3 +222,5 @@ export const NON_CANCELLABLE_STATUSES = [
   "CANCELLED",
   "CANCELLED_REFUND_PENDING",
 ];
+
+export const SOFASCORE_SYNC_MAX_PAGES = 30;
