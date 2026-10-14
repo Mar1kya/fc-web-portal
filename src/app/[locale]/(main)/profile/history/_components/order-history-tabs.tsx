@@ -5,8 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter, usePathname } from "@/i18n/navigation"
 import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
-
-const STATUSES = ["ALL", "PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"];
+import { ORDER_STATUSES } from "@/lib/constants"
 
 export default function OrderHistoryTabs() {
     const t = useTranslations("ProfilePage.History");
@@ -33,7 +32,7 @@ export default function OrderHistoryTabs() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <Tabs value={currentStatus} onValueChange={(val) => updateParams("status", val)} className="w-full sm:w-auto overflow-hidden">
                 <TabsList className="flex w-full justify-start rounded-none border-b border-border bg-transparent p-0 h-auto overflow-x-auto flex-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                    {STATUSES.map((status) => (
+                    {ORDER_STATUSES.map((status) => (
                         <TabsTrigger
                             key={status}
                             value={status}

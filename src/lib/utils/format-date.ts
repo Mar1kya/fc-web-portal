@@ -1,4 +1,4 @@
-import { SHOP_TIMEZONE } from "../constants";
+import { DEFAULT_TIMEZONE } from "../constants";
 
 export function formatOrderDateTime(date: Date | string, locale = "uk-UA") {
   return new Date(date).toLocaleDateString(locale, {
@@ -7,7 +7,7 @@ export function formatOrderDateTime(date: Date | string, locale = "uk-UA") {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: SHOP_TIMEZONE,
+    timeZone: DEFAULT_TIMEZONE,
   });
 }
 
@@ -16,7 +16,7 @@ export function formatOrderDate(date: Date | string, locale = "uk-UA") {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    timeZone: SHOP_TIMEZONE,
+    timeZone: DEFAULT_TIMEZONE,
   });
 }
 
@@ -24,7 +24,7 @@ export function formatOrderTime(date: Date | string, locale = "uk-UA") {
   return new Date(date).toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: SHOP_TIMEZONE,
+    timeZone: DEFAULT_TIMEZONE,
   });
 }
 export function formatOrderDateLong(date: Date | string, locale = "uk-UA") {
@@ -32,7 +32,7 @@ export function formatOrderDateLong(date: Date | string, locale = "uk-UA") {
     day: "numeric",
     month: "long",
     year: "numeric",
-    timeZone: SHOP_TIMEZONE,
+    timeZone: DEFAULT_TIMEZONE,
   });
 }
 

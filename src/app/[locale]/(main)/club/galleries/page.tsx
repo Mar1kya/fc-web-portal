@@ -20,7 +20,6 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
-
 export default async function GalleriesPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const t = await getTranslations("GalleriesPage");
     const resolvedSearchParams = await searchParams;

@@ -34,15 +34,10 @@ export async function GET(request: Request) {
       });
     }
 
-    console.log(
-      `Found ${unsyncedMatches.length} unsynced matches. Starting sync...`,
-    );
-
     let successCount = 0;
     let failedCount = 0;
 
     for (const match of unsyncedMatches) {
-      console.log(`Syncing details for match: ${match.slug}`);
       const result = await processMatchSync(match.id);
 
       if (result.success) {

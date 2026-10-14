@@ -241,7 +241,6 @@ export async function processCheckout(
       },
     );
 
-    console.log("Order created successfully:", order.order.id);
     revalidatePath("/admin");
     revalidatePath("/admin/shop/orders");
     updateTag(SHOP_ANALYTICS_CACHE_TAG);

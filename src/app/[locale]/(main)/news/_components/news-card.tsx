@@ -38,7 +38,6 @@ export default function NewsCard({ post, locale }: NewsCardProps) {
     const formattedDate = format(new Date(post.publishedAt), "dd.MM.yyyy, HH:mm", { locale: dateLocale });
     const { onLoad, objectPositionClass } = useImageOrientation();
 
-
     return (
        <Link href={`/news/${post.slug}`} className="group flex flex-col gap-4 cursor-pointer">
             <div className="relative w-full aspect-4/3 rounded-2xl overflow-hidden bg-muted flex items-center justify-center border border-border/50">
