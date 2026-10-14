@@ -317,10 +317,7 @@ export async function processMatchSync(matchDbId: string) {
               });
             }
           }
-        } else {
-          console.log(`No lineups found for match ${matchDbId}.`);
         }
-
         for (const incident of incidents) {
           if (incident.incidentType === "substitution") {
             const isOpponentSub = incident.isHome !== match.isHomeGame;

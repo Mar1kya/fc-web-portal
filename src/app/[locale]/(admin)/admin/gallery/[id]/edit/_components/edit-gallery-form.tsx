@@ -35,8 +35,6 @@ export function EditGalleryForm({ gallery, matches }: EditGalleryFormProps) {
     const [titleEn, setTitleEn] = useState(initialTitleEn);
     const [matchId, setMatchId] = useState<string>(gallery.matchId || "none");
 
-    // Ініціалізуємо команду за поточним прив'язаним матчем, якщо він є,
-    // інакше падаємо назад на MAIN_TEAM за замовчуванням.
     const initialTeamContext = useMemo(() => {
         if (gallery.matchId) {
             const currentMatch = matches.find(m => m.id === gallery.matchId);

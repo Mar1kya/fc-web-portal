@@ -11,6 +11,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import TeamLogo from "../../matches/_components/team-logo";
+import { StandingsSortKey } from "@/lib/constants";
 
 export type ProcessedStandingItem = {
     id: string;
@@ -29,7 +30,6 @@ export type ProcessedStandingItem = {
     points: number;
 };
 
-type SortKey = 'rank' | 'played' | 'win' | 'draw' | 'lose' | 'goalDifference' | 'points';
 
 type StandingsTableClientProps = {
     data: ProcessedStandingItem[];
@@ -40,9 +40,9 @@ type StandingsTableClientProps = {
 };
 
 export default function StandingsTableClient({ data, labels }: StandingsTableClientProps) {
-    const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
+    const [sortConfig, setSortConfig] = useState<{ key: StandingsSortKey; direction: 'asc' | 'desc' } | null>(null);
 
-    const handleSort = (key: SortKey) => {
+    const handleSort = (key: StandingsSortKey) => {
         let direction: 'asc' | 'desc' = 'desc'; 
         if (sortConfig && sortConfig.key === key && sortConfig.direction === 'desc') {
             direction = 'asc';
@@ -61,7 +61,7 @@ export default function StandingsTableClient({ data, labels }: StandingsTableCli
         return 0;
     });
 
-    const getSortIcon = (key: SortKey) => {
+    const getSortIcon = (key: StandingsSortKey) => {
         if (sortConfig?.key !== key) return <ArrowUpDown className="w-3 h-3 ml-1 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity" />;
         return sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3 ml-1 text-emerald-600" /> : <ArrowDown className="w-3 h-3 ml-1 text-emerald-600" />;
     };

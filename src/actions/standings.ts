@@ -50,9 +50,6 @@ export async function executeStandingsSync(
       let tournamentSeason = tournament.tournamentSeasons[0];
 
       if (!tournamentSeason) {
-        console.log(
-          `[standings] Немає TournamentSeason для ${tournament.slug} у сезоні ${activeSeason.name}. Резолвлю автоматично...`,
-        );
         const saved = await resolveAndSaveTournamentSeason(
           tournament,
           activeSeason,

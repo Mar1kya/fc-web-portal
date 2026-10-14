@@ -13,7 +13,6 @@ export const metadata = {
     description: "Сторінка керування тренерським штабом"
 };
 
-
 export default async function StaffPage({ searchParams }: { searchParams: Promise<{ team?: string }> }) {
     const { team } = await searchParams;
 

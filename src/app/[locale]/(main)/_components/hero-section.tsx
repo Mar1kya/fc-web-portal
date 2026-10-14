@@ -2,12 +2,12 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { CalendarDays, MapPin, ChevronRight, Calendar } from "lucide-react";
 import { getTranslation } from "@/lib/utils/get-translation";
-import { MatchStatus } from "../../../../../generated/prisma";
+import { MatchStatus, TeamContext } from "../../../../../generated/prisma";
 import TeamLogo from "../matches/_components/team-logo";
-import { OUR_LOGO_URL } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { getUserTimeZone } from "@/lib/utils/get-user-timezone";
 import { formatMatchDate, formatMatchTime } from "@/lib/utils/format-date";
+import { getOurLogoUrl } from "@/lib/utils/team-display";
 
 type HeroMatch = {
     id: string;
@@ -19,6 +19,7 @@ type HeroMatch = {
     awayScore: number | null;
     stadium: string | null;
     round: number | null;
+    teamContext: TeamContext,
     opponent: {
         logoUrl: string | null;
         translations: { language: string; name: string }[];
@@ -48,8 +49,9 @@ export default async function HeroSection({ match, locale }: HeroSectionProps) {
     const ourName = tMatches("ourTeamName");
     const homeTeamName = match.isHomeGame ? ourName : opponentName;
     const awayTeamName = match.isHomeGame ? opponentName : ourName;
-    const homeLogo = match.isHomeGame ? OUR_LOGO_URL : (match.opponent.logoUrl || "");
-    const awayLogo = match.isHomeGame ? (match.opponent.logoUrl || "") : OUR_LOGO_URL;
+    const ourLogoUrl = getOurLogoUrl(match.teamContext);
+    const homeLogo = match.isHomeGame ? ourLogoUrl : (match.opponent.logoUrl || "");
+    const awayLogo = match.isHomeGame ? (match.opponent.logoUrl || "") : ourLogoUrl;
     const isFinished = match.status === MatchStatus.FINISHED;
     const isLive = match.status === MatchStatus.LIVE;
     const isFinishedOrLive = isFinished || isLive;

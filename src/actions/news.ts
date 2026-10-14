@@ -40,6 +40,45 @@ export type BoundPostData = {
   selectedMatches: string[];
 };
 
+type Slugged = { slug: string };
+
+type RevalidateNewsOptions = {
+  postSlugs?: Array<string | null | undefined>;
+  players?: Slugged[];
+  coaches?: Slugged[];
+  matches?: Slugged[];
+};
+
+const uniqueSlugs = (items: Array<string | null | undefined>) => [
+  ...new Set(items.filter((s): s is string => Boolean(s))),
+];
+
+function revalidateNewsPaths({
+  postSlugs = [],
+  players = [],
+  coaches = [],
+  matches = [],
+}: RevalidateNewsOptions = {}) {
+  revalidatePath("/admin");
+  revalidatePath("/admin/news");
+  revalidatePath("/admin/news/archive");
+
+  const posts = uniqueSlugs(postSlugs);
+  const playerSlugs = uniqueSlugs(players.map((p) => p.slug));
+  const coachSlugs = uniqueSlugs(coaches.map((c) => c.slug));
+  const matchSlugs = uniqueSlugs(matches.map((m) => m.slug));
+
+  LOCALES.forEach((locale) => {
+    revalidatePath(`/${locale}`);
+    revalidatePath(`/${locale}/news`);
+
+    posts.forEach((s) => revalidatePath(`/${locale}/news/${s}`));
+    playerSlugs.forEach((s) => revalidatePath(`/${locale}/team/${s}`));
+    coachSlugs.forEach((s) => revalidatePath(`/${locale}/team/staff/${s}`));
+    matchSlugs.forEach((s) => revalidatePath(`/${locale}/matches/${s}`));
+  });
+}
+
 export async function softDeletePost(id: string) {
   const session = await auth();
 
@@ -66,25 +105,12 @@ export async function softDeletePost(id: string) {
       data: { deletedAt: new Date() },
     });
 
-    const locale = await getLocale();
-
-    revalidatePath("/admin");
-    revalidatePath("/admin/news");
-    revalidatePath("/admin/news/archive");
-    revalidatePath(`/${locale}/news`);
-    revalidatePath(`/${locale}`);
-
-    postWithRelations.mentionedPlayers.forEach((player) =>
-      revalidatePath(`/${locale}/team/${player.slug}`),
-    );
-
-    postWithRelations.mentionedCoaches.forEach((coach) =>
-      revalidatePath(`/${locale}/team/staff/${coach.slug}`),
-    );
-
-    postWithRelations.relatedMatches.forEach((match) =>
-      revalidatePath(`/${locale}/matches/${match.slug}`),
-    );
+    revalidateNewsPaths({
+      postSlugs: [postWithRelations.slug],
+      players: postWithRelations.mentionedPlayers,
+      coaches: postWithRelations.mentionedCoaches,
+      matches: postWithRelations.relatedMatches,
+    });
 
     return {
       success: true,
@@ -122,23 +148,12 @@ export async function restorePost(id: string) {
       data: { deletedAt: null },
     });
 
-    const locale = await getLocale();
-
-    revalidatePath("/admin");
-    revalidatePath("/admin/news");
-    revalidatePath("/admin/news/archive");
-    revalidatePath(`/${locale}/news`);
-    revalidatePath(`/${locale}`);
-
-    existingPost.mentionedPlayers.forEach((player) =>
-      revalidatePath(`/${locale}/team/${player.slug}`),
-    );
-    existingPost.mentionedCoaches.forEach((coach) =>
-      revalidatePath(`/${locale}/team/staff/${coach.slug}`),
-    );
-    existingPost.relatedMatches.forEach((match) =>
-      revalidatePath(`/${locale}/matches/${match.slug}`),
-    );
+    revalidateNewsPaths({
+      postSlugs: [existingPost.slug],
+      players: existingPost.mentionedPlayers,
+      coaches: existingPost.mentionedCoaches,
+      matches: existingPost.relatedMatches,
+    });
 
     return {
       success: true,
@@ -169,9 +184,7 @@ export async function hardDeletePost(id: string) {
       where: { id },
     });
 
-    revalidatePath("/admin");
-    revalidatePath("/admin/news");
-    revalidatePath("/admin/news/archive");
+    revalidateNewsPaths();
 
     return {
       success: true,
@@ -308,15 +321,8 @@ export async function createPost(
           })
         : [],
     ]);
-    revalidatePath("/admin");
-    revalidatePath("/admin/news");
-    LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/news`);
-      revalidatePath(`/${locale}`);
-      players.forEach((p) => revalidatePath(`/${locale}/team/${p.slug}`));
-      coaches.forEach((c) => revalidatePath(`/${locale}/team/staff/${c.slug}`));
-      matches.forEach((m) => revalidatePath(`/${locale}/matches/${m.slug}`));
-    });
+
+    revalidateNewsPaths({ postSlugs: [slug], players, coaches, matches });
 
     return {
       success: true,
@@ -345,7 +351,12 @@ export async function updatePost(
   try {
     const existingPost = await prisma.post.findUnique({
       where: { id: postId },
-      select: { slug: true },
+      select: {
+        slug: true,
+        mentionedPlayers: { select: { slug: true } },
+        mentionedCoaches: { select: { slug: true } },
+        relatedMatches: { select: { slug: true } },
+      },
     });
 
     if (!existingPost) {
@@ -465,20 +476,12 @@ export async function updatePost(
           })
         : [],
     ]);
-    revalidatePath("/admin");
-    revalidatePath("/admin/news");
-    LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/news`);
-      revalidatePath(`/${locale}/news/${oldSlug}`);
 
-      if (oldSlug !== newSlug) {
-        revalidatePath(`/${locale}/news/${newSlug}`);
-      }
-
-      revalidatePath(`/${locale}`);
-      players.forEach((p) => revalidatePath(`/${locale}/team/${p.slug}`));
-      coaches.forEach((c) => revalidatePath(`/${locale}/team/staff/${c.slug}`));
-      matches.forEach((m) => revalidatePath(`/${locale}/matches/${m.slug}`));
+    revalidateNewsPaths({
+      postSlugs: [existingPost.slug, newSlug],
+      players: [...existingPost.mentionedPlayers, ...players],
+      coaches: [...existingPost.mentionedCoaches, ...coaches],
+      matches: [...existingPost.relatedMatches, ...matches],
     });
 
     return {

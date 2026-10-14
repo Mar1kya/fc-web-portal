@@ -10,7 +10,6 @@ import { OrderActions } from "./order-actions";
 import { formatOrderDate, formatOrderTime } from "@/lib/utils/format-date";
 import { adminLabels, getPaymentBadgeConfig, statusColors, statusTranslations } from "@/lib/constants";
 
-
 export type OrderItemPlain = {
     id: string;
     quantity: number;

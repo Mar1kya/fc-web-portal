@@ -5,7 +5,6 @@ import {
   TeamContext,
 } from "../../generated/prisma";
 
-export const SHOP_TIMEZONE = "Europe/Kyiv";
 export const MIN_PASSWORD_LENGTH = 8;
 export const MIN_NAME_LENGTH = 2;
 export const PAGINATION = {
@@ -24,8 +23,6 @@ export const SOFASCORE_TEAM_IDS: Partial<Record<TeamContext, string>> = {
 };
 export const MAX_QTY_PER_ITEM = 10;
 export const LOCALES = ["uk", "en"];
-export const OUR_LOGO_URL =
-  "https://img.sofascore.com/api/v1/team/258536/image";
 
 export const postTypeTranslations: Record<PostType, string> = {
   NEWS: "Новина",
@@ -224,3 +221,8 @@ export const NON_CANCELLABLE_STATUSES = [
 ];
 
 export const SOFASCORE_SYNC_MAX_PAGES = 30;
+
+export const ORDER_STATUSES = ["ALL", "PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"];
+
+export type StandingsSortKey = 'rank' | 'played' | 'win' | 'draw' | 'lose' | 'goalDifference' | 'points';
+

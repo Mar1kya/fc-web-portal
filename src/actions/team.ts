@@ -3,7 +3,11 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
-import { LOCALES, SOFASCORE_TEAM_IDS, TEAM_CONTEXT_PRIORITY } from "@/lib/constants";
+import {
+  LOCALES,
+  SOFASCORE_TEAM_IDS,
+  TEAM_CONTEXT_PRIORITY,
+} from "@/lib/constants";
 import { PlayerPosition, TeamContext } from "../../generated/prisma";
 import { createCoachSchema, createPlayerSchema } from "@/lib/schemas";
 import { generatePlayerSlug } from "@/lib/utils/slugify";
@@ -89,6 +93,41 @@ const mapPosition = (positionCode: string): PlayerPosition => {
   }
 };
 
+const uniqueSlugs = (items: Array<string | null | undefined>) => [
+  ...new Set(items.filter((s): s is string => Boolean(s))),
+];
+
+function revalidatePlayerPaths(slugs: Array<string | null | undefined> = []) {
+  const playerSlugs = uniqueSlugs(slugs);
+
+  LOCALES.forEach((locale) => {
+    revalidatePath(`/${locale}/admin/team`);
+    revalidatePath(`/${locale}/admin/team/players`);
+    revalidatePath(`/${locale}/team`);
+    revalidatePath(`/${locale}/shop/player`);
+    revalidatePath(`/${locale}/matches`, "layout");
+
+    playerSlugs.forEach((slug) => {
+      revalidatePath(`/${locale}/team/${slug}`);
+      revalidatePath(`/${locale}/shop/player/${slug}`);
+    });
+  });
+}
+
+function revalidateCoachPaths(slugs: Array<string | null | undefined> = []) {
+  const coachSlugs = uniqueSlugs(slugs);
+
+  LOCALES.forEach((locale) => {
+    revalidatePath(`/${locale}/admin/team`);
+    revalidatePath(`/${locale}/admin/team/staff`);
+    revalidatePath(`/${locale}/team`);
+
+    coachSlugs.forEach((slug) => {
+      revalidatePath(`/${locale}/team/staff/${slug}`);
+    });
+  });
+}
+
 export async function softDeletePlayer(id: string) {
   const session = await auth();
 
@@ -102,14 +141,7 @@ export async function softDeletePlayer(id: string) {
       data: { deletedAt: new Date() },
     });
 
-    LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/admin/team`);
-      revalidatePath(`/${locale}/team`);
-      revalidatePath(`/${locale}/team/${player.slug}`);
-      revalidatePath(`/${locale}/shop/player`);
-      revalidatePath(`/${locale}/shop/player/${player.slug}`);
-      revalidatePath(`/${locale}/matches`, "layout");
-    });
+    revalidatePlayerPaths([player.slug]);
 
     return {
       success: true,
@@ -137,14 +169,7 @@ export async function restorePlayer(id: string) {
       data: { deletedAt: null },
     });
 
-    LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/admin/team`);
-      revalidatePath(`/${locale}/team`);
-      revalidatePath(`/${locale}/team/${player.slug}`);
-      revalidatePath(`/${locale}/shop/player`);
-      revalidatePath(`/${locale}/shop/player/${player.slug}`);
-      revalidatePath(`/${locale}/matches`, "layout");
-    });
+    revalidatePlayerPaths([player.slug]);
 
     return {
       success: true,
@@ -179,9 +204,7 @@ export async function hardDeletePlayer(id: string) {
       where: { id },
     });
 
-    LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/admin/team`);
-    });
+    revalidatePlayerPaths();
 
     return {
       success: true,
@@ -285,12 +308,8 @@ export async function createPlayer(
             : undefined,
       },
     });
-    LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/admin/team`);
-      revalidatePath(`/${locale}/admin/team/players`);
-      revalidatePath(`/${locale}/team`);
-      revalidatePath(`/${locale}/shop/player`);
-    });
+
+    revalidatePlayerPaths([slug]);
 
     return {
       success: true,
@@ -408,20 +427,8 @@ export async function updatePlayer(
         },
       },
     });
-    LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/admin/team`);
-      revalidatePath(`/${locale}/admin/team/players`);
-      revalidatePath(`/${locale}/team`);
-      revalidatePath(`/${locale}/team/${oldSlug}`);
-      if (oldSlug !== newSlug) {
-        revalidatePath(`/${locale}/team/${newSlug}`);
-      }
-      revalidatePath(`/${locale}/shop/player`);
-      revalidatePath(`/${locale}/shop/player/${oldSlug}`);
-      if (oldSlug !== newSlug) {
-        revalidatePath(`/${locale}/shop/player/${newSlug}`);
-      }
-    });
+
+    revalidatePlayerPaths([oldSlug, newSlug]);
 
     return {
       success: true,
@@ -449,11 +456,7 @@ export async function softDeleteCoach(id: string) {
       data: { deletedAt: new Date() },
     });
 
-    LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/admin/team`);
-      revalidatePath(`/${locale}/team`);
-      revalidatePath(`/${locale}/team/staff/${coach.slug}`);
-    });
+    revalidateCoachPaths([coach.slug]);
 
     return {
       success: true,
@@ -481,11 +484,7 @@ export async function restoreCoach(id: string) {
       data: { deletedAt: null },
     });
 
-    LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/admin/team`);
-      revalidatePath(`/${locale}/team`);
-      revalidatePath(`/${locale}/team/staff/${coach.slug}`);
-    });
+    revalidateCoachPaths([coach.slug]);
 
     return {
       success: true,
@@ -520,9 +519,7 @@ export async function hardDeleteCoach(id: string) {
       where: { id },
     });
 
-    LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/admin/team`);
-    });
+    revalidateCoachPaths();
 
     return {
       success: true,
@@ -615,11 +612,7 @@ export async function createCoach(
       },
     });
 
-    LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/admin/team`);
-      revalidatePath(`/${locale}/admin/team/staff`);
-      revalidatePath(`/${locale}/team`);
-    });
+    revalidateCoachPaths([slug]);
 
     return {
       success: true,
@@ -725,16 +718,7 @@ export async function updateCoach(
       },
     });
 
-    LOCALES.forEach((locale) => {
-      revalidatePath(`/${locale}/admin/team`);
-      revalidatePath(`/${locale}/admin/team/staff`);
-      revalidatePath(`/${locale}/team`);
-
-      revalidatePath(`/${locale}/team/staff/${oldSlug}`);
-      if (oldSlug !== newSlug) {
-        revalidatePath(`/${locale}/team/staff/${newSlug}`);
-      }
-    });
+    revalidateCoachPaths([oldSlug, newSlug]);
 
     return {
       success: true,
@@ -753,14 +737,14 @@ export async function executeRosterSync(
   teamContext: TeamContext = TeamContext.MAIN_TEAM,
 ): Promise<SyncRosterResult> {
   const sofascoreTeamId = SOFASCORE_TEAM_IDS[teamContext];
- 
+
   if (!sofascoreTeamId) {
     return {
       success: false,
       message: `Для команди "${teamContext}" не задано sofascoreId. Заповніть SOFASCORE_TEAM_IDS.`,
     };
   }
- 
+
   try {
     const response = await fetch(
       `https://sofascore.p.rapidapi.com/teams/get-squad?teamId=${sofascoreTeamId}`,
@@ -772,24 +756,24 @@ export async function executeRosterSync(
         cache: "no-store",
       },
     );
- 
+
     if (!response.ok) throw new Error("Помилка API при отриманні складу");
- 
+
     const data = await response.json();
- 
+
     const playersData = data.players || [];
- 
+
     if (playersData.length === 0) throw new Error("Гравців не знайдено");
- 
+
     let createdCount = 0;
     let updatedCount = 0;
     let removedCount = 0;
- 
+
     const affectedSlugs: string[] = [];
     const currentSquadSofaIds = new Set<number>(
       playersData.map((item: { player: { id: number } }) => item.player.id),
     );
- 
+
     await prisma.$transaction(
       async (tx) => {
         for (const item of playersData) {
@@ -804,24 +788,24 @@ export async function executeRosterSync(
             : null;
           const nationality = playerData.country?.alpha3 || null;
           const avatar = `https://img.sofascore.com/api/v1/player/${sofascoreId}/image`;
- 
+
           const slug = generatePlayerSlug(name, number);
- 
+
           const existingPlayer = await tx.player.findUnique({
             where: { sofascoreId },
           });
- 
+
           if (existingPlayer) {
             const newAvatar = !existingPlayer.isManualAvatar
               ? avatar
               : existingPlayer.avatar;
- 
+
             const isBeingRestored = existingPlayer.deletedAt !== null;
             const shouldUpgradeTeamContext =
               existingPlayer.teamContext !== teamContext &&
               TEAM_CONTEXT_PRIORITY[teamContext] <
                 TEAM_CONTEXT_PRIORITY[existingPlayer.teamContext];
- 
+
             const hasChanges =
               existingPlayer.number !== number ||
               existingPlayer.position !== position ||
@@ -831,7 +815,7 @@ export async function executeRosterSync(
               existingPlayer.birthDate?.getTime() !== birthDate?.getTime() ||
               shouldUpgradeTeamContext ||
               isBeingRestored;
- 
+
             if (hasChanges) {
               await tx.player.update({
                 where: { id: existingPlayer.id },
@@ -873,7 +857,7 @@ export async function executeRosterSync(
             affectedSlugs.push(slug);
           }
         }
- 
+
         const playersNoLongerInSquad = await tx.player.findMany({
           where: {
             teamContext,
@@ -883,7 +867,7 @@ export async function executeRosterSync(
           },
           select: { id: true, slug: true },
         });
- 
+
         if (playersNoLongerInSquad.length > 0) {
           await tx.player.updateMany({
             where: { id: { in: playersNoLongerInSquad.map((p) => p.id) } },
@@ -895,21 +879,11 @@ export async function executeRosterSync(
       },
       { maxWait: 10000, timeout: 30000 },
     );
- 
+
     if (affectedSlugs.length > 0) {
-      LOCALES.forEach((locale) => {
-        revalidatePath(`/${locale}/admin/team`);
-        revalidatePath(`/${locale}/admin/team/players`);
-        revalidatePath(`/${locale}/team`);
-        revalidatePath(`/${locale}/shop/player`);
-        revalidatePath(`/${locale}/matches`, "layout");
-        affectedSlugs.forEach((affectedSlug) => {
-          revalidatePath(`/${locale}/team/${affectedSlug}`);
-          revalidatePath(`/${locale}/shop/player/${affectedSlug}`);
-        });
-      });
+      revalidatePlayerPaths(affectedSlugs);
     }
- 
+
     return {
       success: true,
       created: createdCount,
@@ -924,15 +898,15 @@ export async function executeRosterSync(
     };
   }
 }
- 
+
 export async function syncPlayersRoster(
   teamContext: TeamContext = TeamContext.MAIN_TEAM,
 ): Promise<SyncRosterResult> {
   const session = await auth();
- 
+
   if (!session?.user?.email || session.user.role !== "ADMIN") {
     return { success: false, message: "Немає прав для виконання цієї дії" };
   }
- 
+
   return await executeRosterSync(teamContext);
 }

@@ -14,7 +14,6 @@ export type PostWithRelations = Prisma.PostGetPayload<{
     include: { translations: true; media: true }
 }>
 
-
 export const columns: ColumnDef<PostWithRelations>[] = [
     {
         id: "media",

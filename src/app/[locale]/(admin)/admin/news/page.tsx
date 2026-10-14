@@ -10,7 +10,6 @@ export const metadata = {
     description: "Управління публікаціями, інтерв'ю та заявами клубу."
 }
 
-
 export default function AdminNewsPage() {
     return (
         <div className="flex flex-col gap-6">
